@@ -4,7 +4,7 @@ Resources for foundational models adapted to time-series and other prediction ta
 
 ### Models w/ code
 
- - https://github.com/microprediction/ForecastPFN is trained on synthetic data
+ - https://github.com/microprediction/ForecastPFN is trained on synthetic data  (tensorflow model)
 
 ### List of lists 
 
