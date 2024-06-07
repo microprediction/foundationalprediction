@@ -8,7 +8,11 @@ Resources for foundational models adapted to time-series and other prediction ta
  - https://github.com/moment-timeseries-foundation-model/moment (torch models)     [blog article](https://medium.com/@samuelchazy/moment-a-family-of-open-time-series-foundation-models-80f5135ca35b)
  - https://github.com/WillDreamer/Aurora (torch) from MSFT trained on weather
 
+
 ### List of lists 
 
  - [Awesome-TimeSeries-LLM-FM](https://github.com/start2020/Awesome-TimeSeries-LLM-FM)
  
+### Papers w/out code
+
+ - [Filtered not mixed](https://arxiv.org/abs/2406.02969)
