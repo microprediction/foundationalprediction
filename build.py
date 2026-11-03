@@ -360,7 +360,7 @@ def gift():
 
 # store arm -> (display name, kind) for every model the explorer can show
 FP_MODELS = {
-    "laplace": ("laplace", "ours"), "learned(e2)": ("laplace+", "ours"),
+    "laplace": ("laplace", "ours"), "learned(e2)": ("laplace++", "ours"),
     "Timestral-209M(q21)": ("Timestral-209M", "foundation"), "t0-gamma(q21)": ("t0-gamma", "foundation"),
     "TimesFM3(wide)": ("TimesFM 3.0", "foundation"), "TimesFM(wide)": ("TimesFM 2.5", "foundation"),
     "TiRex(wide)": ("TiRex", "foundation"), "Chronos(wide)": ("Chronos-Bolt", "foundation"),
@@ -407,7 +407,7 @@ def leaderboard(prov, written):
       points per series. Click a column to sort.</p>
     <div class="legend"><span><span class="dot foundation"></span>foundation model</span>
       <span><span class="dot classical"></span>classical, refit every step</span>
-      <span><span class="dot ours"></span>laplace and laplace+</span></div>
+      <span><span class="dot ours"></span>laplace and laplace++</span></div>
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']} ({prov['skaters_date']}).</p>
     <script>window.FP_NAMES = {json.dumps(names)}; window.FP_KIND = {json.dumps(kinds)}; window.FP_STRATA = {json.dumps(strata)};</script>
     <script>{explorer.EXPLORER_JS}</script>
