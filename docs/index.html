@@ -106,6 +106,7 @@
       <tbody id="ex-body"></tbody>
     </table>
     </div>
+    <p class="foot" id="ex-runs"></p>
     <p class="foot">* By log score: a per-series Diebold&ndash;Mariano test on the log predictive density, 64 one-step
       points per series. Click a column to sort.</p>
     <div class="legend"><span><span class="dot foundation"></span>foundation model</span>
@@ -189,6 +190,9 @@
     }).join('');
     document.getElementById('ex-body').innerHTML = body;
     var best = rs.filter(function (r) { return !r.ref; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
+    var runs = d.runs || {}, notes = [];
+    Object.keys(runs).forEach(function (k) { if (runs[k] !== k) notes.push(name(k) + ' on this stratum is an earlier checkpoint (' + runs[k] + '); the full run replaces it when scored.'); });
+    document.getElementById('ex-runs').textContent = notes.join(' ');
     document.getElementById('ex-pick').innerHTML = best
       ? nsel.toLocaleString() + ' series. Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b>, ' +
         (best.dll >= 0 ? '+' : '') + best.dll.toFixed(3) + ' nats at the median, ahead on ' + pct(best.win) + ', behind on ' + pct(best.loss) + '.'

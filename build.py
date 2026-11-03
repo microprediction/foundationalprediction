@@ -403,6 +403,7 @@ def leaderboard(prov, written):
       <tbody id="ex-body"></tbody>
     </table>
     </div>
+    <p class="foot" id="ex-runs"></p>
     <p class="foot">* By log score: a per-series Diebold&ndash;Mariano test on the log predictive density, 64 one-step
       points per series. Click a column to sort.</p>
     <div class="legend"><span><span class="dot foundation"></span>foundation model</span>
@@ -438,6 +439,58 @@ def _fmt_ms(ms):
     return f"{ms * 1000:.0f} &micro;s" if ms < 1 else f"{ms:,.1f} ms"
 
 
+def _kind_of(name):
+    n = name.lower()
+    if n.startswith("laplace"):
+        return "ours"
+    if any(x in n for x in ("arima", "ets", "theta", "garch", "prophet")):
+        return "classical"
+    return "foundation"
+
+
+_KCOL = {"ours": "#1a8c4a", "foundation": "#8f84ff", "classical": "#e09b2d"}
+
+
+def hbars(items, fmt, unit_note):
+    """Horizontal bars on a log scale: items = [(label, value)] sorted ascending."""
+    import math
+    items = [(l, v) for l, v in items if v and v > 0]
+    if not items:
+        return ""
+    lo = 10 ** math.floor(math.log10(min(v for _, v in items)))
+    hi = 10 ** math.ceil(math.log10(max(v for _, v in items)))
+    W, LW, RW, BH, GAP = 760, 190, 90, 20, 8
+    PW = W - LW - RW
+    H = len(items) * (BH + GAP) + 34
+    def x(v):
+        return LW + PW * (math.log10(v) - math.log10(lo)) / (math.log10(hi) - math.log10(lo))
+    out = [f'<svg viewBox="0 0 {W} {H}" style="width:100%;max-width:{W}px;height:auto;display:block;margin:10px 0 4px" '
+           f'role="img" aria-label="Bar chart, log scale, {unit_note}">']
+    k = lo
+    while k <= hi * 1.0001:
+        xx = x(k)
+        out.append(f'<line x1="{xx:.1f}" y1="0" x2="{xx:.1f}" y2="{H - 26}" stroke="#e5e5e5"/>')
+        out.append(f'<text x="{xx:.1f}" y="{H - 10}" font-size="11" fill="#888" text-anchor="middle">{fmt(k)}</text>')
+        k *= 10
+    for i, (label, v) in enumerate(items):
+        y = i * (BH + GAP)
+        col = _KCOL[_kind_of(label)]
+        out.append(f'<text x="{LW - 10}" y="{y + BH * 0.72:.1f}" font-size="13" fill="#333" text-anchor="end">{label}</text>')
+        out.append(f'<rect x="{LW}" y="{y}" width="{max(x(v) - LW, 2):.1f}" height="{BH}" rx="3" fill="{col}"/>')
+        out.append(f'<text x="{x(v) + 6:.1f}" y="{y + BH * 0.72:.1f}" font-size="12" fill="#555">{fmt(v)}</text>')
+    out.append("</svg>")
+    return "".join(out)
+
+
+def _fmt_mb(mb):
+    return f"{mb * 1000:,.0f} KB" if mb < 1 else (f"{mb:,.0f} MB" if mb < 1000 else f"{mb / 1000:,.1f} GB")
+
+
+def _fmt_ms_plain(ms):
+    return f"{ms * 1000:,.0f} µs" if ms < 1 else (f"{ms:,.0f} ms" if ms < 1000 else f"{ms / 1000:,.1f} s")
+
+
+
 def speed_page(prov, perf, perf_meta):
     rows = perf["rows"]
     models = []
@@ -454,6 +507,8 @@ def speed_page(prov, perf, perf_meta):
     body = f"""
     <h1>Speed</h1>
     <p class="lede">Milliseconds per forecast on one CPU, one thread.</p>
+    {hbars([(m, by.get((m, "warm"))) for m in warm], _fmt_ms_plain, "streaming cost per new observation")}
+    <p class="foot">Streaming: the cost of one new observation. Log scale.</p>
     <table class="lb">
       <thead><tr><th>model</th>
       <th class="num" title="One new observation arrives: an online model updates its state, a stateless model re-runs on its context">streaming</th>
@@ -482,6 +537,8 @@ def size_page(prov, f3):
     body = f"""
     <h1>Size</h1>
     <p class="lede">What a deployment carries.</p>
+    {hbars([(q["name"], q["mb"]) for q in pts], _fmt_mb, "bytes each model carries")}
+    <p class="foot">Log scale.</p>
     <table class="lb">
       <thead><tr><th>model</th><th class="num">size</th><th>measured as</th></tr></thead>
       <tbody>
@@ -500,7 +557,7 @@ def main():
     shutil.copy(os.path.join(SKATERS, "docs", "academic.css"), os.path.join(OUT, "academic.css"))
     shutil.copy(os.path.join(SKATERS, "docs", "assets", "frontier3d.js"), os.path.join(OUT, "frontier3d.js"))
     import explorer
-    written = explorer.export(BENCH, OUT, list(FP_MODELS))
+    written = explorer.export(BENCH, OUT, list(FP_MODELS), aliases={"learned(e2)": ["learned(e2s500)"]})
     open(os.path.join(OUT, "index.html"), "w").write(leaderboard(prov, written))
     open(os.path.join(OUT, "frontier.html"), "w").write(frontier_page(prov))
     perf = json.load(open(os.path.join(BENCH, "perf_results.json")))

@@ -23,8 +23,12 @@ TAG_GROUPS = [
 ]
 
 
-def export(bench, out_dir, roster_names):
-    """Write <out_dir>/data/<stratum>.json; returns the list of strata written."""
+def export(bench, out_dir, roster_names, aliases=None):
+    """Write <out_dir>/data/<stratum>.json; returns the list of strata written.
+    aliases: {shown arm: [fallback arms]} -- on a stratum where the shown arm has
+    no rows, the first fallback that has rows is shown under its name (the page
+    says which run it is through FP_RUN)."""
+    aliases = aliases or {}
     tags_by = {}
     for r in csv.DictReader(open(os.path.join(bench, "series_tags.csv"))):
         t = [x for x in r["tags"].split(";") if x] + [r["asset_class"]]
@@ -53,8 +57,22 @@ def export(bench, out_dir, roster_names):
         P = {k: [[idx[s], v, round(d, 4), None if c is None else round(c, 4)] for s, v, d, c in rows]
              for k, rows in pairs[st].items()}
         C = {m: [[idx[s], h, n] for s, (h, n) in d.items() if s in idx] for m, d in cov[st].items()}
+        shown_run = {}
+        for shown, fallbacks in aliases.items():
+            if any(shown in k.split("|") for k in P):
+                shown_run[shown] = shown
+                continue
+            for fb in fallbacks:
+                if any(fb in k.split("|") for k in P):
+                    P = {"|".join(shown if x == fb else x for x in k.split("|")): v for k, v in P.items()
+                         if shown not in k.split("|")}
+                    if fb in C:
+                        C[shown] = C.pop(fb)
+                    shown_run[shown] = fb
+                    break
+        P = {k: v for k, v in P.items() if all(x in roster_names for x in k.split("|"))}
         models = [m for m in roster_names if any(m in k.split("|") for k in P)]
-        data = {"stratum": st, "series": series, "tags": all_tags, "groups": TAG_GROUPS,
+        data = {"stratum": st, "runs": shown_run, "series": series, "tags": all_tags, "groups": TAG_GROUPS,
                 "series_tags": stags, "models": models, "pairs": P, "cov": C}
         with open(os.path.join(out_dir, "data", st.replace(":", "-") + ".json"), "w") as fh:
             json.dump(data, fh, separators=(",", ":"))
@@ -138,6 +156,9 @@ EXPLORER_JS = r"""
     }).join('');
     document.getElementById('ex-body').innerHTML = body;
     var best = rs.filter(function (r) { return !r.ref; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
+    var runs = d.runs || {}, notes = [];
+    Object.keys(runs).forEach(function (k) { if (runs[k] !== k) notes.push(name(k) + ' on this stratum is an earlier checkpoint (' + runs[k] + '); the full run replaces it when scored.'); });
+    document.getElementById('ex-runs').textContent = notes.join(' ');
     document.getElementById('ex-pick').innerHTML = best
       ? nsel.toLocaleString() + ' series. Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b>, ' +
         (best.dll >= 0 ? '+' : '') + best.dll.toFixed(3) + ' nats at the median, ahead on ' + pct(best.win) + ', behind on ' + pct(best.loss) + '.'
