@@ -164,11 +164,20 @@ NAV = """  <header class="site-header">
     <div class="nav-inner">
       <a class="brand" href="./index.html">foundational prediction</a>
       <nav>
-        <a href="./index.html">Leaderboard</a>
-        <a href="./frontier.html">Performance</a>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
         <a href="./methodology.html">Methodology</a>
-        <a href="./horizons.html">Horizons</a>
-        <a href="./gift.html">GIFT reconciliation</a>
         <a href="https://skaters.microprediction.org/">skaters</a>
         <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
       </nav>
@@ -192,6 +201,7 @@ STYLE = """
     tr.yard td { background:#f4f9f5; }
     .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
     .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
     .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
     .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
            padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
@@ -422,6 +432,68 @@ def frontier_page(prov):
                 "Accuracy, cost per observation and footprint of each model in one chart.")
 
 
+
+def _fmt_ms(ms):
+    if ms is None or ms != ms:
+        return "&ndash;"
+    return f"{ms * 1000:.0f} &micro;s" if ms < 1 else f"{ms:,.1f} ms"
+
+
+def speed_page(prov, perf, perf_meta):
+    rows = perf["rows"]
+    models = []
+    for r in rows:
+        if r["model"] not in models:
+            models.append(r["model"])
+    by = {(r["model"], r["regime"]): r["ms"] for r in rows}
+    warm = sorted(models, key=lambda m: by.get((m, "warm"), float("inf")))
+    trs = []
+    for m in warm:
+        cold = [by.get((m, c)) for c in ("cold b=1", "cold b=16", "cold b=64")]
+        trs.append(f'<tr><td><b>{m}</b></td><td class="num">{_fmt_ms(by.get((m, "warm")))}</td>'
+                   + "".join(f'<td class="num">{_fmt_ms(c)}</td>' for c in cold) + "</tr>")
+    body = f"""
+    <h1>Speed</h1>
+    <p class="lede">Milliseconds per forecast on one CPU, one thread.</p>
+    <table class="lb">
+      <thead><tr><th>model</th>
+      <th class="num" title="One new observation arrives: an online model updates its state, a stateless model re-runs on its context">streaming</th>
+      <th class="num" title="A series never seen before, one at a time">batch, 1</th>
+      <th class="num" title="Per series, 16 series per call">batch, 16</th>
+      <th class="num" title="Per series, 64 series per call">batch, 64</th></tr></thead>
+      <tbody>
+{chr(10).join(trs)}
+      </tbody>
+    </table>
+    <p class="foot">Streaming is the cost of the next data point. Batch is the cost of a fresh series, where a
+      pretrained model amortises one forward pass over many series. Hover a column for its definition.</p>
+    <p class="stamp">Measured {perf_meta.get('date', '')} on {perf_meta.get('machine', '')}; built {prov['built']}.</p>
+"""
+    return page("Foundational prediction: speed", body, "Cost per forecast, streaming and batch, on one CPU.")
+
+
+def size_page(prov, f3):
+    pts = sorted(f3["points"], key=lambda p: p["mb"])
+    trs = []
+    for q in pts:
+        mb = q["mb"]
+        size = f"{mb * 1000:.0f} KB" if mb < 1 else f"{mb:,.0f} MB"
+        trs.append(f'<tr><td><b>{q["name"]}</b></td><td class="num">{size}</td>'
+                   f'<td class="muted small">{q["footprint_how"]}</td></tr>')
+    body = f"""
+    <h1>Size</h1>
+    <p class="lede">What a deployment carries.</p>
+    <table class="lb">
+      <thead><tr><th>model</th><th class="num">size</th><th>measured as</th></tr></thead>
+      <tbody>
+{chr(10).join(trs)}
+      </tbody>
+    </table>
+    <p class="stamp">Built {prov['built']}.</p>
+"""
+    return page("Foundational prediction: size", body, "Bytes each model carries: weights for pretrained models, the package for laplace.")
+
+
 def main():
     vs, cov, warm, mb, perf_meta, f3_meta = load()
     prov = provenance()
@@ -432,8 +504,11 @@ def main():
     written = explorer.export(BENCH, OUT, list(FP_MODELS))
     open(os.path.join(OUT, "index.html"), "w").write(leaderboard(prov, written))
     open(os.path.join(OUT, "frontier.html"), "w").write(frontier_page(prov))
+    perf = json.load(open(os.path.join(BENCH, "perf_results.json")))
+    f3 = json.load(open(os.path.join(BENCH, "frontier3d.json")))
+    open(os.path.join(OUT, "speed.html"), "w").write(speed_page(prov, perf, perf.get("meta", {})))
+    open(os.path.join(OUT, "size.html"), "w").write(size_page(prov, f3))
     open(os.path.join(OUT, "methodology.html"), "w").write(methodology(prov))
-    open(os.path.join(OUT, "horizons.html"), "w").write(horizons())
     open(os.path.join(OUT, "gift.html"), "w").write(gift())
     open(os.path.join(OUT, ".nojekyll"), "w").write("")
     json.dump(prov, open(os.path.join(OUT, "provenance.json"), "w"), indent=1)

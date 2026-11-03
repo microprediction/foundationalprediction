@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: speed</title>
+  <meta name="description" content="Cost per forecast, streaming and batch, on one CPU." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">foundational prediction</a>
+      <nav>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
+        <a href="./methodology.html">Methodology</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>Speed</h1>
+    <p class="lede">Milliseconds per forecast on one CPU, one thread.</p>
+    <table class="lb">
+      <thead><tr><th>model</th>
+      <th class="num" title="One new observation arrives: an online model updates its state, a stateless model re-runs on its context">streaming</th>
+      <th class="num" title="A series never seen before, one at a time">batch, 1</th>
+      <th class="num" title="Per series, 16 series per call">batch, 16</th>
+      <th class="num" title="Per series, 64 series per call">batch, 64</th></tr></thead>
+      <tbody>
+<tr><td><b>laplace (Rust) k=1</b></td><td class="num">12 &micro;s</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr><td><b>laplace (Rust) k=12</b></td><td class="num">150 &micro;s</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr><td><b>laplace (Python) k=1</b></td><td class="num">286 &micro;s</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr><td><b>AutoETS (refit)</b></td><td class="num">2.0 ms</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr><td><b>Timestral-28M</b></td><td class="num">5.5 ms</td><td class="num">5.4 ms</td><td class="num">1.0 ms</td><td class="num">708 &micro;s</td></tr>
+<tr><td><b>Chronos-Bolt-small</b></td><td class="num">7.3 ms</td><td class="num">7.3 ms</td><td class="num">1.3 ms</td><td class="num">739 &micro;s</td></tr>
+<tr><td><b>Timestral-209M</b></td><td class="num">30.5 ms</td><td class="num">29.7 ms</td><td class="num">4.0 ms</td><td class="num">3.0 ms</td></tr>
+<tr><td><b>Prophet (refit)</b></td><td class="num">30.7 ms</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr><td><b>t0-gamma</b></td><td class="num">40.1 ms</td><td class="num">40.6 ms</td><td class="num">4.5 ms</td><td class="num">3.5 ms</td></tr>
+<tr><td><b>AutoARIMA (refit)</b></td><td class="num">62.3 ms</td><td class="num">&ndash;</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr><td><b>TimesFM-3.0</b></td><td class="num">66.9 ms</td><td class="num">67.6 ms</td><td class="num">8.6 ms</td><td class="num">5.0 ms</td></tr>
+<tr><td><b>TiRex</b></td><td class="num">94.1 ms</td><td class="num">95.2 ms</td><td class="num">74.4 ms</td><td class="num">74.8 ms</td></tr>
+<tr><td><b>Sundial-base-128m</b></td><td class="num">108.4 ms</td><td class="num">108.5 ms</td><td class="num">33.0 ms</td><td class="num">28.0 ms</td></tr>
+<tr><td><b>TimesFM-2.5-200M</b></td><td class="num">317.1 ms</td><td class="num">322.5 ms</td><td class="num">20.2 ms</td><td class="num">5.0 ms</td></tr>
+      </tbody>
+    </table>
+    <p class="foot">Streaming is the cost of the next data point. Batch is the cost of a fresh series, where a
+      pretrained model amortises one forward pass over many series. Hover a column for its definition.</p>
+    <p class="stamp">Measured 2026-10-28 on Darwin arm64; built 2026-11-03.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>
