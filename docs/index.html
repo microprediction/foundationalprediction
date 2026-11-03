@@ -19,6 +19,12 @@
     tr.yard td { background:#f4f9f5; }
     .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
     .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
 </style>
 </head>
 <body>
@@ -39,8 +45,9 @@
 
     <h1>Which model for the next data point?</h1>
     <p class="lede">The next observation, scored alone. Every model paired against laplace on the same series.</p>
+    <div class="tabs" role="tablist"><button class="tab" role="tab" data-tab="weekly-econ">Weekly</button><button class="tab" role="tab" data-tab="monthly-econ">Monthly</button><button class="tab" role="tab" data-tab="daily-econ">Daily</button><button class="tab" role="tab" data-tab="m4-hourly-econ">Hourly</button><button class="tab" role="tab" data-tab="daily-price">Prices</button><button class="tab" role="tab" data-tab="frontier">All three axes</button></div>
 
-    <h2>Weekly economic series</h2>
+    <section class="panel" role="tabpanel" id="weekly-econ">
     <div class="pick">For the next weekly economic observation the best-scoring model here is <b>Timestral-209M</b>: +0.044 nats against laplace at the median, ahead on 33% of series and behind on 24%.</div>
     <table class="lb">
       <thead><tr><th>model</th><th class="num">series</th>
@@ -61,7 +68,8 @@
 <tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,930</td><td><span class="wdl"><i class="w" style="width:12.6%"></i><i class="d" style="width:49.5%"></i><i class="l" style="width:37.9%"></i></span><span class="wdlnum">13% / 38%</span></td><td class="num">-0.218</td><td class="num">0.985</td><td class="num">0.87</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
       </tbody>
     </table>
-    <h2>Monthly economic series</h2>
+    </section>
+    <section class="panel" role="tabpanel" id="monthly-econ">
     <div class="pick">For the next monthly economic observation the best-scoring model here is <b>Timestral-209M</b>: +0.105 nats against laplace at the median, ahead on 36% of series and behind on 7%.</div>
     <table class="lb">
       <thead><tr><th>model</th><th class="num">series</th>
@@ -82,7 +90,8 @@
 <tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,930</td><td><span class="wdl"><i class="w" style="width:11.8%"></i><i class="d" style="width:69.3%"></i><i class="l" style="width:18.8%"></i></span><span class="wdlnum">12% / 19%</span></td><td class="num">-0.069</td><td class="num">0.969</td><td class="num">0.85</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
       </tbody>
     </table>
-    <h2>Daily economic series</h2>
+    </section>
+    <section class="panel" role="tabpanel" id="daily-econ">
     <div class="pick">No model on the roster beats laplace more often than it loses on this stratum; laplace is the pick.</div>
     <table class="lb">
       <thead><tr><th>model</th><th class="num">series</th>
@@ -103,7 +112,8 @@
 <tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">1,386</td><td><span class="wdl"><i class="w" style="width:1.9%"></i><i class="d" style="width:54.4%"></i><i class="l" style="width:43.7%"></i></span><span class="wdlnum">2% / 44%</span></td><td class="num">-0.199</td><td class="num">1.012</td><td class="num">0.87</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
       </tbody>
     </table>
-    <h2>Hourly, strongly seasonal (M4)</h2>
+    </section>
+    <section class="panel" role="tabpanel" id="m4-hourly-econ">
     <div class="pick">For the next hourly, strongly seasonal (m4) observation the best-scoring model here is <b>Timestral-209M</b>: +0.039 nats against laplace at the median, ahead on 21% of series and behind on 10%.</div>
     <table class="lb">
       <thead><tr><th>model</th><th class="num">series</th>
@@ -123,7 +133,8 @@
 <tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:11.4%"></i><i class="d" style="width:58.7%"></i><i class="l" style="width:30.0%"></i></span><span class="wdlnum">11% / 30%</span></td><td class="num">-0.049</td><td class="num">1.010</td><td class="num">0.90</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
       </tbody>
     </table>
-    <h2>Daily asset prices and returns</h2>
+    </section>
+    <section class="panel" role="tabpanel" id="daily-price">
     <div class="pick">No model on the roster beats laplace more often than it loses on this stratum; laplace is the pick.</div>
     <table class="lb">
       <thead><tr><th>model</th><th class="num">series</th>
@@ -143,13 +154,28 @@
 <tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">1,544</td><td><span class="wdl"><i class="w" style="width:1.6%"></i><i class="d" style="width:85.8%"></i><i class="l" style="width:12.7%"></i></span><span class="wdlnum">2% / 13%</span></td><td class="num">-0.053</td><td class="num">1.013</td><td class="num">0.84</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
       </tbody>
     </table>
-    <h2>Accuracy, speed and footprint together</h2>
-    <figure>
+    </section>
+    <section class="panel" role="tabpanel" id="frontier">
       <div id="frontier3d" style="width:100%;min-height:520px;"></div>
-      <figcaption id="frontier3d-caption"></figcaption>
-    </figure>
+      <p id="frontier3d-caption" class="muted small"></p>
+    </section>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
     <script src="./frontier3d.js"></script>
+    <script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+  function show(id) {
+    if (!document.getElementById(id)) id = tabs[0].dataset.tab;
+    tabs.forEach(function (t) { var on = t.dataset.tab === id; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
+    panels.forEach(function (p) { p.hidden = p.id !== id; });
+    if (id === 'frontier' && window.Plotly) { var el = document.getElementById('frontier3d'); if (el && el.data) Plotly.Plots.resize(el); }
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.tab); }); });
+  show((location.hash || '').slice(1));
+})();
+</script>
     <p class="stamp">Built 2026-11-03 from skaters commit ee26c8e (2026-11-03).
       Cost measured 2026-10-28 on Darwin arm64.</p>
 

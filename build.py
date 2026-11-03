@@ -135,6 +135,25 @@ def table(stratum, vs, cov, warm, mb):
     return "\n".join(trs), pick, rows
 
 
+TAB_LABEL = {"weekly:econ": "Weekly", "monthly:econ": "Monthly", "daily:econ": "Daily",
+             "m4-hourly:econ": "Hourly", "daily:price": "Prices"}
+
+TAB_JS = """
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.panel'));
+  function show(id) {
+    if (!document.getElementById(id)) id = tabs[0].dataset.tab;
+    tabs.forEach(function (t) { var on = t.dataset.tab === id; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
+    panels.forEach(function (p) { p.hidden = p.id !== id; });
+    if (id === 'frontier' && window.Plotly) { var el = document.getElementById('frontier3d'); if (el && el.data) Plotly.Plots.resize(el); }
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.tab); }); });
+  show((location.hash || '').slice(1));
+})();
+"""
+
 NAV = """  <header class="site-header">
     <div class="nav-inner">
       <a class="brand" href="/">foundational prediction</a>
@@ -162,6 +181,12 @@ STYLE = """
     tr.yard td { background:#f4f9f5; }
     .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
     .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
 """
 
 
@@ -191,7 +216,7 @@ def page(title, body, desc):
 
 
 def index(vs, cov, warm, mb, prov, perf_meta):
-    sections, picks = [], []
+    sections, picks, tabs = [], [], []
     for st, long in STRATA:
         trs, pick, rows = table(st, vs, cov, warm, mb)
         if not rows:
@@ -205,8 +230,10 @@ def index(vs, cov, warm, mb, prov, perf_meta):
         else:
             lead = ('<div class="pick">No model on the roster beats laplace more often than it loses on this '
                     'stratum; laplace is the pick.</div>')
+        slug = st.replace(":", "-")
+        tabs.append(f'<button class="tab" role="tab" data-tab="{slug}">{TAB_LABEL.get(st, long)}</button>')
         sections.append(f"""
-    <h2>{long}</h2>
+    <section class="panel" role="tabpanel" id="{slug}">
     {lead}
     <table class="lb">
       <thead><tr><th>model</th><th class="num">series</th>
@@ -219,18 +246,22 @@ def index(vs, cov, warm, mb, prov, perf_meta):
       <tbody>
 {trs}
       </tbody>
-    </table>""")
+    </table>
+    </section>""")
+    tabs.append('<button class="tab" role="tab" data-tab="frontier">All three axes</button>')
+    sections.append("""
+    <section class="panel" role="tabpanel" id="frontier">
+      <div id="frontier3d" style="width:100%;min-height:520px;"></div>
+      <p id="frontier3d-caption" class="muted small"></p>
+    </section>""")
     body = f"""
     <h1>Which model for the next data point?</h1>
     <p class="lede">The next observation, scored alone. Every model paired against laplace on the same series.</p>
+    <div class="tabs" role="tablist">{"".join(tabs)}</div>
 {"".join(sections)}
-    <h2>Accuracy, speed and footprint together</h2>
-    <figure>
-      <div id="frontier3d" style="width:100%;min-height:520px;"></div>
-      <figcaption id="frontier3d-caption"></figcaption>
-    </figure>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
     <script src="./frontier3d.js"></script>
+    <script>{TAB_JS}</script>
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']} ({prov['skaters_date']}).
       Cost measured {perf_meta.get('date', '')} on {perf_meta.get('machine', '')}.</p>
 """
