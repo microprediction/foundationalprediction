@@ -1,7 +1,9 @@
 name: Deploy docs/ to GitHub Pages
+# Manual only while the repository is private (Pages on a private repo needs a
+# paid plan). When it goes public, restore the push trigger:
+#   push:
+#     branches: [main]
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
