@@ -367,6 +367,9 @@ FP_MODELS = {
     "AutoARIMA": ("AutoARIMA", "classical"), "AutoETS": ("AutoETS", "classical"),
     "AutoTheta": ("AutoTheta", "classical"), "GARCH-t": ("GARCH-t", "classical"),
 }
+# laplace++ runs in priority order: the most-trained run scored on a stratum is shown
+LAPLACEPP_RUNS = ["learned(e3)", "learned(e2)", "learned(e2s1000)", "learned(e2s500)"]
+
 FP_STRATA = [
     {"id": "weekly:econ", "kind": "Economic", "freq": "Weekly"},
     {"id": "monthly:econ", "kind": "Economic", "freq": "Monthly"},
@@ -557,7 +560,7 @@ def main():
     shutil.copy(os.path.join(SKATERS, "docs", "academic.css"), os.path.join(OUT, "academic.css"))
     shutil.copy(os.path.join(SKATERS, "docs", "assets", "frontier3d.js"), os.path.join(OUT, "frontier3d.js"))
     import explorer
-    written = explorer.export(BENCH, OUT, list(FP_MODELS), aliases={"learned(e2)": ["learned(e2s500)"]})
+    written = explorer.export(BENCH, OUT, list(FP_MODELS), aliases={"learned(e2)": LAPLACEPP_RUNS})
     open(os.path.join(OUT, "index.html"), "w").write(leaderboard(prov, written))
     open(os.path.join(OUT, "frontier.html"), "w").write(frontier_page(prov))
     perf = json.load(open(os.path.join(BENCH, "perf_results.json")))

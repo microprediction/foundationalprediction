@@ -57,17 +57,17 @@ def export(bench, out_dir, roster_names, aliases=None):
         P = {k: [[idx[s], v, round(d, 4), None if c is None else round(c, 4)] for s, v, d, c in rows]
              for k, rows in pairs[st].items()}
         C = {m: [[idx[s], h, n] for s, (h, n) in d.items() if s in idx] for m, d in cov[st].items()}
+        # aliases: {shown arm: [candidate arms in priority order]}; the first
+        # candidate with rows on this stratum is shown under the shown arm's name
         shown_run = {}
-        for shown, fallbacks in aliases.items():
-            if any(shown in k.split("|") for k in P):
-                shown_run[shown] = shown
-                continue
-            for fb in fallbacks:
+        for shown, cands in aliases.items():
+            for fb in cands:
                 if any(fb in k.split("|") for k in P):
-                    P = {"|".join(shown if x == fb else x for x in k.split("|")): v for k, v in P.items()
-                         if shown not in k.split("|")}
-                    if fb in C:
-                        C[shown] = C.pop(fb)
+                    if fb != shown:
+                        P = {"|".join(shown if x == fb else x for x in k.split("|")): v for k, v in P.items()
+                             if shown not in k.split("|")}
+                        if fb in C:
+                            C[shown] = C.pop(fb)
                     shown_run[shown] = fb
                     break
         P = {k: v for k, v in P.items() if all(x in roster_names for x in k.split("|"))}
@@ -157,7 +157,7 @@ EXPLORER_JS = r"""
     document.getElementById('ex-body').innerHTML = body;
     var best = rs.filter(function (r) { return !r.ref; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
     var runs = d.runs || {}, notes = [];
-    Object.keys(runs).forEach(function (k) { if (runs[k] !== k) notes.push(name(k) + ' on this stratum is an earlier checkpoint (' + runs[k] + '); the full run replaces it when scored.'); });
+    Object.keys(runs).forEach(function (k) { notes.push(name(k) + ' on this stratum: run ' + runs[k].replace(/^learned\(|\)$/g, '') + '.'); });
     document.getElementById('ex-runs').textContent = notes.join(' ');
     document.getElementById('ex-pick').innerHTML = best
       ? nsel.toLocaleString() + ' series. Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b>, ' +
