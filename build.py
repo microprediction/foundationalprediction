@@ -361,7 +361,6 @@ def gift():
 # store arm -> (display name, kind) for every model the explorer can show
 FP_MODELS = {
     "laplace": ("laplace", "ours"), "learned(e2)": ("learned laplace", "ours"),
-    "learned": ("learned laplace (run 1)", "ours"),
     "Timestral-209M(q21)": ("Timestral-209M", "foundation"), "t0-gamma(q21)": ("t0-gamma", "foundation"),
     "TimesFM3(wide)": ("TimesFM 3.0", "foundation"), "TimesFM(wide)": ("TimesFM 2.5", "foundation"),
     "TiRex(wide)": ("TiRex", "foundation"), "Chronos(wide)": ("Chronos-Bolt", "foundation"),
