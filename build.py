@@ -209,25 +209,20 @@ def index(vs, cov, warm, mb, prov, perf_meta):
     <h2>{long}</h2>
     {lead}
     <table class="lb">
-      <thead><tr><th>model</th><th class="num">series</th><th>win / loss vs laplace</th>
-      <th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">cov<sub>90</sub></th>
-      <th class="num">per obs</th><th class="num">size</th></tr></thead>
+      <thead><tr><th>model</th><th class="num">series</th>
+      <th title="Share of series won / lost against laplace by a Diebold-Mariano test; the rest are draws">win / loss</th>
+      <th class="num" title="Median per-series log-score gap in nats; positive beats laplace">&Delta;LL</th>
+      <th class="num" title="Median CRPS ratio to laplace; below 1 is better">CRPS</th>
+      <th class="num" title="Central 90% interval coverage; target 0.90">cov<sub>90</sub></th>
+      <th class="num" title="Cost of one new observation, streaming, one CPU">per obs</th>
+      <th class="num" title="Bytes a deployment carries">size</th></tr></thead>
       <tbody>
 {trs}
       </tbody>
     </table>""")
     body = f"""
     <h1>Which model for the next data point?</h1>
-    <p class="lede">One horizon, isolated: the next observation of a univariate series, scored as a
-      full predictive density on held-out windows, every model paired against the same training-free
-      yardstick on identical series. Published leaderboards pool eight or twelve steps into one number
-      and fit their classical baselines once at the window origin; this table does neither.</p>
-    <p>Columns: the number of series; the share of series where the model beats laplace and where it
-      loses, by a per-series Diebold&ndash;Mariano test on the log-score differential (the rest are
-      draws); the median per-series log-score gap in nats, positive meaning better than laplace; the
-      median CRPS ratio (below 1 is better); central 90% coverage (target 0.90); the cost of one new
-      observation in the streaming regime on one CPU; and the bytes a deployment carries. The
-      <a href="/methodology.html">methodology</a> page defines each.</p>
+    <p class="lede">The next observation, scored alone. Every model paired against laplace on the same series.</p>
 {"".join(sections)}
     <h2>Accuracy, speed and footprint together</h2>
     <figure>
