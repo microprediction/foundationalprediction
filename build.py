@@ -387,7 +387,7 @@ def leaderboard(prov, written):
     <div style="overflow-x:auto">
     <table class="lb" id="ex-table">
       <thead><tr><th data-col="name">model</th><th class="num" data-col="n">series</th>
-      <th data-col="win" title="Share of series won / lost against the reference, by a per-series Diebold-Mariano test on log predictive density; the rest are draws">win / loss*</th>
+      <th data-col="net" title="Share of series won / lost against the reference, by a per-series Diebold-Mariano test on log predictive density; the rest are draws; sorts by win minus loss">win / loss*</th>
       <th class="num" data-col="dll" title="Median per-series log-score gap in nats; positive beats the reference">&Delta;LL</th>
       <th class="num" data-col="crps" title="Median per-series CRPS ratio to the reference; below 1 is better">CRPS</th>
       <th class="num" data-col="cov" title="Central 90% interval coverage, pooled over the selected series; target 0.90">cov<sub>90</sub></th></tr></thead>

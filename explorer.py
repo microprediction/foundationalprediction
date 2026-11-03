@@ -106,7 +106,7 @@ EXPLORER_JS = r"""
         if (r[3] !== null && r[3] > 0) cr.push(flip ? 1 / r[3] : r[3]);
       });
       var n = w + dr + l; if (!n) return;
-      out.push({ m: m, n: n, w: w, d: dr, l: l, win: w / n, loss: l / n, dll: median(dl), crps: median(cr), cov: covOf(d, m, keep) });
+      out.push({ m: m, n: n, w: w, d: dr, l: l, win: w / n, loss: l / n, net: (w - l) / n, dll: median(dl), crps: median(cr), cov: covOf(d, m, keep) });
     });
     var c = state.sort.col, dir = state.sort.dir;
     out.sort(function (a, b) {
@@ -120,7 +120,10 @@ EXPLORER_JS = r"""
     var d = state.data; if (!d) return;
     var keep = selected(d), nsel = 0; for (var i = 0; i < keep.length; i++) nsel += keep[i];
     var rs = rows(d, keep);
-    var body = rs.map(function (r) {
+    var rc = covOf(d, state.ref, keep);
+    var refRow = '<tr class="yard"><td>' + dot(state.ref) + '<b>' + name(state.ref) + '</b></td><td class="muted" colspan="2">reference</td>' +
+      '<td class="num">+0.000</td><td class="num">1.000</td><td class="num">' + (rc === null ? '&ndash;' : rc.toFixed(2)) + '</td></tr>';
+    var body = refRow + rs.map(function (r) {
       return '<tr><td>' + dot(r.m) + '<b>' + name(r.m) + '</b></td><td class="num">' + r.n.toLocaleString() + '</td>' +
         '<td><span class="wdl"><i class="w" style="width:' + (100 * r.win).toFixed(1) + '%"></i><i class="d" style="width:' +
         (100 * r.d / r.n).toFixed(1) + '%"></i><i class="l" style="width:' + (100 * r.loss).toFixed(1) + '%"></i></span>' +
@@ -129,9 +132,6 @@ EXPLORER_JS = r"""
         '<td class="num">' + (r.crps === null ? '&ndash;' : r.crps.toFixed(3)) + '</td>' +
         '<td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td></tr>';
     }).join('');
-    var rc = covOf(d, state.ref, keep);
-    body += '<tr class="yard"><td>' + dot(state.ref) + '<b>' + name(state.ref) + '</b></td><td class="muted" colspan="2">reference</td>' +
-      '<td class="num">+0.000</td><td class="num">1.000</td><td class="num">' + (rc === null ? '&ndash;' : rc.toFixed(2)) + '</td></tr>';
     document.getElementById('ex-body').innerHTML = body;
     var best = rs.slice().sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
     document.getElementById('ex-pick').innerHTML = best
