@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: GIFT-Eval reconciliation</title>
+  <meta name="description" content="The published GIFT-Eval numbers for the roster beside the per-horizon and density columns." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="/">foundational prediction</a>
+      <nav>
+        <a href="/">Next data point</a>
+        <a href="/methodology.html">Methodology</a>
+        <a href="/horizons.html">Horizons</a>
+        <a href="/gift.html">GIFT reconciliation</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>GIFT-Eval reconciliation</h1>
+    <p>GIFT-Eval reports one number per model and configuration, pooled over its horizon (8 steps for
+      weekly series, 12 for monthly, in the short-term track) and over rolling windows, as MASE and a
+      quantile loss on nine levels. This page will carry those published numbers for the roster models
+      beside the per-horizon and density columns this site adds, so every row can be reconciled with
+      the leaderboard and then read further. Pretraining overlap with the evaluation data is declared
+      per model where it is known.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>

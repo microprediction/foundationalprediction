@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: methodology</title>
+  <meta name="description" content="How the tables are computed: one-step densities, paired Diebold-Mariano tests, online baselines, a family split for trained models." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="/">foundational prediction</a>
+      <nav>
+        <a href="/">Next data point</a>
+        <a href="/methodology.html">Methodology</a>
+        <a href="/horizons.html">Horizons</a>
+        <a href="/gift.html">GIFT reconciliation</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>Methodology</h1>
+    <h2>The question</h2>
+    <p>Which model should forecast the next observation of a stream? That question needs the one-step
+      metric isolated. Suites that pool steps 1 to H into one score cannot answer it, and a model that is
+      strong at step one and ordinary after is indistinguishable there from one that is flat.</p>
+    <h2>The protocol</h2>
+    <p>Every model forecasts the one-step change of a series from a fixed context, rolling over a test
+      window; every forecast becomes a full predictive density scored by log likelihood and CRPS at the
+      realised value. Pretrained models run zero-shot, each in its own environment, on CPU. Their
+      quantile outputs are turned into densities by a stated reconstruction: native levels where the
+      model emits them (21 for Timestral and t0-gamma), the generous bandwidth otherwise, because a
+      tight reconstruction of nine deciles manufactures about half a nat of apparent deficit.</p>
+    <h2>Pairing and the test</h2>
+    <p>Every model is paired against laplace, the training-free online yardstick, on identical series
+      and windows. Per series the mean log-score differential is tested by Diebold&ndash;Mariano with a
+      Newey&ndash;West standard error; a win or a loss is a difference beyond 1.96 standard errors, the
+      rest are draws. A draw says the window cannot separate the two, not that they are equal, so the
+      median gap is the better measure of size.</p>
+    <h2>Baselines that keep learning</h2>
+    <p>The classical baselines in published suites are fit once at the window origin and never updated.
+      Here every baseline is online: it sees every observation before it forecasts the next. The gap
+      between foundation models and classical methods shown here is therefore the gap a practitioner
+      running a stream would see. The fully online ARIMA and ETS rows are being added.</p>
+    <h2>Trained models</h2>
+    <p>A model trained on this panel is scored only on series whose family it never saw: the panel is
+      split by series family, and the learned rows report the held-out half. The clean out-of-domain
+      test is GIFT-Eval's data under this protocol.</p>
+    <h2>Roster</h2>
+    <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
+      here. Submissions that cannot be rerun are not listed.</p>
+    <h2>Source</h2>
+    <p>The tables are generated from the skaters repository's committed summaries, the per-step store
+      behind them, its cost measurements and its footprint measurements, by
+      <code>build.py</code> in this repository. The same files drive
+      <a href="https://skaters.microprediction.org/benchmarks.html">skaters.microprediction.org</a>,
+      which carries the per-model pages, the sandwich results and the papers.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>

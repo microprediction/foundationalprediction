@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: the next data point</title>
+  <meta name="description" content="Which model to use for the next data point: foundation models and a training-free baseline, paired on identical series, one horizon isolated." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="/">foundational prediction</a>
+      <nav>
+        <a href="/">Next data point</a>
+        <a href="/methodology.html">Methodology</a>
+        <a href="/horizons.html">Horizons</a>
+        <a href="/gift.html">GIFT reconciliation</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>Which model for the next data point?</h1>
+    <p class="lede">One horizon, isolated: the next observation of a univariate series, scored as a
+      full predictive density on held-out windows, every model paired against the same training-free
+      yardstick on identical series. Published leaderboards pool eight or twelve steps into one number
+      and fit their classical baselines once at the window origin; this table does neither.</p>
+    <p>Columns: the number of series; the share of series where the model beats laplace and where it
+      loses, by a per-series Diebold&ndash;Mariano test on the log-score differential (the rest are
+      draws); the median per-series log-score gap in nats, positive meaning better than laplace; the
+      median CRPS ratio (below 1 is better); central 90% coverage (target 0.90); the cost of one new
+      observation in the streaming regime on one CPU; and the bytes a deployment carries. The
+      <a href="/methodology.html">methodology</a> page defines each.</p>
+
+    <h2>Weekly economic series</h2>
+    <div class="pick">For the next weekly economic observation the best-scoring model here is <b>Timestral-209M</b>: +0.044 nats against laplace at the median, ahead on 33% of series and behind on 24%.</div>
+    <table class="lb">
+      <thead><tr><th>model</th><th class="num">series</th><th>win / loss vs laplace</th>
+      <th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">cov<sub>90</sub></th>
+      <th class="num">per obs</th><th class="num">size</th></tr></thead>
+      <tbody>
+<tr><td><b>Timestral-209M</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:32.8%"></i><i class="d" style="width:43.0%"></i><i class="l" style="width:24.1%"></i></span><span class="wdlnum">33% / 24%</span></td><td class="num">+0.044</td><td class="num">0.862</td><td class="num">0.91</td><td class="num">30 ms</td><td class="num">837 MB</td></tr>
+<tr><td><b>learned laplace</b><br><span class="muted small">trained on half of FRED by family; scored on the other half only; see the skaters page for the model (learned)</span></td><td class="num">400</td><td><span class="wdl"><i class="w" style="width:24.0%"></i><i class="d" style="width:71.8%"></i><i class="l" style="width:4.2%"></i></span><span class="wdlnum">24% / 4%</span></td><td class="num">+0.009</td><td class="num">0.999</td><td class="num">0.89</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr><td><b>TimesFM 3.0</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:32.2%"></i><i class="d" style="width:47.1%"></i><i class="l" style="width:20.8%"></i></span><span class="wdlnum">32% / 21%</span></td><td class="num">+0.001</td><td class="num">0.875</td><td class="num">0.89</td><td class="num">67 ms</td><td class="num">3,969 MB</td></tr>
+<tr class="yard"><td><b>laplace</b><br><span class="muted small">online, training-free; the yardstick; every other row is paired against it</span></td><td class="muted" colspan="2">yardstick</td><td class="num">+0.000</td><td class="num">1.000</td><td class="num">0.91</td><td class="num">12 &micro;s</td><td class="num">2 MB</td></tr>
+<tr><td><b>t0-gamma</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:23.1%"></i><i class="d" style="width:47.6%"></i><i class="l" style="width:29.3%"></i></span><span class="wdlnum">23% / 29%</span></td><td class="num">-0.012</td><td class="num">0.941</td><td class="num">0.91</td><td class="num">40 ms</td><td class="num">1,022 MB</td></tr>
+<tr><td><b>TimesFM 2.5</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,920</td><td><span class="wdl"><i class="w" style="width:27.6%"></i><i class="d" style="width:48.3%"></i><i class="l" style="width:24.1%"></i></span><span class="wdlnum">28% / 24%</span></td><td class="num">-0.030</td><td class="num">0.957</td><td class="num">0.87</td><td class="num">317 ms</td><td class="num">925 MB</td></tr>
+<tr><td><b>TiRex</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,920</td><td><span class="wdl"><i class="w" style="width:14.9%"></i><i class="d" style="width:54.2%"></i><i class="l" style="width:31.0%"></i></span><span class="wdlnum">15% / 31%</span></td><td class="num">-0.143</td><td class="num">0.943</td><td class="num">0.87</td><td class="num">94 ms</td><td class="num">141 MB</td></tr>
+<tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,930</td><td><span class="wdl"><i class="w" style="width:12.6%"></i><i class="d" style="width:49.5%"></i><i class="l" style="width:37.9%"></i></span><span class="wdlnum">13% / 38%</span></td><td class="num">-0.218</td><td class="num">0.985</td><td class="num">0.87</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
+      </tbody>
+    </table>
+    <h2>Monthly economic series</h2>
+    <div class="pick">For the next monthly economic observation the best-scoring model here is <b>Timestral-209M</b>: +0.105 nats against laplace at the median, ahead on 36% of series and behind on 7%.</div>
+    <table class="lb">
+      <thead><tr><th>model</th><th class="num">series</th><th>win / loss vs laplace</th>
+      <th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">cov<sub>90</sub></th>
+      <th class="num">per obs</th><th class="num">size</th></tr></thead>
+      <tbody>
+<tr><td><b>Timestral-209M</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">5,576</td><td><span class="wdl"><i class="w" style="width:36.1%"></i><i class="d" style="width:57.3%"></i><i class="l" style="width:6.6%"></i></span><span class="wdlnum">36% / 7%</span></td><td class="num">+0.105</td><td class="num">0.883</td><td class="num">0.90</td><td class="num">30 ms</td><td class="num">837 MB</td></tr>
+<tr><td><b>t0-gamma</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">5,576</td><td><span class="wdl"><i class="w" style="width:27.2%"></i><i class="d" style="width:62.7%"></i><i class="l" style="width:10.1%"></i></span><span class="wdlnum">27% / 10%</span></td><td class="num">+0.061</td><td class="num">0.916</td><td class="num">0.89</td><td class="num">40 ms</td><td class="num">1,022 MB</td></tr>
+<tr><td><b>TimesFM 3.0</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">5,576</td><td><span class="wdl"><i class="w" style="width:25.6%"></i><i class="d" style="width:63.4%"></i><i class="l" style="width:10.9%"></i></span><span class="wdlnum">26% / 11%</span></td><td class="num">+0.046</td><td class="num">0.893</td><td class="num">0.86</td><td class="num">67 ms</td><td class="num">3,969 MB</td></tr>
+<tr><td><b>learned laplace</b><br><span class="muted small">trained on half of FRED by family; scored on the other half only; see the skaters page for the model (learned(e2))</span></td><td class="num">588</td><td><span class="wdl"><i class="w" style="width:24.3%"></i><i class="d" style="width:68.7%"></i><i class="l" style="width:7.0%"></i></span><span class="wdlnum">24% / 7%</span></td><td class="num">+0.016</td><td class="num">0.994</td><td class="num">0.91</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr class="yard"><td><b>laplace</b><br><span class="muted small">online, training-free; the yardstick; every other row is paired against it</span></td><td class="muted" colspan="2">yardstick</td><td class="num">+0.000</td><td class="num">1.000</td><td class="num">0.92</td><td class="num">12 &micro;s</td><td class="num">2 MB</td></tr>
+<tr><td><b>TiRex</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,920</td><td><span class="wdl"><i class="w" style="width:19.3%"></i><i class="d" style="width:68.6%"></i><i class="l" style="width:12.1%"></i></span><span class="wdlnum">19% / 12%</span></td><td class="num">-0.001</td><td class="num">0.931</td><td class="num">0.86</td><td class="num">94 ms</td><td class="num">141 MB</td></tr>
+<tr><td><b>TimesFM 2.5</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,920</td><td><span class="wdl"><i class="w" style="width:18.7%"></i><i class="d" style="width:66.4%"></i><i class="l" style="width:14.9%"></i></span><span class="wdlnum">19% / 15%</span></td><td class="num">-0.011</td><td class="num">0.943</td><td class="num">0.86</td><td class="num">317 ms</td><td class="num">925 MB</td></tr>
+<tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,930</td><td><span class="wdl"><i class="w" style="width:11.8%"></i><i class="d" style="width:69.3%"></i><i class="l" style="width:18.8%"></i></span><span class="wdlnum">12% / 19%</span></td><td class="num">-0.069</td><td class="num">0.969</td><td class="num">0.85</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
+      </tbody>
+    </table>
+    <h2>Daily economic series</h2>
+    <div class="pick">No model on the roster beats laplace more often than it loses on this stratum; laplace is the pick.</div>
+    <table class="lb">
+      <thead><tr><th>model</th><th class="num">series</th><th>win / loss vs laplace</th>
+      <th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">cov<sub>90</sub></th>
+      <th class="num">per obs</th><th class="num">size</th></tr></thead>
+      <tbody>
+<tr class="yard"><td><b>laplace</b><br><span class="muted small">online, training-free; the yardstick; every other row is paired against it</span></td><td class="muted" colspan="2">yardstick</td><td class="num">+0.000</td><td class="num">1.000</td><td class="num">0.92</td><td class="num">12 &micro;s</td><td class="num">2 MB</td></tr>
+<tr><td><b>learned laplace</b><br><span class="muted small">trained on half of FRED by family; scored on the other half only; see the skaters page for the model (learned)</span></td><td class="num">400</td><td><span class="wdl"><i class="w" style="width:13.0%"></i><i class="d" style="width:65.0%"></i><i class="l" style="width:22.0%"></i></span><span class="wdlnum">13% / 22%</span></td><td class="num">-0.000</td><td class="num">1.000</td><td class="num">0.93</td><td class="num">&ndash;</td><td class="num">&ndash;</td></tr>
+<tr><td><b>Timestral-209M</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">2,179</td><td><span class="wdl"><i class="w" style="width:9.3%"></i><i class="d" style="width:64.0%"></i><i class="l" style="width:26.7%"></i></span><span class="wdlnum">9% / 27%</span></td><td class="num">-0.036</td><td class="num">0.975</td><td class="num">0.91</td><td class="num">30 ms</td><td class="num">837 MB</td></tr>
+<tr><td><b>TimesFM 2.5</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">1,381</td><td><span class="wdl"><i class="w" style="width:10.7%"></i><i class="d" style="width:57.2%"></i><i class="l" style="width:32.1%"></i></span><span class="wdlnum">11% / 32%</span></td><td class="num">-0.082</td><td class="num">0.993</td><td class="num">0.88</td><td class="num">317 ms</td><td class="num">925 MB</td></tr>
+<tr><td><b>TimesFM 3.0</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">2,179</td><td><span class="wdl"><i class="w" style="width:8.2%"></i><i class="d" style="width:63.4%"></i><i class="l" style="width:28.4%"></i></span><span class="wdlnum">8% / 28%</span></td><td class="num">-0.082</td><td class="num">0.984</td><td class="num">0.89</td><td class="num">67 ms</td><td class="num">3,969 MB</td></tr>
+<tr><td><b>t0-gamma</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">2,179</td><td><span class="wdl"><i class="w" style="width:3.5%"></i><i class="d" style="width:63.8%"></i><i class="l" style="width:32.7%"></i></span><span class="wdlnum">4% / 33%</span></td><td class="num">-0.089</td><td class="num">0.997</td><td class="num">0.91</td><td class="num">40 ms</td><td class="num">1,022 MB</td></tr>
+<tr><td><b>TiRex</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">1,381</td><td><span class="wdl"><i class="w" style="width:5.0%"></i><i class="d" style="width:59.9%"></i><i class="l" style="width:35.1%"></i></span><span class="wdlnum">5% / 35%</span></td><td class="num">-0.144</td><td class="num">1.000</td><td class="num">0.89</td><td class="num">94 ms</td><td class="num">141 MB</td></tr>
+<tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">1,386</td><td><span class="wdl"><i class="w" style="width:1.9%"></i><i class="d" style="width:54.4%"></i><i class="l" style="width:43.7%"></i></span><span class="wdlnum">2% / 44%</span></td><td class="num">-0.199</td><td class="num">1.012</td><td class="num">0.87</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
+      </tbody>
+    </table>
+    <h2>Hourly, strongly seasonal (M4)</h2>
+    <div class="pick">For the next hourly, strongly seasonal (m4) observation the best-scoring model here is <b>Timestral-209M</b>: +0.039 nats against laplace at the median, ahead on 21% of series and behind on 10%.</div>
+    <table class="lb">
+      <thead><tr><th>model</th><th class="num">series</th><th>win / loss vs laplace</th>
+      <th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">cov<sub>90</sub></th>
+      <th class="num">per obs</th><th class="num">size</th></tr></thead>
+      <tbody>
+<tr><td><b>Timestral-209M</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:20.5%"></i><i class="d" style="width:69.6%"></i><i class="l" style="width:9.9%"></i></span><span class="wdlnum">21% / 10%</span></td><td class="num">+0.039</td><td class="num">0.946</td><td class="num">0.87</td><td class="num">30 ms</td><td class="num">837 MB</td></tr>
+<tr><td><b>t0-gamma</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:21.7%"></i><i class="d" style="width:51.0%"></i><i class="l" style="width:27.3%"></i></span><span class="wdlnum">22% / 27%</span></td><td class="num">+0.021</td><td class="num">0.967</td><td class="num">0.89</td><td class="num">40 ms</td><td class="num">1,022 MB</td></tr>
+<tr class="yard"><td><b>laplace</b><br><span class="muted small">online, training-free; the yardstick; every other row is paired against it</span></td><td class="muted" colspan="2">yardstick</td><td class="num">+0.000</td><td class="num">1.000</td><td class="num">0.89</td><td class="num">12 &micro;s</td><td class="num">2 MB</td></tr>
+<tr><td><b>TimesFM 3.0</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:16.9%"></i><i class="d" style="width:51.7%"></i><i class="l" style="width:31.4%"></i></span><span class="wdlnum">17% / 31%</span></td><td class="num">-0.014</td><td class="num">0.988</td><td class="num">0.89</td><td class="num">67 ms</td><td class="num">3,969 MB</td></tr>
+<tr><td><b>TimesFM 2.5</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:13.3%"></i><i class="d" style="width:62.1%"></i><i class="l" style="width:24.6%"></i></span><span class="wdlnum">13% / 25%</span></td><td class="num">-0.020</td><td class="num">0.987</td><td class="num">0.88</td><td class="num">317 ms</td><td class="num">925 MB</td></tr>
+<tr><td><b>TiRex</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:12.8%"></i><i class="d" style="width:64.7%"></i><i class="l" style="width:22.5%"></i></span><span class="wdlnum">13% / 22%</span></td><td class="num">-0.044</td><td class="num">0.979</td><td class="num">0.82</td><td class="num">94 ms</td><td class="num">141 MB</td></tr>
+<tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:11.4%"></i><i class="d" style="width:58.7%"></i><i class="l" style="width:30.0%"></i></span><span class="wdlnum">11% / 30%</span></td><td class="num">-0.049</td><td class="num">1.010</td><td class="num">0.90</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
+      </tbody>
+    </table>
+    <h2>Daily asset prices and returns</h2>
+    <div class="pick">No model on the roster beats laplace more often than it loses on this stratum; laplace is the pick.</div>
+    <table class="lb">
+      <thead><tr><th>model</th><th class="num">series</th><th>win / loss vs laplace</th>
+      <th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">cov<sub>90</sub></th>
+      <th class="num">per obs</th><th class="num">size</th></tr></thead>
+      <tbody>
+<tr class="yard"><td><b>laplace</b><br><span class="muted small">online, training-free; the yardstick; every other row is paired against it</span></td><td class="muted" colspan="2">yardstick</td><td class="num">+0.000</td><td class="num">1.000</td><td class="num">0.92</td><td class="num">12 &micro;s</td><td class="num">2 MB</td></tr>
+<tr><td><b>t0-gamma</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">7,633</td><td><span class="wdl"><i class="w" style="width:5.8%"></i><i class="d" style="width:92.9%"></i><i class="l" style="width:1.3%"></i></span><span class="wdlnum">6% / 1%</span></td><td class="num">-0.004</td><td class="num">1.001</td><td class="num">0.91</td><td class="num">40 ms</td><td class="num">1,022 MB</td></tr>
+<tr><td><b>TimesFM 3.0</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">7,633</td><td><span class="wdl"><i class="w" style="width:6.6%"></i><i class="d" style="width:90.7%"></i><i class="l" style="width:2.6%"></i></span><span class="wdlnum">7% / 3%</span></td><td class="num">-0.008</td><td class="num">1.005</td><td class="num">0.87</td><td class="num">67 ms</td><td class="num">3,969 MB</td></tr>
+<tr><td><b>Timestral-209M</b><br><span class="muted small">zero-shot, pretrained; native 21 quantile levels</span></td><td class="num">7,633</td><td><span class="wdl"><i class="w" style="width:2.5%"></i><i class="d" style="width:93.7%"></i><i class="l" style="width:3.8%"></i></span><span class="wdlnum">3% / 4%</span></td><td class="num">-0.011</td><td class="num">1.002</td><td class="num">0.89</td><td class="num">30 ms</td><td class="num">837 MB</td></tr>
+<tr><td><b>TimesFM 2.5</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">1,539</td><td><span class="wdl"><i class="w" style="width:5.8%"></i><i class="d" style="width:89.3%"></i><i class="l" style="width:4.8%"></i></span><span class="wdlnum">6% / 5%</span></td><td class="num">-0.023</td><td class="num">1.008</td><td class="num">0.86</td><td class="num">317 ms</td><td class="num">925 MB</td></tr>
+<tr><td><b>TiRex</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">1,539</td><td><span class="wdl"><i class="w" style="width:1.9%"></i><i class="d" style="width:93.1%"></i><i class="l" style="width:5.0%"></i></span><span class="wdlnum">2% / 5%</span></td><td class="num">-0.032</td><td class="num">1.019</td><td class="num">0.88</td><td class="num">94 ms</td><td class="num">141 MB</td></tr>
+<tr><td><b>Chronos-Bolt</b><br><span class="muted small">zero-shot, pretrained; nine deciles, generous reconstruction</span></td><td class="num">1,544</td><td><span class="wdl"><i class="w" style="width:1.6%"></i><i class="d" style="width:85.8%"></i><i class="l" style="width:12.7%"></i></span><span class="wdlnum">2% / 13%</span></td><td class="num">-0.053</td><td class="num">1.013</td><td class="num">0.84</td><td class="num">7 ms</td><td class="num">191 MB</td></tr>
+      </tbody>
+    </table>
+    <h2>Accuracy, speed and footprint together</h2>
+    <figure>
+      <div id="frontier3d" style="width:100%;min-height:520px;"></div>
+      <figcaption id="frontier3d-caption"></figcaption>
+    </figure>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <script src="./frontier3d.js"></script>
+    <p class="stamp">Built 2026-11-03 from skaters commit ee26c8e (2026-11-03).
+      Cost measured 2026-10-28 on Darwin arm64.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>
