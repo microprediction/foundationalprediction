@@ -32,6 +32,11 @@ STRATA = [
 ]
 
 # the roster: display name, store arm, perf model, frontier3d name, kind, note
+TAGS = {"laplace": ["online", "no training"], "learned laplace": ["trained", "held-out half"],
+        "Timestral-209M": ["zero-shot", "21 q"], "t0-gamma": ["zero-shot", "21 q"],
+        "TimesFM 3.0": ["zero-shot", "9 q"], "TimesFM 2.5": ["zero-shot", "9 q"],
+        "TiRex": ["zero-shot", "9 q"], "Chronos-Bolt": ["zero-shot", "9 q"]}
+
 ROSTER = [
     ("laplace",         "laplace",             "laplace (Rust) k=1", "laplace (Rust core)", "online, training-free",
      "the yardstick; every other row is paired against it"),
@@ -127,7 +132,8 @@ def table(stratum, vs, cov, warm, mb):
         size = "&ndash;" if x["mb"] is None else (f"{x['mb']*1000:.0f} KB" if x["mb"] < 1 else f"{x['mb']:,.0f} MB")
         covs = "&ndash;" if x["cov"] is None else f"{x['cov']:.2f}"
         cls = ' class="yard"' if x["yardstick"] else ""
-        trs.append(f'<tr{cls}><td><b>{x["name"]}</b><br><span class="muted small">{x["kind"]}; {x["note"]}</span></td>'
+        tags = "".join(f'<span class="tag">{t}</span>' for t in TAGS.get(x["name"], []))
+        trs.append(f'<tr{cls}><td title="{x["kind"]}; {x["note"]}"><b>{x["name"]}</b> {tags}</td>'
                    f'{wdl}<td class="num">{x["dll"]:+.3f}</td><td class="num">{x["crps"]:.3f}</td>'
                    f'<td class="num">{covs}</td><td class="num">{ms}</td><td class="num">{size}</td></tr>')
     # the pick: ahead of laplace at the median AND on more series than it is behind
@@ -177,7 +183,11 @@ STYLE = """
     table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
     table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
     table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
-    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
     tr.yard td { background:#f4f9f5; }
     .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
     .stamp { color:#888; font-size:.85em; font-style:italic; }
