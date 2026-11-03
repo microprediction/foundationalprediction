@@ -115,9 +115,12 @@
   function pct(x) { return Math.round(100 * x) + '%'; }
   function stratum() { var s = STRATA.filter(function (x) { return x.kind === state.kind && x.freq === state.freq; })[0]; return s && s.id; }
 
+  function groupsShown(d) {   // asset class only for prices
+    return d.groups.filter(function (g) { return g[0] !== 'Asset class' || state.kind === 'Prices'; });
+  }
   function selected(d) {
     var tix = {}; d.tags.forEach(function (t, i) { tix[t] = i; });
-    var groups = d.groups.map(function (g) { return g[1].filter(function (t) { return state.tags[t]; }); });
+    var groups = groupsShown(d).map(function (g) { return g[1].filter(function (t) { return state.tags[t]; }); });
     var keep = new Uint8Array(d.series.length);
     for (var i = 0; i < d.series.length; i++) {
       var st = d.series_tags[i], ok = true;
@@ -205,7 +208,7 @@
   function chips(d) {
     document.getElementById('ex-ref').innerHTML = d.models.map(function (m) {
       return '<option value="' + m + '"' + (m === state.ref ? ' selected' : '') + '>' + name(m) + '</option>'; }).join('');
-    document.getElementById('ex-tags').innerHTML = d.groups.map(function (g) {
+    document.getElementById('ex-tags').innerHTML = groupsShown(d).map(function (g) {
       return '<div class="chipgroup"><span class="glabel">' + g[0] + '</span>' + g[1].map(function (t) {
         return '<button class="chip' + (state.tags[t] ? ' on' : '') + '" data-tag="' + t + '">' + t + '</button>'; }).join('') + '</div>';
     }).join('');
