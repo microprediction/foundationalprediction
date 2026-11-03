@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: accuracy, speed and size</title>
+  <meta name="description" content="Accuracy, cost per observation and footprint of each model in one chart." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="/">foundational prediction</a>
+      <nav>
+        <a href="/">Leaderboard</a>
+        <a href="/frontier.html">Accuracy, speed, size</a>
+        <a href="/methodology.html">Methodology</a>
+        <a href="/horizons.html">Horizons</a>
+        <a href="/gift.html">GIFT reconciliation</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>Accuracy, speed and size</h1>
+    <p class="lede">One point per model. Drag to rotate.</p>
+    <div id="frontier3d" style="width:100%;min-height:560px;"></div>
+    <p id="frontier3d-caption" class="muted small"></p>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <script src="./frontier3d.js"></script>
+    <p class="stamp">Built 2026-11-03 from skaters commit ee26c8e.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>

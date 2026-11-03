@@ -164,7 +164,8 @@ NAV = """  <header class="site-header">
     <div class="nav-inner">
       <a class="brand" href="/">foundational prediction</a>
       <nav>
-        <a href="/">Next data point</a>
+        <a href="/">Leaderboard</a>
+        <a href="/frontier.html">Accuracy, speed, size</a>
         <a href="/methodology.html">Methodology</a>
         <a href="/horizons.html">Horizons</a>
         <a href="/gift.html">GIFT reconciliation</a>
@@ -200,7 +201,7 @@ STYLE = """
 """
 
 
-def page(title, body, desc):
+def page(title, body, desc, extra_css=""):
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -209,7 +210,7 @@ def page(title, body, desc):
   <title>{title}</title>
   <meta name="description" content="{desc}" />
   <link rel="stylesheet" href="./academic.css" />
-  <style>{STYLE}</style>
+  <style>{STYLE}{extra_css}</style>
 </head>
 <body>
 {NAV}
@@ -346,13 +347,91 @@ def gift():
                 "The published GIFT-Eval numbers for the roster beside the per-horizon and density columns.")
 
 
+
+# store arm -> (display name, kind) for every model the explorer can show
+FP_MODELS = {
+    "laplace": ("laplace", "ours"), "learned(e2)": ("learned laplace", "ours"),
+    "learned": ("learned laplace (run 1)", "ours"),
+    "Timestral-209M(q21)": ("Timestral-209M", "foundation"), "t0-gamma(q21)": ("t0-gamma", "foundation"),
+    "TimesFM3(wide)": ("TimesFM 3.0", "foundation"), "TimesFM(wide)": ("TimesFM 2.5", "foundation"),
+    "TiRex(wide)": ("TiRex", "foundation"), "Chronos(wide)": ("Chronos-Bolt", "foundation"),
+    "AutoARIMA": ("AutoARIMA", "classical"), "AutoETS": ("AutoETS", "classical"),
+    "AutoTheta": ("AutoTheta", "classical"), "GARCH-t": ("GARCH-t", "classical"),
+}
+FP_STRATA = [
+    {"id": "weekly:econ", "kind": "Economic", "freq": "Weekly"},
+    {"id": "monthly:econ", "kind": "Economic", "freq": "Monthly"},
+    {"id": "daily:econ", "kind": "Economic", "freq": "Daily"},
+    {"id": "m4-hourly:econ", "kind": "Economic", "freq": "Hourly (M4)"},
+    {"id": "daily:price", "kind": "Prices", "freq": "Daily"},
+]
+
+
+def leaderboard(prov, written):
+    import explorer
+    strata = [x for x in FP_STRATA if x["id"] in written]
+    names = {k: v[0] for k, v in FP_MODELS.items()}
+    kinds = {k: v[1] for k, v in FP_MODELS.items()}
+    body = f"""
+    <h1>Which model for the next data point?</h1>
+    <p class="lede">The next observation, scored alone. Every model paired against a reference on the same series.</p>
+    <div class="picker">
+      <span class="lab">Series</span><div class="segs" id="ex-kind"></div>
+      <span class="lab">Frequency</span><div class="segs" id="ex-freq"></div>
+      <span class="lab">Reference</span><div><select id="ex-ref"></select></div>
+    </div>
+    <details open><summary class="small muted">Series types <button class="linkbtn" id="ex-clear">clear</button></summary>
+      <div id="ex-tags"></div>
+    </details>
+    <p id="ex-pick" class="pick"></p>
+    <div style="overflow-x:auto">
+    <table class="lb" id="ex-table">
+      <thead><tr><th data-col="name">model</th><th class="num" data-col="n">series</th>
+      <th data-col="win" title="Share of series won / lost against the reference, by a per-series Diebold-Mariano test on log predictive density; the rest are draws">win / loss*</th>
+      <th class="num" data-col="dll" title="Median per-series log-score gap in nats; positive beats the reference">&Delta;LL</th>
+      <th class="num" data-col="crps" title="Median per-series CRPS ratio to the reference; below 1 is better">CRPS</th>
+      <th class="num" data-col="cov" title="Central 90% interval coverage, pooled over the selected series; target 0.90">cov<sub>90</sub></th></tr></thead>
+      <tbody id="ex-body"></tbody>
+    </table>
+    </div>
+    <p class="foot">* By log score: a per-series Diebold&ndash;Mariano test on the log predictive density, 64 one-step
+      points per series. Click a column to sort.</p>
+    <div class="legend"><span><span class="dot foundation"></span>foundation model</span>
+      <span><span class="dot classical"></span>classical, refit every step</span>
+      <span><span class="dot ours"></span>laplace and the learned model</span></div>
+    <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']} ({prov['skaters_date']}).</p>
+    <script>window.FP_NAMES = {json.dumps(names)}; window.FP_KIND = {json.dumps(kinds)}; window.FP_STRATA = {json.dumps(strata)};</script>
+    <script>{explorer.EXPLORER_JS}</script>
+"""
+    return page("Foundational prediction: the next data point", body,
+                "Which model to use for the next data point: foundation, classical and online models paired on identical series, filtered by series type, with a choice of reference.",
+                extra_css=explorer.EXPLORER_CSS)
+
+
+def frontier_page(prov):
+    body = f"""
+    <h1>Accuracy, speed and size</h1>
+    <p class="lede">One point per model. Drag to rotate.</p>
+    <div id="frontier3d" style="width:100%;min-height:560px;"></div>
+    <p id="frontier3d-caption" class="muted small"></p>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <script src="./frontier3d.js"></script>
+    <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']}.</p>
+"""
+    return page("Foundational prediction: accuracy, speed and size", body,
+                "Accuracy, cost per observation and footprint of each model in one chart.")
+
+
 def main():
     vs, cov, warm, mb, perf_meta, f3_meta = load()
     prov = provenance()
     os.makedirs(OUT, exist_ok=True)
     shutil.copy(os.path.join(SKATERS, "docs", "academic.css"), os.path.join(OUT, "academic.css"))
     shutil.copy(os.path.join(SKATERS, "docs", "assets", "frontier3d.js"), os.path.join(OUT, "frontier3d.js"))
-    open(os.path.join(OUT, "index.html"), "w").write(index(vs, cov, warm, mb, prov, perf_meta))
+    import explorer
+    written = explorer.export(BENCH, OUT, list(FP_MODELS))
+    open(os.path.join(OUT, "index.html"), "w").write(leaderboard(prov, written))
+    open(os.path.join(OUT, "frontier.html"), "w").write(frontier_page(prov))
     open(os.path.join(OUT, "methodology.html"), "w").write(methodology(prov))
     open(os.path.join(OUT, "horizons.html"), "w").write(horizons())
     open(os.path.join(OUT, "gift.html"), "w").write(gift())
