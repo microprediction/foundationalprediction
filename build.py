@@ -165,7 +165,7 @@ NAV = """  <header class="site-header">
       <a class="brand" href="/">foundational prediction</a>
       <nav>
         <a href="/">Leaderboard</a>
-        <a href="/frontier.html">Accuracy, speed, size</a>
+        <a href="/frontier.html">Performance</a>
         <a href="/methodology.html">Methodology</a>
         <a href="/horizons.html">Horizons</a>
         <a href="/gift.html">GIFT reconciliation</a>
@@ -410,7 +410,7 @@ def leaderboard(prov, written):
 
 def frontier_page(prov):
     body = f"""
-    <h1>Accuracy, speed and size</h1>
+    <h1>Performance</h1>
     <p class="lede">One point per model. Drag to rotate.</p>
     <div id="frontier3d" style="width:100%;min-height:560px;"></div>
     <p id="frontier3d-caption" class="muted small"></p>
@@ -418,7 +418,7 @@ def frontier_page(prov):
     <script src="./frontier3d.js"></script>
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']}.</p>
 """
-    return page("Foundational prediction: accuracy, speed and size", body,
+    return page("Foundational prediction: performance", body,
                 "Accuracy, cost per observation and footprint of each model in one chart.")
 
 
