@@ -372,7 +372,7 @@ FP_MODELS = {
 # monthly: the run with the most training data scored so far; weekly: e3 (a third
 # pass, e4, overfit on held-out weekly series and is not listed)
 LAPLACEPP_RUNS = ["learned(e4s21000)", "learned(e4s18000)", "learned(e4s15000)", "learned(e4s12000)",
-                  "learned(e4s9000)", "learned(aug)", "learned(e3)", "learned(e2)", "learned(e2s1000)", "learned(e2s500)"]
+                  "learned(e4s9000)", "learned(e3)", "learned(e2)", "learned(e2s1000)", "learned(e2s500)"]
 
 FP_STRATA = [
     {"id": "weekly:econ", "kind": "Economic", "freq": "Weekly"},
