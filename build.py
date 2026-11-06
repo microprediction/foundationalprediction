@@ -462,27 +462,31 @@ def _kind_of(name):
 _KCOL = {"ours": "#1a8c4a", "foundation": "#8f84ff", "classical": "#e09b2d"}
 
 
-def hbars(items, fmt, unit_note):
-    """Horizontal bars on a log scale: items = [(label, value)] sorted ascending."""
+def hbars(items, fmt, unit_note, power=0.25):
+    """Horizontal bars, length proportional to value**power (0 < power < 1 sits
+    between a log scale and a linear one: 0.25 keeps a 10,000x range readable
+    while the gaps still look like gaps). items = [(label, value)], ascending."""
     import math
     items = [(l, v) for l, v in items if v and v > 0]
     if not items:
         return ""
-    lo = 10 ** math.floor(math.log10(min(v for _, v in items)))
-    hi = 10 ** math.ceil(math.log10(max(v for _, v in items)))
+    vmax = max(v for _, v in items)
     W, LW, RW, BH, GAP = 760, 190, 90, 20, 8
     PW = W - LW - RW
     H = len(items) * (BH + GAP) + 34
     def x(v):
-        return LW + PW * (math.log10(v) - math.log10(lo)) / (math.log10(hi) - math.log10(lo))
+        return LW + PW * (v / vmax) ** power
     out = [f'<svg viewBox="0 0 {W} {H}" style="width:100%;max-width:{W}px;height:auto;display:block;margin:10px 0 4px" '
-           f'role="img" aria-label="Bar chart, log scale, {unit_note}">']
-    k = lo
-    while k <= hi * 1.0001:
-        xx = x(k)
+           f'role="img" aria-label="Bar chart, fourth-root scale, {unit_note}">']
+    vmin = min(v for _, v in items)
+    k = 10 ** math.ceil(math.log10(vmin))
+    ticks = []
+    while k <= vmax * 1.0001:
+        ticks.append(k); k *= 10
+    for t in ticks:
+        xx = x(t)
         out.append(f'<line x1="{xx:.1f}" y1="0" x2="{xx:.1f}" y2="{H - 26}" stroke="#e5e5e5"/>')
-        out.append(f'<text x="{xx:.1f}" y="{H - 10}" font-size="11" fill="#888" text-anchor="middle">{fmt(k)}</text>')
-        k *= 10
+        out.append(f'<text x="{xx:.1f}" y="{H - 10}" font-size="11" fill="#888" text-anchor="middle">{fmt(t)}</text>')
     for i, (label, v) in enumerate(items):
         y = i * (BH + GAP)
         col = _KCOL[_kind_of(label)]
@@ -519,7 +523,8 @@ def speed_page(prov, perf, perf_meta):
     <h1>Speed</h1>
     <p class="lede">Milliseconds per forecast on one CPU, one thread.</p>
     {hbars([(m, by.get((m, "warm"))) for m in warm], _fmt_ms_plain, "streaming cost per new observation")}
-    <p class="foot">Streaming: the cost of one new observation. Log scale.</p>
+    <p class="foot">Streaming: the cost of one new observation. Bar length is the fourth root of the time,
+      between a log and a linear scale.</p>
     <table class="lb">
       <thead><tr><th>model</th>
       <th class="num" title="One new observation arrives: an online model updates its state, a stateless model re-runs on its context">streaming</th>
@@ -549,7 +554,7 @@ def size_page(prov, f3):
     <h1>Size</h1>
     <p class="lede">What a deployment carries.</p>
     {hbars([(q["name"], q["mb"]) for q in pts], _fmt_mb, "bytes each model carries")}
-    <p class="foot">Log scale.</p>
+    <p class="foot">Bar length is the fourth root of the size, between a log and a linear scale.</p>
     <table class="lb">
       <thead><tr><th>model</th><th class="num">size</th><th>measured as</th></tr></thead>
       <tbody>
