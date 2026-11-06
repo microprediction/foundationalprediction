@@ -14,6 +14,7 @@ import collections
 import csv
 import json
 import os
+import sys
 
 TAG_GROUPS = [
     ("Dynamics", ["martingale", "mean-reverting", "momentum"]),
@@ -72,7 +73,13 @@ def export(bench, out_dir, roster_names, aliases=None):
                     break
         P = {k: v for k, v in P.items() if all(x in roster_names for x in k.split("|"))}
         models = [m for m in roster_names if any(m in k.split("|") for k in P)]
-        data = {"stratum": st, "runs": shown_run, "series": series, "tags": all_tags, "groups": TAG_GROUPS,
+        try:
+            sys.path.insert(0, bench)
+            from learned_split import split_of
+            held = [1 if split_of(sid) == "valid" else 0 for sid in series]
+        except Exception:                                   # noqa: BLE001
+            held = [1] * len(series)
+        data = {"stratum": st, "runs": shown_run, "held": held, "series": series, "tags": all_tags, "groups": TAG_GROUPS,
                 "series_tags": stags, "models": models, "pairs": P, "cov": C}
         with open(os.path.join(out_dir, "data", st.replace(":", "-") + ".json"), "w") as fh:
             json.dump(data, fh, separators=(",", ":"))
@@ -83,7 +90,7 @@ def export(bench, out_dir, roster_names, aliases=None):
 EXPLORER_JS = r"""
 (function () {
   var NAMES = window.FP_NAMES || {}, KIND = window.FP_KIND || {}, STRATA = window.FP_STRATA || [];
-  var state = { kind: null, freq: null, ref: 'laplace', tags: {}, data: null, sort: { col: 'net', dir: -1 } };
+  var state = { kind: null, freq: null, ref: 'laplace', tags: {}, data: null, sort: { col: 'net', dir: -1 }, heldOnly: false };
   var cache = {};
   function name(m) { return NAMES[m] || m; }
   function dot(m) { return '<span class="dot ' + (KIND[m] || 'other') + '"></span>'; }
@@ -105,6 +112,7 @@ EXPLORER_JS = r"""
         if (!groups[g].length) continue;
         ok = groups[g].some(function (t) { return st.indexOf(tix[t]) >= 0; });
       }
+      if (ok && state.heldOnly && d.held && !d.held[i]) ok = false;
       keep[i] = ok ? 1 : 0;
     }
     return keep;
@@ -209,6 +217,7 @@ EXPLORER_JS = r"""
     });
   }
   document.getElementById('ex-ref').addEventListener('change', function (e) { state.ref = e.target.value; render(); });
+  document.getElementById('ex-held').addEventListener('change', function (e) { state.heldOnly = e.target.checked; render(); });
   document.getElementById('ex-clear').addEventListener('click', function () { state.tags = {}; if (state.data) { chips(state.data); render(); } });
   Array.prototype.forEach.call(document.querySelectorAll('#ex-table th[data-col]'), function (th) {
     th.addEventListener('click', function () {

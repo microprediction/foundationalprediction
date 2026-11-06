@@ -394,7 +394,9 @@ def leaderboard(prov, written):
     <div class="picker">
       <span class="lab">Series</span><div class="segs" id="ex-kind"></div>
       <span class="lab">Frequency</span><div class="segs" id="ex-freq"></div>
-      <span class="lab">Reference</span><div><select id="ex-ref"></select></div>
+      <span class="lab">Reference</span><div><select id="ex-ref"></select>
+        <label class="small muted" style="margin-left:14px" title="laplace++ is trained on one half of the series and scored only on the other. Tick to score every model on that held-out half, so all rows cover the same series.">
+        <input type="checkbox" id="ex-held"> held-out series only</label></div>
     </div>
     <details open><summary class="small muted">Series types <button class="linkbtn" id="ex-clear">clear</button></summary>
       <div id="ex-tags"></div>
@@ -411,6 +413,8 @@ def leaderboard(prov, written):
     </table>
     </div>
     <p class="foot" id="ex-runs"></p>
+    <p class="foot">laplace++ is trained on one half of each panel (split by series family) and scored only on the other
+      half, so its row covers fewer series; tick <i>held-out series only</i> to put every model on that same half.</p>
     <p class="foot">* By log score: a per-series Diebold&ndash;Mariano test on the log predictive density, 64 one-step
       points per series. Click a column to sort.</p>
     <div class="legend"><span><span class="dot foundation"></span>foundation model</span>
