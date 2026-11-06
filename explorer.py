@@ -89,13 +89,16 @@ def export(bench, out_dir, roster_names, aliases=None):
 
 EXPLORER_JS = r"""
 (function () {
-  var NAMES = window.FP_NAMES || {}, KIND = window.FP_KIND || {}, STRATA = window.FP_STRATA || [];
+  var LIC = window.FP_LIC || {}, NAMES = window.FP_NAMES || {}, KIND = window.FP_KIND || {}, STRATA = window.FP_STRATA || [];
   var state = { kind: null, freq: null, ref: 'laplace', tags: {}, data: null, sort: { col: 'net', dir: -1 }, heldOnly: false };
   var cache = {};
   function name(m) { return NAMES[m] || m; }
   function dot(m) { return '<span class="dot ' + (KIND[m] || 'other') + '"></span>'; }
   function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; });
     var k = a.length >> 1; return a.length % 2 ? a[k] : 0.5 * (a[k - 1] + a[k]); }
+  function licName(m) { return (LIC[m] || ['?'])[0]; }
+  function lic(m) { var l = LIC[m]; if (!l) return '<td class="muted">&ndash;</td>';
+    return '<td><a class="lic ' + l[1] + '" href="' + l[2] + '" title="' + l[3] + '">' + l[0] + '</a></td>'; }
   function pct(x) { return Math.round(100 * x) + '%'; }
   function stratum() { var s = STRATA.filter(function (x) { return x.kind === state.kind && x.freq === state.freq; })[0]; return s && s.id; }
 
@@ -141,7 +144,7 @@ EXPLORER_JS = r"""
     out.push({ m: ref, ref: true, n: nref, w: 0, d: 0, l: 0, win: 0, loss: 0, net: 0, dll: 0, crps: 1, cov: covOf(d, ref, keep) });
     var c = state.sort.col, dir = state.sort.dir;
     out.sort(function (a, b) {
-      var x = c === 'name' ? name(a.m) : a[c], y = c === 'name' ? name(b.m) : b[c];
+      var f = c === 'name' ? name : c === 'lic' ? licName : null, x = f ? f(a.m) : a[c], y = f ? f(b.m) : b[c];
       if (x === null) return 1; if (y === null) return -1;
       return (x < y ? -1 : x > y ? 1 : 0) * dir;
     });
@@ -153,14 +156,14 @@ EXPLORER_JS = r"""
     var rs = rows(d, keep);
     var body = rs.map(function (r) {
       if (r.ref) return '<tr class="yard"><td>' + dot(r.m) + '<b>' + name(r.m) + '</b></td><td class="muted" colspan="2">reference</td>' +
-        '<td class="num">+0.000</td><td class="num">1.000</td><td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td></tr>';
+        '<td class="num">+0.000</td><td class="num">1.000</td><td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td>' + lic(r.m) + '</tr>';
       return '<tr><td>' + dot(r.m) + '<b>' + name(r.m) + '</b></td><td class="num">' + r.n.toLocaleString() + '</td>' +
         '<td><span class="wdl"><i class="w" style="width:' + (100 * r.win).toFixed(1) + '%"></i><i class="d" style="width:' +
         (100 * r.d / r.n).toFixed(1) + '%"></i><i class="l" style="width:' + (100 * r.loss).toFixed(1) + '%"></i></span>' +
         '<span class="wdlnum">' + pct(r.win) + ' / ' + pct(r.loss) + '</span></td>' +
         '<td class="num">' + (r.dll >= 0 ? '+' : '') + r.dll.toFixed(3) + '</td>' +
         '<td class="num">' + (r.crps === null ? '&ndash;' : r.crps.toFixed(3)) + '</td>' +
-        '<td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td></tr>';
+        '<td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td>' + lic(r.m) + '</tr>';
     }).join('');
     document.getElementById('ex-body').innerHTML = body;
     var best = rs.filter(function (r) { return !r.ref; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
@@ -223,7 +226,7 @@ EXPLORER_JS = r"""
     th.addEventListener('click', function () {
       var c = th.dataset.col;
       if (state.sort.col === c) state.sort.dir = -state.sort.dir;
-      else { state.sort.col = c; state.sort.dir = (c === 'name' || c === 'loss' || c === 'crps') ? 1 : -1; }
+      else { state.sort.col = c; state.sort.dir = (c === 'name' || c === 'lic' || c === 'loss' || c === 'crps') ? 1 : -1; }
       render();
     });
   });
@@ -252,6 +255,11 @@ EXPLORER_CSS = """
     .seg { font:inherit; font-size:.88rem; padding:4px 14px; border:1px solid #ccc; background:#fff; color:#444; cursor:pointer; margin-left:-1px; }
     .seg:first-child { border-radius:4px 0 0 4px; margin-left:0; } .seg:last-child { border-radius:0 4px 4px 0; }
     .seg.on { background:#4a3aff; border-color:#4a3aff; color:#fff; position:relative; }
+    .lic { font-size:.72rem; padding:1px 6px; border-radius:8px; white-space:nowrap; text-decoration:none; }
+    .lic.open { background:#e3f4e8; color:#1d6b35; } .lic.restricted { background:#fbf0d9; color:#8a5a00; }
+    .lic.noncommercial { background:#fbe3e3; color:#9b2121; }
+    @media (prefers-color-scheme: dark) { .lic.open { background:#163d24; color:#9fe0b3; }
+      .lic.restricted { background:#3d2f12; color:#f0cf87; } .lic.noncommercial { background:#401a1a; color:#f2a8a8; } }
     #ex-table th[data-col] { cursor:pointer; user-select:none; }
     #ex-table th[data-col]:hover { color:#4a3aff; }
     #ex-table th[data-col]::after { content:attr(data-dir); font-size:.7rem; margin-left:3px; }

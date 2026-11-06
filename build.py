@@ -314,7 +314,7 @@ def methodology(prov):
     <p>The classical baselines in published suites are fit once at the window origin and never updated.
       Here every baseline is online: it sees every observation before it forecasts the next. The gap
       between foundation models and classical methods shown here is therefore the gap a practitioner
-      running a stream would see. The fully online ARIMA and ETS rows are being added.</p>
+      running a stream would see. AutoARIMA, AutoETS, AutoTheta and GARCH-t are refit at every step.</p>
     <h2>Trained models</h2>
     <p>A model trained on this panel is scored only on series whose family it never saw: the panel is
       split by series family, and the learned rows report the held-out half. The clean out-of-domain
@@ -322,6 +322,12 @@ def methodology(prov):
     <h2>Roster</h2>
     <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
       here. Submissions that cannot be rerun are not listed.</p>
+    <h2>Licences and versions</h2>
+    <p>The licence column gives each model's terms. Three are open, two are free below a revenue
+      threshold, and TimesFM 3.0 and TimeH2O are licensed for testing, evaluation and research only.
+      All evaluation here is non-commercial benchmarking. TimeH2O is h2oai/timeh2o-v1 with weights at
+      Hugging Face revision 60b68fa (2026-10-22), run zero-shot on CPU on 2026-11-03 and 2026-11-04
+      by the protocol above.</p>
     <h2>Source</h2>
     <p>The tables are generated from the skaters repository's committed summaries, the per-step store
       behind them, its cost measurements and its footprint measurements, by
@@ -368,6 +374,28 @@ FP_MODELS = {
     "AutoARIMA": ("AutoARIMA", "classical"), "AutoETS": ("AutoETS", "classical"),
     "AutoTheta": ("AutoTheta", "classical"), "GARCH-t": ("GARCH-t", "classical"),
 }
+# store arm -> (short label, class, link, tooltip). class: open, restricted (free below a
+# revenue threshold), noncommercial
+_APACHE = ("Apache-2.0", "open", "https://www.apache.org/licenses/LICENSE-2.0", "Apache License 2.0: commercial use allowed")
+FP_LICENSES = {
+    "laplace": ("MIT", "open", "https://github.com/microprediction/skaters/blob/main/LICENSE", "MIT: commercial use allowed"),
+    "learned(e2)": ("MIT", "open", "https://github.com/microprediction/skaters/blob/main/LICENSE", "MIT: commercial use allowed"),
+    "Timestral-209M(q21)": ("Modified MIT", "restricted", "https://huggingface.co/mistralai/Timestral-209M/blob/main/LICENSE",
+                            "Modified MIT: no rights for companies above $20M monthly revenue"),
+    "t0-gamma(q21)": _APACHE[:2] + ("https://huggingface.co/theforecastingcompany/t0-gamma",) + _APACHE[3:],
+    "TimesFM3(wide)": ("Non-commercial", "noncommercial", "https://huggingface.co/google/timesfm-3.0-pytorch/blob/main/LICENSE",
+                       "TimesFM Non-Commercial License v1.0: testing, evaluation and research only"),
+    "TimesFM(wide)": _APACHE[:2] + ("https://huggingface.co/google/timesfm-2.5-200m-pytorch",) + _APACHE[3:],
+    "TiRex(wide)": ("NXAI Community", "restricted", "https://huggingface.co/NX-AI/TiRex/blob/main/LICENSE",
+                    "NXAI Community License: commercial terms apply above EUR 100M annual revenue"),
+    "Chronos(wide)": _APACHE[:2] + ("https://huggingface.co/amazon/chronos-bolt-small",) + _APACHE[3:],
+    "TimeH2O-v1(wide)": ("Non-commercial", "noncommercial", "https://huggingface.co/h2oai/timeh2o-v1",
+                         "H2O Model Non-Commercial Licence v1.0: testing, evaluation, benchmarking and research only"),
+    "AutoARIMA": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
+    "AutoETS": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
+    "AutoTheta": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
+    "GARCH-t": ("NCSA", "open", "https://github.com/bashtage/arch/blob/main/LICENSE.md", "University of Illinois/NCSA (arch package): commercial use allowed"),
+}
 # laplace++ runs in priority order: the most-trained run scored on a stratum is shown
 # monthly: the run with the most training data scored so far; weekly: e3 (a third
 # pass, e4, overfit on held-out weekly series and is not listed)
@@ -408,7 +436,8 @@ def leaderboard(prov, written):
       <th data-col="net" title="Share of series won / lost against the reference, by a per-series Diebold-Mariano test on log predictive density; the rest are draws; sorts by win minus loss">win / loss*</th>
       <th class="num" data-col="dll" title="Median per-series log-score gap in nats; positive beats the reference">&Delta;LL</th>
       <th class="num" data-col="crps" title="Median per-series CRPS ratio to the reference; below 1 is better">CRPS</th>
-      <th class="num" data-col="cov" title="Central 90% interval coverage, pooled over the selected series; target 0.90">cov<sub>90</sub></th></tr></thead>
+      <th class="num" data-col="cov" title="Central 90% interval coverage, pooled over the selected series; target 0.90">cov<sub>90</sub></th>
+      <th data-col="lic" title="Licence of the model weights or package; hover a cell for the terms">licence</th></tr></thead>
       <tbody id="ex-body"></tbody>
     </table>
     </div>
@@ -419,9 +448,14 @@ def leaderboard(prov, written):
       points per series. Click a column to sort.</p>
     <div class="legend"><span><span class="dot foundation"></span>foundation model</span>
       <span><span class="dot classical"></span>classical, refit every step</span>
-      <span><span class="dot ours"></span>laplace and laplace++</span></div>
+      <span><span class="dot ours"></span>laplace and laplace++</span>
+      <span><span class="lic open">open</span> commercial use allowed</span>
+      <span><span class="lic restricted">restricted</span> free below a revenue threshold</span>
+      <span><span class="lic noncommercial">non-commercial</span> research and evaluation only</span></div>
+    <p class="foot">TimeH2O: h2oai/timeh2o-v1, weights at revision 60b68fa (2026-10-22), evaluated 2026-11-03 to 2026-11-04
+      under its non-commercial licence. Method: <a href="methodology.html">methodology</a>.</p>
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']} ({prov['skaters_date']}).</p>
-    <script>window.FP_NAMES = {json.dumps(names)}; window.FP_KIND = {json.dumps(kinds)}; window.FP_STRATA = {json.dumps(strata)};</script>
+    <script>window.FP_NAMES = {json.dumps(names)}; window.FP_KIND = {json.dumps(kinds)}; window.FP_STRATA = {json.dumps(strata)}; window.FP_LIC = {json.dumps(FP_LICENSES)};</script>
     <script>{explorer.EXPLORER_JS}</script>
 """
     return page("Foundational prediction: the next data point", body,

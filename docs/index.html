@@ -49,6 +49,11 @@
     .seg { font:inherit; font-size:.88rem; padding:4px 14px; border:1px solid #ccc; background:#fff; color:#444; cursor:pointer; margin-left:-1px; }
     .seg:first-child { border-radius:4px 0 0 4px; margin-left:0; } .seg:last-child { border-radius:0 4px 4px 0; }
     .seg.on { background:#4a3aff; border-color:#4a3aff; color:#fff; position:relative; }
+    .lic { font-size:.72rem; padding:1px 6px; border-radius:8px; white-space:nowrap; text-decoration:none; }
+    .lic.open { background:#e3f4e8; color:#1d6b35; } .lic.restricted { background:#fbf0d9; color:#8a5a00; }
+    .lic.noncommercial { background:#fbe3e3; color:#9b2121; }
+    @media (prefers-color-scheme: dark) { .lic.open { background:#163d24; color:#9fe0b3; }
+      .lic.restricted { background:#3d2f12; color:#f0cf87; } .lic.noncommercial { background:#401a1a; color:#f2a8a8; } }
     #ex-table th[data-col] { cursor:pointer; user-select:none; }
     #ex-table th[data-col]:hover { color:#4a3aff; }
     #ex-table th[data-col]::after { content:attr(data-dir); font-size:.7rem; margin-left:3px; }
@@ -104,7 +109,8 @@
       <th data-col="net" title="Share of series won / lost against the reference, by a per-series Diebold-Mariano test on log predictive density; the rest are draws; sorts by win minus loss">win / loss*</th>
       <th class="num" data-col="dll" title="Median per-series log-score gap in nats; positive beats the reference">&Delta;LL</th>
       <th class="num" data-col="crps" title="Median per-series CRPS ratio to the reference; below 1 is better">CRPS</th>
-      <th class="num" data-col="cov" title="Central 90% interval coverage, pooled over the selected series; target 0.90">cov<sub>90</sub></th></tr></thead>
+      <th class="num" data-col="cov" title="Central 90% interval coverage, pooled over the selected series; target 0.90">cov<sub>90</sub></th>
+      <th data-col="lic" title="Licence of the model weights or package; hover a cell for the terms">licence</th></tr></thead>
       <tbody id="ex-body"></tbody>
     </table>
     </div>
@@ -115,18 +121,26 @@
       points per series. Click a column to sort.</p>
     <div class="legend"><span><span class="dot foundation"></span>foundation model</span>
       <span><span class="dot classical"></span>classical, refit every step</span>
-      <span><span class="dot ours"></span>laplace and laplace++</span></div>
+      <span><span class="dot ours"></span>laplace and laplace++</span>
+      <span><span class="lic open">open</span> commercial use allowed</span>
+      <span><span class="lic restricted">restricted</span> free below a revenue threshold</span>
+      <span><span class="lic noncommercial">non-commercial</span> research and evaluation only</span></div>
+    <p class="foot">TimeH2O: h2oai/timeh2o-v1, weights at revision 60b68fa (2026-10-22), evaluated 2026-11-03 to 2026-11-04
+      under its non-commercial licence. Method: <a href="methodology.html">methodology</a>.</p>
     <p class="stamp">Built 2026-11-06 from skaters commit 6c5da15 (2026-11-06).</p>
-    <script>window.FP_NAMES = {"laplace": "laplace", "learned(e2)": "laplace++", "Timestral-209M(q21)": "Timestral-209M", "t0-gamma(q21)": "t0-gamma", "TimesFM3(wide)": "TimesFM 3.0", "TimesFM(wide)": "TimesFM 2.5", "TiRex(wide)": "TiRex", "Chronos(wide)": "Chronos-Bolt", "TimeH2O-v1(wide)": "TimeH2O", "AutoARIMA": "AutoARIMA", "AutoETS": "AutoETS", "AutoTheta": "AutoTheta", "GARCH-t": "GARCH-t"}; window.FP_KIND = {"laplace": "ours", "learned(e2)": "ours", "Timestral-209M(q21)": "foundation", "t0-gamma(q21)": "foundation", "TimesFM3(wide)": "foundation", "TimesFM(wide)": "foundation", "TiRex(wide)": "foundation", "Chronos(wide)": "foundation", "TimeH2O-v1(wide)": "foundation", "AutoARIMA": "classical", "AutoETS": "classical", "AutoTheta": "classical", "GARCH-t": "classical"}; window.FP_STRATA = [{"id": "weekly:econ", "kind": "Economic", "freq": "Weekly"}, {"id": "monthly:econ", "kind": "Economic", "freq": "Monthly"}, {"id": "daily:econ", "kind": "Economic", "freq": "Daily"}, {"id": "m4-hourly:econ", "kind": "Economic", "freq": "Hourly (M4)"}, {"id": "daily:price", "kind": "Prices", "freq": "Daily"}];</script>
+    <script>window.FP_NAMES = {"laplace": "laplace", "learned(e2)": "laplace++", "Timestral-209M(q21)": "Timestral-209M", "t0-gamma(q21)": "t0-gamma", "TimesFM3(wide)": "TimesFM 3.0", "TimesFM(wide)": "TimesFM 2.5", "TiRex(wide)": "TiRex", "Chronos(wide)": "Chronos-Bolt", "TimeH2O-v1(wide)": "TimeH2O", "AutoARIMA": "AutoARIMA", "AutoETS": "AutoETS", "AutoTheta": "AutoTheta", "GARCH-t": "GARCH-t"}; window.FP_KIND = {"laplace": "ours", "learned(e2)": "ours", "Timestral-209M(q21)": "foundation", "t0-gamma(q21)": "foundation", "TimesFM3(wide)": "foundation", "TimesFM(wide)": "foundation", "TiRex(wide)": "foundation", "Chronos(wide)": "foundation", "TimeH2O-v1(wide)": "foundation", "AutoARIMA": "classical", "AutoETS": "classical", "AutoTheta": "classical", "GARCH-t": "classical"}; window.FP_STRATA = [{"id": "weekly:econ", "kind": "Economic", "freq": "Weekly"}, {"id": "monthly:econ", "kind": "Economic", "freq": "Monthly"}, {"id": "daily:econ", "kind": "Economic", "freq": "Daily"}, {"id": "m4-hourly:econ", "kind": "Economic", "freq": "Hourly (M4)"}, {"id": "daily:price", "kind": "Prices", "freq": "Daily"}]; window.FP_LIC = {"laplace": ["MIT", "open", "https://github.com/microprediction/skaters/blob/main/LICENSE", "MIT: commercial use allowed"], "learned(e2)": ["MIT", "open", "https://github.com/microprediction/skaters/blob/main/LICENSE", "MIT: commercial use allowed"], "Timestral-209M(q21)": ["Modified MIT", "restricted", "https://huggingface.co/mistralai/Timestral-209M/blob/main/LICENSE", "Modified MIT: no rights for companies above $20M monthly revenue"], "t0-gamma(q21)": ["Apache-2.0", "open", "https://huggingface.co/theforecastingcompany/t0-gamma", "Apache License 2.0: commercial use allowed"], "TimesFM3(wide)": ["Non-commercial", "noncommercial", "https://huggingface.co/google/timesfm-3.0-pytorch/blob/main/LICENSE", "TimesFM Non-Commercial License v1.0: testing, evaluation and research only"], "TimesFM(wide)": ["Apache-2.0", "open", "https://huggingface.co/google/timesfm-2.5-200m-pytorch", "Apache License 2.0: commercial use allowed"], "TiRex(wide)": ["NXAI Community", "restricted", "https://huggingface.co/NX-AI/TiRex/blob/main/LICENSE", "NXAI Community License: commercial terms apply above EUR 100M annual revenue"], "Chronos(wide)": ["Apache-2.0", "open", "https://huggingface.co/amazon/chronos-bolt-small", "Apache License 2.0: commercial use allowed"], "TimeH2O-v1(wide)": ["Non-commercial", "noncommercial", "https://huggingface.co/h2oai/timeh2o-v1", "H2O Model Non-Commercial Licence v1.0: testing, evaluation, benchmarking and research only"], "AutoARIMA": ["Apache-2.0", "open", "https://github.com/Nixtla/statsforecast", "Apache License 2.0: commercial use allowed"], "AutoETS": ["Apache-2.0", "open", "https://github.com/Nixtla/statsforecast", "Apache License 2.0: commercial use allowed"], "AutoTheta": ["Apache-2.0", "open", "https://github.com/Nixtla/statsforecast", "Apache License 2.0: commercial use allowed"], "GARCH-t": ["NCSA", "open", "https://github.com/bashtage/arch/blob/main/LICENSE.md", "University of Illinois/NCSA (arch package): commercial use allowed"]};</script>
     <script>
 (function () {
-  var NAMES = window.FP_NAMES || {}, KIND = window.FP_KIND || {}, STRATA = window.FP_STRATA || [];
+  var LIC = window.FP_LIC || {}, NAMES = window.FP_NAMES || {}, KIND = window.FP_KIND || {}, STRATA = window.FP_STRATA || [];
   var state = { kind: null, freq: null, ref: 'laplace', tags: {}, data: null, sort: { col: 'net', dir: -1 }, heldOnly: false };
   var cache = {};
   function name(m) { return NAMES[m] || m; }
   function dot(m) { return '<span class="dot ' + (KIND[m] || 'other') + '"></span>'; }
   function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; });
     var k = a.length >> 1; return a.length % 2 ? a[k] : 0.5 * (a[k - 1] + a[k]); }
+  function licName(m) { return (LIC[m] || ['?'])[0]; }
+  function lic(m) { var l = LIC[m]; if (!l) return '<td class="muted">&ndash;</td>';
+    return '<td><a class="lic ' + l[1] + '" href="' + l[2] + '" title="' + l[3] + '">' + l[0] + '</a></td>'; }
   function pct(x) { return Math.round(100 * x) + '%'; }
   function stratum() { var s = STRATA.filter(function (x) { return x.kind === state.kind && x.freq === state.freq; })[0]; return s && s.id; }
 
@@ -172,7 +186,7 @@
     out.push({ m: ref, ref: true, n: nref, w: 0, d: 0, l: 0, win: 0, loss: 0, net: 0, dll: 0, crps: 1, cov: covOf(d, ref, keep) });
     var c = state.sort.col, dir = state.sort.dir;
     out.sort(function (a, b) {
-      var x = c === 'name' ? name(a.m) : a[c], y = c === 'name' ? name(b.m) : b[c];
+      var f = c === 'name' ? name : c === 'lic' ? licName : null, x = f ? f(a.m) : a[c], y = f ? f(b.m) : b[c];
       if (x === null) return 1; if (y === null) return -1;
       return (x < y ? -1 : x > y ? 1 : 0) * dir;
     });
@@ -184,14 +198,14 @@
     var rs = rows(d, keep);
     var body = rs.map(function (r) {
       if (r.ref) return '<tr class="yard"><td>' + dot(r.m) + '<b>' + name(r.m) + '</b></td><td class="muted" colspan="2">reference</td>' +
-        '<td class="num">+0.000</td><td class="num">1.000</td><td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td></tr>';
+        '<td class="num">+0.000</td><td class="num">1.000</td><td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td>' + lic(r.m) + '</tr>';
       return '<tr><td>' + dot(r.m) + '<b>' + name(r.m) + '</b></td><td class="num">' + r.n.toLocaleString() + '</td>' +
         '<td><span class="wdl"><i class="w" style="width:' + (100 * r.win).toFixed(1) + '%"></i><i class="d" style="width:' +
         (100 * r.d / r.n).toFixed(1) + '%"></i><i class="l" style="width:' + (100 * r.loss).toFixed(1) + '%"></i></span>' +
         '<span class="wdlnum">' + pct(r.win) + ' / ' + pct(r.loss) + '</span></td>' +
         '<td class="num">' + (r.dll >= 0 ? '+' : '') + r.dll.toFixed(3) + '</td>' +
         '<td class="num">' + (r.crps === null ? '&ndash;' : r.crps.toFixed(3)) + '</td>' +
-        '<td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td></tr>';
+        '<td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td>' + lic(r.m) + '</tr>';
     }).join('');
     document.getElementById('ex-body').innerHTML = body;
     var best = rs.filter(function (r) { return !r.ref; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
@@ -254,7 +268,7 @@
     th.addEventListener('click', function () {
       var c = th.dataset.col;
       if (state.sort.col === c) state.sort.dir = -state.sort.dir;
-      else { state.sort.col = c; state.sort.dir = (c === 'name' || c === 'loss' || c === 'crps') ? 1 : -1; }
+      else { state.sort.col = c; state.sort.dir = (c === 'name' || c === 'lic' || c === 'loss' || c === 'crps') ? 1 : -1; }
       render();
     });
   });

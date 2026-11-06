@@ -80,7 +80,7 @@
     <p>The classical baselines in published suites are fit once at the window origin and never updated.
       Here every baseline is online: it sees every observation before it forecasts the next. The gap
       between foundation models and classical methods shown here is therefore the gap a practitioner
-      running a stream would see. The fully online ARIMA and ETS rows are being added.</p>
+      running a stream would see. AutoARIMA, AutoETS, AutoTheta and GARCH-t are refit at every step.</p>
     <h2>Trained models</h2>
     <p>A model trained on this panel is scored only on series whose family it never saw: the panel is
       split by series family, and the learned rows report the held-out half. The clean out-of-domain
@@ -88,6 +88,12 @@
     <h2>Roster</h2>
     <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
       here. Submissions that cannot be rerun are not listed.</p>
+    <h2>Licences and versions</h2>
+    <p>The licence column gives each model's terms. Three are open, two are free below a revenue
+      threshold, and TimesFM 3.0 and TimeH2O are licensed for testing, evaluation and research only.
+      All evaluation here is non-commercial benchmarking. TimeH2O is h2oai/timeh2o-v1 with weights at
+      Hugging Face revision 60b68fa (2026-10-22), run zero-shot on CPU on 2026-11-03 and 2026-11-04
+      by the protocol above.</p>
     <h2>Source</h2>
     <p>The tables are generated from the skaters repository's committed summaries, the per-step store
       behind them, its cost measurements and its footprint measurements, by
