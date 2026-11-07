@@ -26,7 +26,7 @@ TAG_GROUPS = [
 
 def export(bench, out_dir, roster_names, aliases=None):
     """Write <out_dir>/data/<stratum>.json; returns the list of strata written.
-    aliases: {shown arm: [fallback arms]} -- on a stratum where the shown arm has
+    aliases: {shown arm: [fallback arms] or {stratum: [...], "*": [...]}} -- on a stratum where the shown arm has
     no rows, the first fallback that has rows is shown under its name (the page
     says which run it is through FP_RUN)."""
     aliases = aliases or {}
@@ -62,6 +62,8 @@ def export(bench, out_dir, roster_names, aliases=None):
         # candidate with rows on this stratum is shown under the shown arm's name
         shown_run = {}
         for shown, cands in aliases.items():
+            if isinstance(cands, dict):                     # per-stratum priority, "*" = default
+                cands = cands.get(st, cands.get("*", []))
             for fb in cands:
                 if any(fb in k.split("|") for k in P):
                     if fb != shown:

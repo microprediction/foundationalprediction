@@ -399,8 +399,12 @@ FP_LICENSES = {
 # laplace++ runs in priority order: the most-trained run scored on a stratum is shown
 # monthly: the run with the most training data scored so far; weekly: e3 (a third
 # pass, e4, overfit on held-out weekly series and is not listed)
-LAPLACEPP_RUNS = ["learned(wswa2)", "learned(swa6)", "learned(swa5)", "learned(swa4)", "learned(swa3)", "learned(e4s21000)", "learned(e4s18000)", "learned(e4s15000)", "learned(e4s12000)",
+_LAPLACEPP_DEFAULT = ["learned(wswa2)", "learned(swa6)", "learned(swa5)", "learned(swa4)", "learned(swa3)", "learned(e4s21000)", "learned(e4s18000)", "learned(e4s15000)", "learned(e4s12000)",
                   "learned(e4s9000)", "learned(e3)", "learned(e2)", "learned(e2s1000)", "learned(e2s500)"]
+# weekly: gpswa (FRED weekly train + GIFT-Eval weekly pretraining, running average)
+# beats wswa2 head to head 238-62 on 1,522 held-out series; hourly's gpswa is
+# worse than e3, so the order is per stratum
+LAPLACEPP_RUNS = {"weekly:econ": ["learned(gpswa)"] + _LAPLACEPP_DEFAULT, "*": _LAPLACEPP_DEFAULT}
 
 FP_STRATA = [
     {"id": "weekly:econ", "kind": "Economic", "freq": "Weekly"},
