@@ -50,6 +50,12 @@
             <a href="./size.html">Size</a>
           </span>
         </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">laplace++</a>
+          </span>
+        </span>
         <a href="./methodology.html">Methodology</a>
         <a href="https://skaters.microprediction.org/">skaters</a>
         <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
@@ -82,9 +88,10 @@
       between foundation models and classical methods shown here is therefore the gap a practitioner
       running a stream would see. AutoARIMA, AutoETS, AutoTheta and GARCH-t are refit at every step.</p>
     <h2>Trained models</h2>
-    <p>A model trained on this panel is scored only on series whose family it never saw: the panel is
-      split by series family, and the learned rows report the held-out half. The clean out-of-domain
-      test is GIFT-Eval's data under this protocol.</p>
+    <p>laplace++ is the one trained model here. It is trained on half of each panel, split by series
+      family, and every number shown for it is on the other half. Training data added from outside the
+      panel is never one of the held-out series. How it is built and what it guarantees are on the
+      <a href="laplacepp.html">laplace++</a> page.</p>
     <h2>Roster</h2>
     <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
       here. Submissions that cannot be rerun are not listed.</p>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>laplace++</title>
+  <meta name="description" content="laplace++: a learned laplace mixed with the original by the Aggregating Algorithm, with a log-score guarantee against laplace." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">foundational prediction</a>
+      <nav>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">laplace++</a>
+          </span>
+        </span>
+        <a href="./methodology.html">Methodology</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>laplace++</h1>
+    <p class="lede">laplace with its parameters learned from data, mixed with the original so that it can
+      never do much worse.</p>
+    <h2>The mixture</h2>
+    <p>Two forecasters each issue a predictive density for the next value: the original laplace,
+      <i>p</i><sub>lap</sub>, and a trained copy of laplace's own machinery, <i>p</i><sub>exp</sub>.
+      laplace++ issues</p>
+    <p class="pick"><i>q<sub>t</sub></i>(<i>y</i>) = <i>w<sub>t</sub></i> <i>p</i><sub>lap,t</sub>(<i>y</i>)
+      + (1 &minus; <i>w<sub>t</sub></i>) <i>p</i><sub>exp,t</sub>(<i>y</i>),</p>
+    <p>where <i>w<sub>t</sub></i> is the posterior weight on laplace given the series so far: a prior
+      &pi; = 0.25 times laplace's likelihood on the observations to date, against 0.75 times the trained
+      model's. This is Vovk's Aggregating Algorithm for log loss. Multiplying the mixture densities along
+      a series telescopes the weights, so for every series, whatever the data,</p>
+    <p class="pick">total log score of laplace++ &ge; total log score of laplace &minus; log 4,</p>
+    <p>and it is never more than log(4/3) behind the trained model. The bound needs the exact log
+      densities in the weights (no floor). It concerns log score, not coverage; the coverage below is
+      measured, not guaranteed.</p>
+    <h2>Training and scoring</h2>
+    <p>Each panel is split by series family. The trained model learns on one half by prequential
+      truncated backpropagation (each forecast is issued before its outcome is used), and every number
+      below is on the other half. Training data from outside the panel is never one of the held-out
+      series, and series derived from FRED are screened out if they nearly duplicate one.</p>
+    <h2>Against laplace, held-out series</h2>
+    <table class="lb"><thead><tr><th>panel</th><th class="num">series</th><th class="num">laplace++ wins</th>
+      <th class="num">laplace wins</th><th class="num">median gain</th><th class="num">trained model alone</th>
+      <th class="num">cov<sub>90</sub></th></tr></thead><tbody><tr><td>Economic, Weekly</td><td class="num">1,522</td><td class="num">480</td><td class="num">78</td><td class="num">+0.014</td><td class="num">+0.017</td><td class="num">0.90</td></tr><tr><td>Economic, Monthly</td><td class="num">3,210</td><td class="num">1,027</td><td class="num">153</td><td class="num">+0.048</td><td class="num">+0.075</td><td class="num">0.90</td></tr><tr><td>Economic, Daily</td><td colspan="6" class="muted">no trained run beats laplace yet</td></tr><tr><td>Economic, Hourly (M4)</td><td class="num">205</td><td class="num">45</td><td class="num">8</td><td class="num">+0.014</td><td class="num">+0.027</td><td class="num">0.89</td></tr><tr><td>Prices, Daily</td><td colspan="6" class="muted">not trained: too few price series on the training side</td></tr></tbody></table>
+    <p class="foot">Wins are per-series Diebold&ndash;Mariano tests on log score; the rest are draws. Median
+      gain is the per-series mean log-score difference in nats per step, at the median series.</p>
+    <h2>Runs shown</h2>
+    <ul class="small"><li><b>gpswa</b>: the FRED weekly training half plus GIFT-Eval's weekly pretraining series (NN5, road traffic, web traffic), running weight average.</li><li><b>swa5</b>: the FRED monthly training half, four passes, average of five checkpoints along the fourth.</li><li><b>e3</b>: the M4 hourly training half (split by series id), three passes.</li></ul>
+    <p class="stamp">Built 2026-11-09 from skaters commit 6c5da15.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>

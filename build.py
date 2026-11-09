@@ -177,6 +177,12 @@ NAV = """  <header class="site-header">
             <a href="./size.html">Size</a>
           </span>
         </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">laplace++</a>
+          </span>
+        </span>
         <a href="./methodology.html">Methodology</a>
         <a href="https://skaters.microprediction.org/">skaters</a>
         <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
@@ -316,9 +322,10 @@ def methodology(prov):
       between foundation models and classical methods shown here is therefore the gap a practitioner
       running a stream would see. AutoARIMA, AutoETS, AutoTheta and GARCH-t are refit at every step.</p>
     <h2>Trained models</h2>
-    <p>A model trained on this panel is scored only on series whose family it never saw: the panel is
-      split by series family, and the learned rows report the held-out half. The clean out-of-domain
-      test is GIFT-Eval's data under this protocol.</p>
+    <p>laplace++ is the one trained model here. It is trained on half of each panel, split by series
+      family, and every number shown for it is on the other half. Training data added from outside the
+      panel is never one of the held-out series. How it is built and what it guarantees are on the
+      <a href="laplacepp.html">laplace++</a> page.</p>
     <h2>Roster</h2>
     <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
       here. Submissions that cannot be rerun are not listed.</p>
@@ -604,6 +611,113 @@ def size_page(prov, f3):
     return page("Foundational prediction: size", body, "Bytes each model carries: weights for pretrained models, the package for laplace.")
 
 
+
+# what each laplace++ run was trained on (the run shown per stratum comes from LAPLACEPP_RUNS)
+LAPLACEPP_TRAINING = {
+    "learned(gpswa)": "the FRED weekly training half plus GIFT-Eval's weekly pretraining series (NN5, road traffic, web traffic), running weight average",
+    "learned(wswa2)": "the FRED weekly training half, three passes, averaged with a run that added leak-checked daily-to-weekly series",
+    "learned(swa5)": "the FRED monthly training half, four passes, average of five checkpoints along the fourth",
+    "learned(e3)": "the M4 hourly training half (split by series id), three passes",
+}
+
+
+def _summary_rows():
+    vs, cov = {}, {}
+    for r in csv.DictReader(open(os.path.join(BENCH, "canonical_summary_vs_laplace.csv"))):
+        vs[(r["study"], r["model"])] = r
+    for r in csv.DictReader(open(os.path.join(BENCH, "canonical_summary_coverage.csv"))):
+        cov[(r["study"], r["method"])] = float(r["cov_central90"])
+    return vs, cov
+
+
+def laplace_page(prov, perf):
+    by = {(r["model"], r["regime"]): r["ms"] for r in perf["rows"]}
+    rows = "".join(
+        f'<tr><td><b>{m}</b></td><td class="num">{_fmt_ms(by.get((m, "warm")))}</td>'
+        f'<td class="num">{_fmt_ms(by.get((m, "cold")))}</td></tr>'
+        for m in ("laplace (Rust) k=1", "laplace (Python) k=1") if (m, "warm") in by)
+    body = f"""
+    <h1>laplace</h1>
+    <p class="lede">The reference model on every leaderboard here: an online forecaster that needs no training.</p>
+    <p>laplace updates its state with each new observation and issues a full predictive density for the
+      next one. It is the default skater in the <a href="https://skaters.microprediction.org/">skaters</a>
+      package, pure Python with a compiled Rust core, and the same model has twins in JavaScript and R
+      that agree with the Python to 1e-6.</p>
+    <h2>Cost</h2>
+    <table class="lb"><thead><tr><th>build</th><th class="num">one update</th>
+      <th class="num">cold start, 256 points</th></tr></thead><tbody>{rows}</tbody></table>
+    <p class="foot">Measured on one CPU thread ({perf.get("meta", {}).get("machine", "")}), skaters
+      {perf.get("meta", {}).get("version", "")}; foundation-model costs are on the <a href="speed.html">Speed</a> page.</p>
+    <h2>Why it is the reference</h2>
+    <p>It sees every observation before forecasting the next, as a deployed forecaster would, and it
+      costs microseconds. A model that cannot beat it on the next data point is not worth its weight for
+      that job. laplace is also one of the two components of <a href="laplacepp.html">laplace++</a>.</p>
+    <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']}.</p>
+"""
+    return page("laplace", body, "laplace: the training-free online forecaster used as the reference on every leaderboard.")
+
+
+def laplacepp_page(prov):
+    vs, cov = _summary_rows()
+    trs, shown = [], []
+    for x in FP_STRATA:
+        st = x["id"]
+        label = f'{x["kind"]}, {x["freq"]}'
+        f = os.path.join(OUT, "data", st.replace(":", "-") + ".json")
+        run = json.load(open(f)).get("runs", {}).get("learned(e2)") if os.path.exists(f) else None
+        if run is not None and (st, run) not in vs:
+            run = None
+        if run is None:
+            why = "not trained: too few price series on the training side" if "price" in st else "no trained run beats laplace yet"
+            trs.append(f'<tr><td>{label}</td><td colspan="6" class="muted">{why}</td></tr>')
+            continue
+        shown.append(run)
+        r = vs[(st, run)]
+        e = vs.get((st, run.replace("learned(", "learned-expert(")))
+        n, w, l = int(r["n_series"]), int(r["win"]), int(r["loss"])
+        expert = "" if e is None else f'{float(e["med_dLL"]):+.3f}'
+        trs.append(f'<tr><td>{label}</td><td class="num">{n:,}</td><td class="num">{w:,}</td>'
+                   f'<td class="num">{l:,}</td><td class="num">{float(r["med_dLL"]):+.3f}</td>'
+                   f'<td class="num">{expert}</td>'
+                   f'<td class="num">{cov.get((st, run), float("nan")):.2f}</td></tr>')
+    notes = "".join(f"<li><b>{name.replace('learned(', '').rstrip(')')}</b>: {LAPLACEPP_TRAINING.get(name, 'see the skaters repository')}.</li>"
+                    for name in dict.fromkeys(shown))
+    body = f"""
+    <h1>laplace++</h1>
+    <p class="lede">laplace with its parameters learned from data, mixed with the original so that it can
+      never do much worse.</p>
+    <h2>The mixture</h2>
+    <p>Two forecasters each issue a predictive density for the next value: the original laplace,
+      <i>p</i><sub>lap</sub>, and a trained copy of laplace's own machinery, <i>p</i><sub>exp</sub>.
+      laplace++ issues</p>
+    <p class="pick"><i>q<sub>t</sub></i>(<i>y</i>) = <i>w<sub>t</sub></i> <i>p</i><sub>lap,t</sub>(<i>y</i>)
+      + (1 &minus; <i>w<sub>t</sub></i>) <i>p</i><sub>exp,t</sub>(<i>y</i>),</p>
+    <p>where <i>w<sub>t</sub></i> is the posterior weight on laplace given the series so far: a prior
+      &pi; = 0.25 times laplace's likelihood on the observations to date, against 0.75 times the trained
+      model's. This is Vovk's Aggregating Algorithm for log loss. Multiplying the mixture densities along
+      a series telescopes the weights, so for every series, whatever the data,</p>
+    <p class="pick">total log score of laplace++ &ge; total log score of laplace &minus; log 4,</p>
+    <p>and it is never more than log(4/3) behind the trained model. The bound needs the exact log
+      densities in the weights (no floor). It concerns log score, not coverage; the coverage below is
+      measured, not guaranteed.</p>
+    <h2>Training and scoring</h2>
+    <p>Each panel is split by series family. The trained model learns on one half by prequential
+      truncated backpropagation (each forecast is issued before its outcome is used), and every number
+      below is on the other half. Training data from outside the panel is never one of the held-out
+      series, and series derived from FRED are screened out if they nearly duplicate one.</p>
+    <h2>Against laplace, held-out series</h2>
+    <table class="lb"><thead><tr><th>panel</th><th class="num">series</th><th class="num">laplace++ wins</th>
+      <th class="num">laplace wins</th><th class="num">median gain</th><th class="num">trained model alone</th>
+      <th class="num">cov<sub>90</sub></th></tr></thead><tbody>{"".join(trs)}</tbody></table>
+    <p class="foot">Wins are per-series Diebold&ndash;Mariano tests on log score; the rest are draws. Median
+      gain is the per-series mean log-score difference in nats per step, at the median series.</p>
+    <h2>Runs shown</h2>
+    <ul class="small">{notes}</ul>
+    <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']}.</p>
+"""
+    return page("laplace++", body, "laplace++: a learned laplace mixed with the original by the Aggregating Algorithm, with a log-score guarantee against laplace.")
+
+
 def main():
     vs, cov, warm, mb, perf_meta, f3_meta = load()
     prov = provenance()
@@ -619,6 +733,8 @@ def main():
     open(os.path.join(OUT, "speed.html"), "w").write(speed_page(prov, perf, perf.get("meta", {})))
     open(os.path.join(OUT, "size.html"), "w").write(size_page(prov, f3))
     open(os.path.join(OUT, "methodology.html"), "w").write(methodology(prov))
+    open(os.path.join(OUT, "laplace.html"), "w").write(laplace_page(prov, perf))
+    open(os.path.join(OUT, "laplacepp.html"), "w").write(laplacepp_page(prov))
     open(os.path.join(OUT, "gift.html"), "w").write(gift())
     open(os.path.join(OUT, ".nojekyll"), "w").write("")
     json.dump(prov, open(os.path.join(OUT, "provenance.json"), "w"), indent=1)
