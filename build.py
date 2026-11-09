@@ -330,11 +330,12 @@ def methodology(prov):
     <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
       here. Submissions that cannot be rerun are not listed.</p>
     <h2>Licences and versions</h2>
-    <p>The licence column gives each model's terms. Three are open, two are free below a revenue
-      threshold, and TimesFM 3.0 and TimeH2O are licensed for testing, evaluation and research only.
-      All evaluation here is non-commercial benchmarking. TimeH2O is h2oai/timeh2o-v1 with weights at
-      Hugging Face revision 60b68fa (2026-10-22), run zero-shot on CPU on 2026-11-03 and 2026-11-04
-      by the protocol above.</p>
+    <p>The licence column gives each model's terms. Of the seven foundation models, three are open,
+      two are free below a revenue threshold, and TimesFM 3.0 and TimeH2O are licensed for testing,
+      evaluation and research only. laplace, laplace++ and the classical models are open. All
+      evaluation here is non-commercial benchmarking. TimeH2O is h2oai/timeh2o-v1 at Hugging Face
+      revision c556990, whose weights are unchanged since revision 60b68fa of 2026-10-22, run zero-shot
+      on CPU on 2026-11-03 and 2026-11-04 by the protocol above.</p>
     <h2>Source</h2>
     <p>The tables are generated from the skaters repository's committed summaries, the per-step store
       behind them, its cost measurements and its footprint measurements, by
@@ -463,7 +464,7 @@ def leaderboard(prov, written):
       <span><span class="lic open">open</span> commercial use allowed</span>
       <span><span class="lic restricted">restricted</span> free below a revenue threshold</span>
       <span><span class="lic noncommercial">non-commercial</span> research and evaluation only</span></div>
-    <p class="foot">TimeH2O: h2oai/timeh2o-v1, weights at revision 60b68fa (2026-10-22), evaluated 2026-11-03 to 2026-11-04
+    <p class="foot">TimeH2O: h2oai/timeh2o-v1 at Hugging Face revision c556990 (weights unchanged since 60b68fa, 2026-10-22), evaluated 2026-11-03 to 2026-11-04
       under its non-commercial licence. Method: <a href="methodology.html">methodology</a>.</p>
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']} ({prov['skaters_date']}).</p>
     <script>window.FP_NAMES = {json.dumps(names)}; window.FP_KIND = {json.dumps(kinds)}; window.FP_STRATA = {json.dumps(strata)}; window.FP_LIC = {json.dumps(FP_LICENSES)};</script>
