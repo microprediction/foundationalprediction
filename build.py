@@ -508,16 +508,27 @@ def _kind_of(name):
 _KCOL = {"ours": "#1a8c4a", "foundation": "#8f84ff", "classical": "#e09b2d"}
 
 
-def hbars(items, fmt, unit_note, power=0.25):
+def _times(r):
+    """A multiple to two significant figures: 1.7x, 14x, 370x, 37,000x."""
+    import math
+    if r < 10:
+        return f"{r:.1f}×"
+    p = 10 ** (math.floor(math.log10(r)) - 1)
+    return f"{round(r / p) * p:,.0f}×"
+
+
+def hbars(items, fmt, unit_note, power=0.25, ref=None):
     """Horizontal bars, length proportional to value**power (0 < power < 1 sits
     between a log scale and a linear one: 0.25 keeps a 10,000x range readable
-    while the gaps still look like gaps). items = [(label, value)], ascending."""
+    while the gaps still look like gaps). items = [(label, value)], ascending.
+    With ref = (label, value), each bar above it also states its multiple of
+    that value, since the compressed scale understates the ratios."""
     import math
     items = [(l, v) for l, v in items if v and v > 0]
     if not items:
         return ""
     vmax = max(v for _, v in items)
-    W, LW, RW, BH, GAP = 760, 190, 90, 20, 8
+    W, LW, RW, BH, GAP = 760, 190, (190 if ref else 90), 20, 8
     PW = W - LW - RW
     H = len(items) * (BH + GAP) + 34
     def x(v):
@@ -538,7 +549,10 @@ def hbars(items, fmt, unit_note, power=0.25):
         col = _KCOL[_kind_of(label)]
         out.append(f'<text x="{LW - 10}" y="{y + BH * 0.72:.1f}" font-size="13" fill="#333" text-anchor="end">{label}</text>')
         out.append(f'<rect x="{LW}" y="{y}" width="{max(x(v) - LW, 2):.1f}" height="{BH}" rx="3" fill="{col}"/>')
-        out.append(f'<text x="{x(v) + 6:.1f}" y="{y + BH * 0.72:.1f}" font-size="12" fill="#555">{fmt(v)}</text>')
+        note = fmt(v)
+        if ref and v >= 1.5 * ref[1]:
+            note += f'  <tspan fill="#999">{_times(v / ref[1])} {ref[0]}</tspan>'
+        out.append(f'<text x="{x(v) + 6:.1f}" y="{y + BH * 0.72:.1f}" font-size="12" fill="#555">{note}</text>')
     out.append("</svg>")
     return "".join(out)
 
@@ -568,7 +582,7 @@ def speed_page(prov, perf, perf_meta):
     body = f"""
     <h1>Speed</h1>
     <p class="lede">Milliseconds per forecast on one CPU, one thread.</p>
-    {hbars([(m, by.get((m, "warm"))) for m in warm], _fmt_ms_plain, "streaming cost per new observation")}
+    {hbars([(m, by.get((m, "warm"))) for m in warm], _fmt_ms_plain, "streaming cost per new observation", ref=("laplace (Python)", by.get(("laplace (Python) k=1", "warm"))) if by.get(("laplace (Python) k=1", "warm")) else None)}
     <p class="foot">Streaming: the cost of one new observation. Bar length is the fourth root of the time,
       between a log and a linear scale.</p>
     <table class="lb">
@@ -599,7 +613,7 @@ def size_page(prov, f3):
     body = f"""
     <h1>Size</h1>
     <p class="lede">What a deployment carries.</p>
-    {hbars([(q["name"], q["mb"]) for q in pts], _fmt_mb, "bytes each model carries")}
+    {hbars([(q["name"], q["mb"]) for q in pts], _fmt_mb, "bytes each model carries", ref=next((("laplace", q["mb"]) for q in pts if q["name"] == "laplace (pure Python)"), None))}
     <p class="foot">Bar length is the fourth root of the size, between a log and a linear scale.</p>
     <table class="lb">
       <thead><tr><th>model</th><th class="num">size</th><th>measured as</th></tr></thead>
