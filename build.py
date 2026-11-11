@@ -299,6 +299,9 @@ def index(vs, cov, warm, mb, prov, perf_meta):
 def methodology(prov):
     body = """
     <h1>Methodology</h1>
+    <p class="lede">How the leaderboards are scored. How laplace and laplace++ (granger) are built, and the
+      transforms and ensembles underneath them, is in the
+      <a href="https://skaters.microprediction.org/guide.html">skaters guide</a>.</p>
     <h2>The question</h2>
     <p>Which model should forecast the next observation of a stream? That question needs the one-step
       metric isolated. Suites that pool steps 1 to H into one score cannot answer it, and a model that is
@@ -659,8 +662,9 @@ def laplace_page(prov, perf):
     <p class="lede">The reference model on every leaderboard here: an online forecaster that needs no training.</p>
     <p>laplace updates its state with each new observation and issues a full predictive density for the
       next one. It is the default skater in the <a href="https://skaters.microprediction.org/">skaters</a>
-      package, pure Python with a compiled Rust core, and the same model has twins in JavaScript and R
-      that agree with the Python to 1e-6.</p>
+      package, pure Python with a compiled Rust core, and the same model has twins in JavaScript, R and
+      Julia that agree with the Python to 1e-6. How it is built, from its transform chains to the tail
+      splice, is in the <a href="https://skaters.microprediction.org/guide.html">skaters guide</a>.</p>
     <h2>Cost</h2>
     <table class="lb"><thead><tr><th>build</th><th class="num">one update</th>
       <th class="num">cold start, 256 points</th></tr></thead><tbody>{rows}</tbody></table>
@@ -704,6 +708,9 @@ def laplacepp_page(prov):
     <h1>laplace++</h1>
     <p class="lede">laplace with its parameters learned from data, mixed with the original so that it can
       never do much worse.</p>
+    <p>It ships in the skaters package as <code>granger</code>, in all five ports; the
+      <a href="https://skaters.microprediction.org/guide.html">skaters guide</a> describes how it and
+      laplace are built.</p>
     <h2>The mixture</h2>
     <p>Two forecasters each issue a predictive density for the next value: the original laplace,
       <i>p</i><sub>lap</sub>, and a trained copy of laplace's own machinery, <i>p</i><sub>exp</sub>.
