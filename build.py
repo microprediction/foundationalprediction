@@ -333,12 +333,38 @@ def methodology(prov):
     <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
       here. Submissions that cannot be rerun are not listed.</p>
     <h2>Licences and versions</h2>
-    <p>The licence column gives each model's terms. Of the seven foundation models, three are open,
-      two are free below a revenue threshold, and TimesFM 3.0 and TimeH2O are licensed for testing,
-      evaluation and research only. laplace, laplace++ and the classical models are open. All
+    <p>The licence column gives each model's terms. Timestral and TiRex are free below a revenue
+      threshold; TimesFM 3.0, TimeH2O and Moirai 2.0 are licensed for testing, evaluation and research
+      only; the other foundation models, laplace, laplace++ and the classical models are open. All
       evaluation here is non-commercial benchmarking. TimeH2O is h2oai/timeh2o-v1 at Hugging Face
       revision c556990, whose weights are unchanged since revision 60b68fa of 2026-10-22, run zero-shot
       on CPU on 2026-11-03 and 2026-11-04 by the protocol above.</p>
+    <h2>Training-data overlap</h2>
+    <p>A pretrained model may have seen the evaluation series, or earlier stretches of them, in
+      training. The panels are FRED economic and price series and the M4 hourly set. What each model's
+      own documentation says:</p>
+    <ul>
+      <li><b>Chronos-2</b>: pretraining includes all 414 M4 hourly series, the whole hourly panel here,
+        and other M4 frequencies; no FRED dataset is named
+        (<a href="https://arxiv.org/abs/2510.15821">report</a>, Table 6).</li>
+      <li><b>Moirai 2.0</b>: pretraining includes GIFT-Eval's pretraining set, which contains
+        <code>fred_md</code> (107 FRED-MD monthly series), and GIFT-Eval's training split, which covers
+        every M4 frequency (<a href="https://arxiv.org/abs/2511.11698">paper</a>).</li>
+      <li><b>TTM-R3</b>: trained on selected GIFT-Eval pretraining and training datasets; the list is
+        not published (<a href="https://huggingface.co/ibm-granite/granite-timeseries-ttm-r3">model card</a>).</li>
+      <li><b>TiRex-2</b>: pretrained on the Chronos datasets and LOTSA, which include M4 and the Monash
+        archive's <code>fred_md</code> (<a href="https://huggingface.co/NX-AI/TiRex-2">model card</a>).</li>
+      <li><b>TinyCast</b>: GIFT-Eval's pretraining set with the datasets that overlap the GIFT-Eval and
+        Chronos zero-shot test sets removed; the exclusion list is not published
+        (<a href="https://arxiv.org/abs/2608.15767">paper</a>).</li>
+      <li><b>Toto 2.0</b>: Datadog observability metrics and synthetic series only, no public
+        forecasting data (<a href="https://arxiv.org/abs/2605.20119">paper</a>).</li>
+      <li><b>Timestral, t0-gamma, TimeH2O, TimesFM, Chronos-Bolt and TiRex</b>: not yet checked against
+        these panels.</li>
+      <li><b>laplace++</b>: trained on one half of each panel, split by series family, and scored on the
+        other.</li>
+    </ul>
+    <p>Where a model has seen a panel, its row on that panel measures recall as well as forecasting.</p>
     <h2>Source</h2>
     <p>The tables are generated from the skaters repository's committed summaries, the per-step store
       behind them, its cost measurements and its footprint measurements, by
@@ -382,6 +408,11 @@ FP_MODELS = {
     "TimesFM3(wide)": ("TimesFM 3.0", "foundation"), "TimesFM(wide)": ("TimesFM 2.5", "foundation"),
     "TiRex(wide)": ("TiRex", "foundation"), "Chronos(wide)": ("Chronos-Bolt", "foundation"),
     "TimeH2O-v1(wide)": ("TimeH2O", "foundation"),
+    # #329 additions: the 21-level Chronos-2 natively, the nine-decile models through the generous nozzle
+    "Chronos-2": ("Chronos-2", "foundation"), "TiRex-2(wide)": ("TiRex-2", "foundation"),
+    "Toto2-2.5B(wide)": ("Toto 2.0 2.5B", "foundation"), "Toto2-313m(wide)": ("Toto 2.0 313M", "foundation"),
+    "TTM-R3(wide)": ("TTM-R3", "foundation"), "Moirai-2.0-small(wide)": ("Moirai 2.0 small", "foundation"),
+    "TinyCast(wide)": ("TinyCast", "foundation"),
     "AutoARIMA": ("AutoARIMA", "classical"), "AutoETS": ("AutoETS", "classical"),
     "AutoTheta": ("AutoTheta", "classical"), "GARCH-t": ("GARCH-t", "classical"),
 }
@@ -402,6 +433,14 @@ FP_LICENSES = {
     "Chronos(wide)": _APACHE[:2] + ("https://huggingface.co/amazon/chronos-bolt-small",) + _APACHE[3:],
     "TimeH2O-v1(wide)": ("Non-commercial", "noncommercial", "https://huggingface.co/h2oai/timeh2o-v1",
                          "H2O Model Non-Commercial Licence v1.0: testing, evaluation, benchmarking and research only"),
+    "Chronos-2": _APACHE[:2] + ("https://huggingface.co/amazon/chronos-2",) + _APACHE[3:],
+    "TiRex-2(wide)": _APACHE[:2] + ("https://huggingface.co/NX-AI/TiRex-2",) + _APACHE[3:],
+    "Toto2-2.5B(wide)": _APACHE[:2] + ("https://huggingface.co/Datadog/Toto-2.0-2.5B",) + _APACHE[3:],
+    "Toto2-313m(wide)": _APACHE[:2] + ("https://huggingface.co/Datadog/Toto-2.0-313m",) + _APACHE[3:],
+    "TTM-R3(wide)": _APACHE[:2] + ("https://huggingface.co/ibm-granite/granite-timeseries-ttm-r3",) + _APACHE[3:],
+    "Moirai-2.0-small(wide)": ("CC BY-NC 4.0", "noncommercial", "https://huggingface.co/Salesforce/moirai-2.0-R-small",
+                               "Creative Commons Attribution-NonCommercial 4.0: research use only"),
+    "TinyCast(wide)": _APACHE[:2] + ("https://huggingface.co/raws-labs/tinycast",) + _APACHE[3:],
     "AutoARIMA": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
     "AutoETS": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
     "AutoTheta": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
