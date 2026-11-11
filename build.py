@@ -432,13 +432,16 @@ def leaderboard(prov, written):
     <h1>Which model for the next data point?</h1>
     <p class="lede">The next observation, scored alone. Every model paired against a reference on the same series.</p>
     <div class="picker">
-      <span class="lab">Series</span><div class="segs" id="ex-kind"></div>
-      <span class="lab">Frequency</span><div class="segs" id="ex-freq"></div>
+      <span class="lab">Series</span>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px">
+        <div class="segs" id="ex-kind"></div>
+        <span class="lab">Frequency</span><div class="segs" id="ex-freq"></div>
+      </div>
       <span class="lab">Reference</span><div><select id="ex-ref"></select>
         <label class="small muted" style="margin-left:14px" title="laplace++ is trained on one half of the series and scored only on the other. Tick to score every model on that held-out half, so all rows cover the same series.">
         <input type="checkbox" id="ex-held"> held-out series only</label></div>
     </div>
-    <details open><summary class="small muted">Series types <button class="linkbtn" id="ex-clear">clear</button></summary>
+    <details><summary class="small muted">Series types <button class="linkbtn" id="ex-clear">clear</button></summary>
       <div id="ex-tags"></div>
     </details>
     <p id="ex-pick" class="pick"></p>

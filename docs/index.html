@@ -99,13 +99,16 @@
     <h1>Which model for the next data point?</h1>
     <p class="lede">The next observation, scored alone. Every model paired against a reference on the same series.</p>
     <div class="picker">
-      <span class="lab">Series</span><div class="segs" id="ex-kind"></div>
-      <span class="lab">Frequency</span><div class="segs" id="ex-freq"></div>
+      <span class="lab">Series</span>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px">
+        <div class="segs" id="ex-kind"></div>
+        <span class="lab">Frequency</span><div class="segs" id="ex-freq"></div>
+      </div>
       <span class="lab">Reference</span><div><select id="ex-ref"></select>
         <label class="small muted" style="margin-left:14px" title="laplace++ is trained on one half of the series and scored only on the other. Tick to score every model on that held-out half, so all rows cover the same series.">
         <input type="checkbox" id="ex-held"> held-out series only</label></div>
     </div>
-    <details open><summary class="small muted">Series types <button class="linkbtn" id="ex-clear">clear</button></summary>
+    <details><summary class="small muted">Series types <button class="linkbtn" id="ex-clear">clear</button></summary>
       <div id="ex-tags"></div>
     </details>
     <p id="ex-pick" class="pick"></p>
@@ -148,10 +151,49 @@
   function lic(m) { var l = LIC[m]; if (!l) return '<td class="muted">&ndash;</td>';
     return '<td><a class="lic ' + l[1] + '" href="' + l[2] + '" title="' + l[3] + '">' + l[0] + '</a></td>'; }
   function pct(x) { return Math.round(100 * x) + '%'; }
-  function stratum() { var s = STRATA.filter(function (x) { return x.kind === state.kind && x.freq === state.freq; })[0]; return s && s.id; }
+  var ALL = 'All';
+  function chosen() {         // the strata the Series and Frequency buttons select ('All' pools them)
+    return STRATA.filter(function (x) { return (state.kind === ALL || x.kind === state.kind) &&
+                                                (state.freq === ALL || x.freq === state.freq); })
+                 .map(function (x) { return x.id; });
+  }
+  function merge(ds) {        // pool strata: series concatenated, indexes and tags remapped
+    if (ds.length === 1) return ds[0];
+    var out = { runs: {}, held: [], series: [], tags: [], groups: [], series_tags: [], models: [], pairs: {}, cov: {} };
+    var anyHeld = ds.some(function (d) { return d.held; });
+    ds.forEach(function (d) {
+      var off = out.series.length;
+      var tmap = d.tags.map(function (t) { var j = out.tags.indexOf(t); if (j < 0) { out.tags.push(t); j = out.tags.length - 1; } return j; });
+      d.groups.forEach(function (g) {
+        var have = out.groups.filter(function (h) { return h[0] === g[0]; })[0];
+        if (!have) { out.groups.push([g[0], g[1].slice()]); return; }
+        g[1].forEach(function (t) { if (have[1].indexOf(t) < 0) have[1].push(t); });
+      });
+      d.series.forEach(function (s, i) {
+        out.series.push(s);
+        out.series_tags.push(d.series_tags[i].map(function (k) { return tmap[k]; }));
+        if (anyHeld) out.held.push(d.held ? d.held[i] : 1);
+      });
+      d.models.forEach(function (m) { if (out.models.indexOf(m) < 0) out.models.push(m); });
+      Object.keys(d.pairs).forEach(function (k) {
+        var a = out.pairs[k] || (out.pairs[k] = []);
+        d.pairs[k].forEach(function (r) { a.push([r[0] + off].concat(r.slice(1))); });
+      });
+      Object.keys(d.cov).forEach(function (k) {
+        var a = out.cov[k] || (out.cov[k] = []);
+        d.cov[k].forEach(function (r) { a.push([r[0] + off].concat(r.slice(1))); });
+      });
+      Object.keys(d.runs || {}).forEach(function (k) {
+        var label = d.stratum + ': ' + d.runs[k].replace(/^learned\(|\)$/g, '');
+        out.runs[k] = out.runs[k] ? out.runs[k] + ', ' + label : label;
+      });
+    });
+    if (!anyHeld) out.held = null;
+    return out;
+  }
 
-  function groupsShown(d) {   // asset class only for prices
-    return d.groups.filter(function (g) { return g[0] !== 'Asset class' || state.kind === 'Prices'; });
+  function groupsShown(d) {   // asset class only when prices are in view
+    return d.groups.filter(function (g) { return g[0] !== 'Asset class' || state.kind === 'Prices' || state.kind === ALL; });
   }
   function selected(d) {
     var tix = {}; d.tags.forEach(function (t, i) { tix[t] = i; });
@@ -216,7 +258,9 @@
     document.getElementById('ex-body').innerHTML = body;
     var best = rs.filter(function (r) { return !r.ref; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
     var runs = d.runs || {}, notes = [];
-    Object.keys(runs).forEach(function (k) { notes.push(name(k) + ' on this stratum: run ' + runs[k].replace(/^learned\(|\)$/g, '') + '.'); });
+    Object.keys(runs).forEach(function (k) {
+      notes.push(d.stratum ? name(k) + ' on this stratum: run ' + runs[k].replace(/^learned\(|\)$/g, '') + '.'
+                           : name(k) + ' runs by stratum: ' + runs[k] + '.'); });
     document.getElementById('ex-runs').textContent = notes.join(' ');
     document.getElementById('ex-pick').innerHTML = best
       ? nsel.toLocaleString() + ' series. Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b>, ' +
@@ -236,13 +280,15 @@
   }
   function controls() {
     var kinds = []; STRATA.forEach(function (s) { if (kinds.indexOf(s.kind) < 0) kinds.push(s.kind); });
-    seg('ex-kind', kinds.map(function (k) { return [k, k]; }), state.kind, function (v) {
-      state.kind = v; var f = STRATA.filter(function (s) { return s.kind === v; });
-      if (!f.some(function (s) { return s.freq === state.freq; })) state.freq = f[0].freq;
+    seg('ex-kind', [[ALL, ALL]].concat(kinds.map(function (k) { return [k, k]; })), state.kind, function (v) {
+      state.kind = v;
+      if (state.freq !== ALL && !STRATA.some(function (s) { return (v === ALL || s.kind === v) && s.freq === state.freq; }))
+        state.freq = ALL;
       go();
     });
-    var freqs = STRATA.filter(function (s) { return s.kind === state.kind; }).map(function (s) { return [s.freq, s.freq]; });
-    seg('ex-freq', freqs, state.freq, function (v) { state.freq = v; go(); });
+    var freqs = [];
+    STRATA.forEach(function (s) { if ((state.kind === ALL || s.kind === state.kind) && freqs.indexOf(s.freq) < 0) freqs.push(s.freq); });
+    seg('ex-freq', [[ALL, ALL]].concat(freqs.map(function (f) { return [f, f]; })), state.freq, function (v) { state.freq = v; go(); });
   }
   function chips(d) {
     document.getElementById('ex-ref').innerHTML = d.models.map(function (m) {
@@ -259,12 +305,16 @@
   function hash() { try { history.replaceState(null, '', '#' + encodeURIComponent(state.kind) + '/' + encodeURIComponent(state.freq)); } catch (e) {} }
   function go() {
     controls(); hash();
-    var st = stratum(); if (!st) return;
+    var ids = chosen(); if (!ids.length) return;
+    var want = ids.join(',');
     var apply = function (d) { state.data = d; if (d.models.indexOf(state.ref) < 0) state.ref = d.models.indexOf('laplace') >= 0 ? 'laplace' : d.models[0]; chips(d); render(); };
-    if (cache[st]) return apply(cache[st]);
+    if (cache[want]) return apply(cache[want]);
     document.getElementById('ex-body').innerHTML = '<tr><td colspan="6" class="muted">loading&hellip;</td></tr>';
-    fetch('./data/' + st.replace(':', '-') + '.json').then(function (r) { return r.json(); }).then(function (d) {
-      cache[st] = d; if (stratum() === st) apply(d);
+    Promise.all(ids.map(function (st) {
+      return cache[st] ? Promise.resolve(cache[st]) : fetch('./data/' + st.replace(':', '-') + '.json')
+        .then(function (r) { return r.json(); }).then(function (d) { cache[st] = d; return d; });
+    })).then(function (ds) {
+      cache[want] = merge(ds); if (chosen().join(',') === want) apply(cache[want]);
     });
   }
   document.getElementById('ex-ref').addEventListener('change', function (e) { state.ref = e.target.value; render(); });
@@ -279,8 +329,11 @@
     });
   });
   var h = decodeURIComponent((location.hash || '').slice(1)).split('/');
-  var s0 = STRATA.filter(function (s) { return s.kind === h[0] && s.freq === h[1]; })[0] || STRATA[0];
-  state.kind = s0.kind; state.freq = s0.freq; go();
+  var okKind = h[0] === ALL || STRATA.some(function (s) { return s.kind === h[0]; });
+  var okFreq = h[1] === ALL || STRATA.some(function (s) { return s.freq === h[1] && (h[0] === ALL || s.kind === h[0]); });
+  if (okKind && okFreq) { state.kind = h[0]; state.freq = h[1]; }
+  else { state.kind = STRATA[0].kind; state.freq = STRATA[0].freq; }
+  go();
 })();
 </script>
 
