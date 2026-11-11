@@ -135,7 +135,7 @@ EXPLORER_JS = r"""
         d.cov[k].forEach(function (r) { a.push([r[0] + off].concat(r.slice(1))); });
       });
       Object.keys(d.runs || {}).forEach(function (k) {
-        var label = d.stratum + ': ' + d.runs[k].replace(/^learned\(|\)$/g, '');
+        var label = d.runs[k].replace(/^learned\(|\)$/g, '') + ' (' + d.stratum.replace(':', ' ') + ')';
         out.runs[k] = out.runs[k] ? out.runs[k] + ', ' + label : label;
       });
     });
@@ -170,16 +170,17 @@ EXPLORER_JS = r"""
       var rs = d.pairs[m + '|' + ref], flip = false;
       if (!rs) { rs = d.pairs[ref + '|' + m]; flip = true; }
       if (!rs) return;
-      var w = 0, dr = 0, l = 0, dl = [], cr = [];
+      var w = 0, dr = 0, l = 0, dl = [], cr = [], used = new Uint8Array(keep.length);
       rs.forEach(function (r) {
         if (!keep[r[0]]) return;
+        used[r[0]] = 1;            // coverage over the same series as the W/D/L
         var v = r[1]; if (flip) v = v === 'W' ? 'L' : v === 'L' ? 'W' : v;
         if (v === 'W') w++; else if (v === 'L') l++; else dr++;
         dl.push(flip ? -r[2] : r[2]);
         if (r[3] !== null && r[3] > 0) cr.push(flip ? 1 / r[3] : r[3]);
       });
       var n = w + dr + l; if (!n) return;
-      out.push({ m: m, n: n, w: w, d: dr, l: l, win: w / n, loss: l / n, net: (w - l) / n, dll: median(dl), crps: median(cr), cov: covOf(d, m, keep) });
+      out.push({ m: m, n: n, w: w, d: dr, l: l, win: w / n, loss: l / n, net: (w - l) / n, dll: median(dl), crps: median(cr), cov: covOf(d, m, used) });
     });
     var nref = 0; out.forEach(function (r) { if (r.n > nref) nref = r.n; });
     out.push({ m: ref, ref: true, n: nref, w: 0, d: 0, l: 0, win: 0, loss: 0, net: 0, dll: 0, crps: 1, cov: covOf(d, ref, keep) });
@@ -207,14 +208,17 @@ EXPLORER_JS = r"""
         '<td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td>' + lic(r.m) + '</tr>';
     }).join('');
     document.getElementById('ex-body').innerHTML = body;
-    var best = rs.filter(function (r) { return !r.ref; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
+    // the pick must cover most of the selection: a model scored on a fraction of a pooled view
+    // (laplace++ has no price or daily rows) cannot stand for all of it
+    var best = rs.filter(function (r) { return !r.ref && r.n >= 0.5 * nsel; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
     var runs = d.runs || {}, notes = [];
     Object.keys(runs).forEach(function (k) {
       notes.push(d.stratum ? name(k) + ' on this stratum: run ' + runs[k].replace(/^learned\(|\)$/g, '') + '.'
                            : name(k) + ' runs by stratum: ' + runs[k] + '.'); });
     document.getElementById('ex-runs').textContent = notes.join(' ');
     document.getElementById('ex-pick').innerHTML = best
-      ? nsel.toLocaleString() + ' series. Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b>, ' +
+      ? nsel.toLocaleString() + ' series. Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b> (' +
+        best.n.toLocaleString() + ' series), ' +
         (best.dll >= 0 ? '+' : '') + best.dll.toFixed(3) + ' nats at the median, ahead on ' + pct(best.win) + ', behind on ' + pct(best.loss) + '.'
       : nsel.toLocaleString() + ' series. Nothing beats ' + dot(state.ref) + '<b>' + name(state.ref) + '</b> both at the median and on more series than it loses.';
     Array.prototype.forEach.call(document.querySelectorAll('#ex-table th[data-col]'), function (th) {
@@ -260,12 +264,16 @@ EXPLORER_JS = r"""
     var want = ids.join(',');
     var apply = function (d) { state.data = d; if (d.models.indexOf(state.ref) < 0) state.ref = d.models.indexOf('laplace') >= 0 ? 'laplace' : d.models[0]; chips(d); render(); };
     if (cache[want]) return apply(cache[want]);
-    document.getElementById('ex-body').innerHTML = '<tr><td colspan="6" class="muted">loading&hellip;</td></tr>';
+    document.getElementById('ex-body').innerHTML = '<tr><td colspan="7" class="muted">loading&hellip;</td></tr>';
     Promise.all(ids.map(function (st) {
       return cache[st] ? Promise.resolve(cache[st]) : fetch('./data/' + st.replace(':', '-') + '.json')
-        .then(function (r) { return r.json(); }).then(function (d) { cache[st] = d; return d; });
+        .then(function (r) { if (!r.ok) throw new Error(st + ': HTTP ' + r.status); return r.json(); })
+        .then(function (d) { cache[st] = d; return d; });
     })).then(function (ds) {
       cache[want] = merge(ds); if (chosen().join(',') === want) apply(cache[want]);
+    }).catch(function (e) {
+      if (chosen().join(',') === want)
+        document.getElementById('ex-body').innerHTML = '<tr><td colspan="7" class="muted">could not load the data (' + e.message + ')</td></tr>';
     });
   }
   document.getElementById('ex-ref').addEventListener('change', function (e) { state.ref = e.target.value; render(); });
@@ -279,7 +287,8 @@ EXPLORER_JS = r"""
       render();
     });
   });
-  var h = decodeURIComponent((location.hash || '').slice(1)).split('/');
+  var h = [];
+  try { h = decodeURIComponent((location.hash || '').slice(1)).split('/'); } catch (e) {}
   var okKind = h[0] === ALL || STRATA.some(function (s) { return s.kind === h[0]; });
   var okFreq = h[1] === ALL || STRATA.some(function (s) { return s.freq === h[1] && (h[0] === ALL || s.kind === h[0]); });
   if (okKind && okFreq) { state.kind = h[0]; state.freq = h[1]; }

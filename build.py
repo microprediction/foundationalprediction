@@ -334,8 +334,8 @@ def methodology(prov):
       here. Submissions that cannot be rerun are not listed.</p>
     <h2>Licences and versions</h2>
     <p>The licence column gives each model's terms. Timestral and TiRex are free below a revenue
-      threshold; TimesFM 3.0, TimeH2O and Moirai 2.0 are licensed for testing, evaluation and research
-      only; the other foundation models, laplace, laplace++ and the classical models are open. All
+      threshold; TimesFM 3.0 and TimeH2O are licensed for testing, evaluation and research only, and
+      Moirai 2.0 (CC BY-NC 4.0) for non-commercial use; the other foundation models, laplace, laplace++ and the classical models are open. All
       evaluation here is non-commercial benchmarking. TimeH2O is h2oai/timeh2o-v1 at Hugging Face
       revision c556990, whose weights are unchanged since revision 60b68fa of 2026-10-22, run zero-shot
       on CPU on 2026-11-03 and 2026-11-04 by the protocol above.</p>
@@ -361,8 +361,9 @@ def methodology(prov):
         forecasting data (<a href="https://arxiv.org/abs/2605.20119">paper</a>).</li>
       <li><b>Timestral, t0-gamma, TimeH2O, TimesFM, Chronos-Bolt and TiRex</b>: not yet checked against
         these panels.</li>
-      <li><b>laplace++</b>: trained on one half of each panel, split by series family, and scored on the
-        other.</li>
+      <li><b>laplace++</b>: runs on the weekly, monthly and M4 hourly panels. It is trained on one half
+        of each, split by series family, and scored on the other; the weekly run also trained on
+        GIFT-Eval's weekly pretraining series (NN5, road and web traffic), none of them in the panels.</li>
     </ul>
     <p>Where a model has seen a panel, its row on that panel measures recall as well as forecasting.</p>
     <h2>Source</h2>
@@ -439,7 +440,7 @@ FP_LICENSES = {
     "Toto2-313m(wide)": _APACHE[:2] + ("https://huggingface.co/Datadog/Toto-2.0-313m",) + _APACHE[3:],
     "TTM-R3(wide)": _APACHE[:2] + ("https://huggingface.co/ibm-granite/granite-timeseries-ttm-r3",) + _APACHE[3:],
     "Moirai-2.0-small(wide)": ("CC BY-NC 4.0", "noncommercial", "https://huggingface.co/Salesforce/moirai-2.0-R-small",
-                               "Creative Commons Attribution-NonCommercial 4.0: research use only"),
+                               "Creative Commons Attribution-NonCommercial 4.0: non-commercial use only"),
     "TinyCast(wide)": _APACHE[:2] + ("https://huggingface.co/raws-labs/tinycast",) + _APACHE[3:],
     "AutoARIMA": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
     "AutoETS": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
@@ -477,7 +478,8 @@ def leaderboard(prov, written):
       <span class="lab">Series</span>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px">
         <div class="segs" id="ex-kind"></div>
-        <span class="lab">Frequency</span><div class="segs" id="ex-freq"></div>
+        <span style="display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px">
+          <span class="lab">Frequency</span><span class="segs" id="ex-freq"></span></span>
       </div>
       <span class="lab">Reference</span><div><select id="ex-ref"></select>
         <label class="small muted" style="margin-left:14px" title="laplace++ is trained on one half of the series and scored only on the other. Tick to score every model on that held-out half, so all rows cover the same series.">
@@ -556,10 +558,9 @@ _KCOL = {"ours": "#1a8c4a", "foundation": "#8f84ff", "classical": "#e09b2d"}
 def _times(r):
     """A multiple to two significant figures: 1.7x, 14x, 370x, 37,000x."""
     import math
-    if r < 10:
-        return f"{r:.1f}×"
     p = 10 ** (math.floor(math.log10(r)) - 1)
-    return f"{round(r / p) * p:,.0f}×"
+    r = round(r / p) * p                    # two significant figures first, then the format
+    return f"{r:.1f}×" if r < 10 else f"{r:,.0f}×"
 
 
 def hbars(items, fmt, unit_note, power=0.25, ref=None):
@@ -603,7 +604,11 @@ def hbars(items, fmt, unit_note, power=0.25, ref=None):
 
 
 def _fmt_mb(mb):
-    return f"{mb * 1000:,.0f} KB" if mb < 1 else (f"{mb:,.0f} MB" if mb < 1000 else f"{mb / 1000:,.1f} GB")
+    if mb < 1:
+        return f"{mb * 1000:,.0f} KB"
+    if mb < 10:
+        return f"{mb:.1f} MB"
+    return f"{mb:,.0f} MB" if mb < 1000 else f"{mb / 1000:,.1f} GB"
 
 
 def _fmt_ms_plain(ms):
