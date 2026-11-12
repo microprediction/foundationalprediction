@@ -1,0 +1,36 @@
+# Mirror the built site (docs/) to the Hugging Face Space
+# microprediction/foundationalprediction on every push that changes it.
+# Needs a repository secret HF_TOKEN with write access to that Space.
+name: hf-space
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**", "hf-space/**"]
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble the Space
+        run: |
+          mkdir -p space
+          cp -r docs/. space/
+          rm -f space/CNAME
+          cp hf-space/README.md space/README.md
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Upload
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then echo "HF_TOKEN not set; skipping the mirror"; exit 0; fi
+          pip install -q huggingface_hub
+          python - <<'EOF'
+          from huggingface_hub import HfApi
+          HfApi().upload_folder(repo_id="microprediction/foundationalprediction", repo_type="space",
+                                folder_path="space", commit_message="Mirror foundationalprediction.com",
+                                delete_patterns=["*"])
+          EOF
