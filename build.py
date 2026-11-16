@@ -314,11 +314,14 @@ def methodology(prov):
       model emits them (21 for Timestral and t0-gamma), the generous bandwidth otherwise, because a
       tight reconstruction of nine deciles manufactures about half a nat of apparent deficit.</p>
     <h2>Pairing and the test</h2>
-    <p>Every model is paired against laplace, the training-free online yardstick, on identical series
-      and windows. Per series the mean log-score differential is tested by Diebold&ndash;Mariano with a
-      Newey&ndash;West standard error; a win or a loss is a difference beyond 1.96 standard errors, the
-      rest are draws. A draw says the window cannot separate the two, not that they are equal, so the
-      median gap is the better measure of size.</p>
+    <p>Every pair of models is compared per series on identical series and windows. The leaderboards
+      pair each model against laplace, the training-free online reference; the explorer lets you pick
+      any model in its menu as the reference, granger, a foundation model, the conformal baseline or a
+      classical one, because the per-series test is precomputed for every pair. Per series the mean
+      log-score differential is tested by Diebold&ndash;Mariano with a Newey&ndash;West standard
+      error; a win or a loss is a difference beyond 1.96 standard errors, the rest are draws. A draw
+      says the window cannot separate the two, not that they are equal, so the median gap is the
+      better measure of size.</p>
     <h2>Baselines that keep learning</h2>
     <p>The classical baselines in published suites are fit once at the window origin and never updated.
       Here every baseline is online: it sees every observation before it forecasts the next. The gap
