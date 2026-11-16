@@ -832,7 +832,9 @@ def _abstract(slug):
     tex = open(os.path.join(HERE, "papers", slug, slug + ".tex")).read()
     ab = _re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", tex, _re.S).group(1).strip()
     ab = _re.sub(r"\\(?:code|texttt|emph)\{([^}]*)\}", r"\1", ab)
+    ab = ab.replace("D_{\\mathrm{KL}}(P\\|Q)", "<i>D</i><sub>KL</sub>(<i>P</i>&#8214;<i>Q</i>)")
     ab = ab.replace("G\\^arleanu", "G&acirc;rleanu").replace("$", "").replace("~", " ")
+    ab = _re.sub(r"\\[A-Za-z]+", "", ab)          # any macro left over is dropped rather than shown raw
     return ab
 
 
