@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>laplace++</title>
-  <meta name="description" content="laplace++: a learned laplace mixed with the original by the Aggregating Algorithm, with a log-score guarantee against laplace." />
+  <title>granger</title>
+  <meta name="description" content="granger: a learned laplace mixed with the original by the Aggregating Algorithm, with a log-score guarantee against laplace." />
   <link rel="stylesheet" href="./academic.css" />
   <style>
     .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
@@ -53,7 +53,7 @@
         <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
           <span class="drop">
             <a href="./laplace.html">laplace</a>
-            <a href="./laplacepp.html">laplace++</a>
+            <a href="./laplacepp.html">granger</a>
           </span>
         </span>
         <a href="./methodology.html">Methodology</a>
@@ -64,7 +64,8 @@
   </header>
   <main>
 
-    <h1>laplace++</h1>
+    <h1>granger</h1>
+    <p class="lede">The trained laplace. Shown on this site as laplace++ until November 2026; the package calls it <code>granger</code>.</p>
     <p class="lede">laplace with its parameters learned from data, mixed with the original so that it can
       never do much worse.</p>
     <p>It ships in the skaters package as <code>granger</code>, in all five ports; the
@@ -73,14 +74,14 @@
     <h2>The mixture</h2>
     <p>Two forecasters each issue a predictive density for the next value: the original laplace,
       <i>p</i><sub>lap</sub>, and a trained copy of laplace's own machinery, <i>p</i><sub>exp</sub>.
-      laplace++ issues</p>
+      granger issues</p>
     <p class="pick"><i>q<sub>t</sub></i>(<i>y</i>) = <i>w<sub>t</sub></i> <i>p</i><sub>lap,t</sub>(<i>y</i>)
       + (1 &minus; <i>w<sub>t</sub></i>) <i>p</i><sub>exp,t</sub>(<i>y</i>),</p>
     <p>where <i>w<sub>t</sub></i> is the posterior weight on laplace given the series so far: a prior
       &pi; = 0.25 times laplace's likelihood on the observations to date, against 0.75 times the trained
       model's. This is Vovk's Aggregating Algorithm for log loss. Multiplying the mixture densities along
       a series telescopes the weights, so for every series, whatever the data,</p>
-    <p class="pick">total log score of laplace++ &ge; total log score of laplace &minus; log 4,</p>
+    <p class="pick">total log score of granger &ge; total log score of laplace &minus; log 4,</p>
     <p>and it is never more than log(4/3) behind the trained model. The bound needs the exact log
       densities in the weights (no floor). It concerns log score, not coverage; the coverage below is
       measured, not guaranteed.</p>
@@ -90,14 +91,14 @@
       below is on the other half. Training data from outside the panel is never one of the held-out
       series, and series derived from FRED are screened out if they nearly duplicate one.</p>
     <h2>Against laplace, held-out series</h2>
-    <table class="lb"><thead><tr><th>panel</th><th class="num">series</th><th class="num">laplace++ wins</th>
+    <table class="lb"><thead><tr><th>panel</th><th class="num">series</th><th class="num">granger wins</th>
       <th class="num">laplace wins</th><th class="num">median gain</th><th class="num">trained model alone</th>
-      <th class="num">cov<sub>90</sub></th></tr></thead><tbody><tr><td>Economic, Weekly</td><td class="num">1,522</td><td class="num">480</td><td class="num">78</td><td class="num">+0.014</td><td class="num">+0.017</td><td class="num">0.90</td></tr><tr><td>Economic, Monthly</td><td class="num">3,210</td><td class="num">1,027</td><td class="num">153</td><td class="num">+0.048</td><td class="num">+0.075</td><td class="num">0.90</td></tr><tr><td>Economic, Daily</td><td colspan="6" class="muted">no trained run beats laplace yet</td></tr><tr><td>Economic, Hourly (M4)</td><td class="num">205</td><td class="num">45</td><td class="num">8</td><td class="num">+0.014</td><td class="num">+0.027</td><td class="num">0.89</td></tr><tr><td>Prices, Daily</td><td colspan="6" class="muted">not trained: too few price series on the training side</td></tr></tbody></table>
+      <th class="num">cov<sub>90</sub></th></tr></thead><tbody><tr><td>Economic, Weekly</td><td class="num">1,522</td><td class="num">424</td><td class="num">22</td><td class="num">+0.001</td><td class="num">+0.014</td><td class="num">0.90</td></tr><tr><td>Economic, Monthly</td><td class="num">3,226</td><td class="num">954</td><td class="num">61</td><td class="num">+0.041</td><td class="num">+0.074</td><td class="num">0.90</td></tr><tr><td>Economic, Daily</td><td colspan="6" class="muted">no trained run beats laplace yet</td></tr><tr><td>Economic, Hourly (M4)</td><td class="num">205</td><td class="num">42</td><td class="num">6</td><td class="num">+0.014</td><td class="num">+0.025</td><td class="num">0.89</td></tr><tr><td>Prices, Daily</td><td colspan="6" class="muted">not trained: too few price series on the training side</td></tr></tbody></table>
     <p class="foot">Wins are per-series Diebold&ndash;Mariano tests on log score; the rest are draws. Median
       gain is the per-series mean log-score difference in nats per step, at the median series.</p>
     <h2>Runs shown</h2>
     <ul class="small"><li><b>gpswa</b>: the FRED weekly training half plus GIFT-Eval's weekly pretraining series (NN5, road traffic, web traffic), running weight average.</li><li><b>swa5</b>: the FRED monthly training half, four passes, average of five checkpoints along the fourth.</li><li><b>e3</b>: the M4 hourly training half (split by series id), three passes.</li></ul>
-    <p class="stamp">Built 2026-11-12 from skaters commit 6ae5e2a.</p>
+    <p class="stamp">Built 2026-11-16 from skaters commit 6ae5e2a.</p>
 
   </main>
   <footer>

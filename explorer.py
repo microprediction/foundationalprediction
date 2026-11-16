@@ -325,7 +325,7 @@ EXPLORER_CSS = """
     #ex-table th[data-col]:hover { color:#4a3aff; }
     #ex-table th[data-col]::after { content:attr(data-dir); font-size:.7rem; margin-left:3px; }
     .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:7px; vertical-align:middle; }
-    .dot.foundation { background:#8f84ff; } .dot.classical { background:#e09b2d; } .dot.ours { background:#1a8c4a; }
+    .dot.foundation { background:#8f84ff; } .dot.classical { background:#e09b2d; } .dot.ours { background:#1a8c4a; } .dot.conformal { background:#d9534f; }
     .dot.other { background:#aaa; }
     .legend { font-size:.82rem; color:#666; display:flex; gap:16px; flex-wrap:wrap; margin:4px 0 0; }
     .foot { font-size:.82rem; color:#666; margin-top:4px; }

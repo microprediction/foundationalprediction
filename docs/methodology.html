@@ -53,7 +53,7 @@
         <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
           <span class="drop">
             <a href="./laplace.html">laplace</a>
-            <a href="./laplacepp.html">laplace++</a>
+            <a href="./laplacepp.html">granger</a>
           </span>
         </span>
         <a href="./methodology.html">Methodology</a>
@@ -65,7 +65,7 @@
   <main>
 
     <h1>Methodology</h1>
-    <p class="lede">How the leaderboards are scored. How laplace and laplace++ (granger) are built, and the
+    <p class="lede">How the leaderboards are scored. How laplace and granger (the trained laplace, formerly shown here as laplace++) are built, and the
       transforms and ensembles underneath them, is in the
       <a href="https://skaters.microprediction.org/guide.html">skaters guide</a>.</p>
     <h2>The question</h2>
@@ -91,17 +91,17 @@
       between foundation models and classical methods shown here is therefore the gap a practitioner
       running a stream would see. AutoARIMA, AutoETS, AutoTheta and GARCH-t are refit at every step.</p>
     <h2>Trained models</h2>
-    <p>laplace++ is the one trained model here. It is trained on half of each panel, split by series
+    <p>granger (formerly labelled laplace++ on this site) is the one trained model here. It is trained on half of each panel, split by series
       family, and every number shown for it is on the other half. Training data added from outside the
       panel is never one of the held-out series. How it is built and what it guarantees are on the
-      <a href="laplacepp.html">laplace++</a> page.</p>
+      <a href="laplacepp.html">granger</a> page.</p>
     <h2>Roster</h2>
     <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
       here. Submissions that cannot be rerun are not listed.</p>
     <h2>Licences and versions</h2>
     <p>The licence column gives each model's terms. Timestral and TiRex are free below a revenue
       threshold; TimesFM 3.0 and TimeH2O are licensed for testing, evaluation and research only, and
-      Moirai 2.0 (CC BY-NC 4.0) for non-commercial use; the other foundation models, laplace, laplace++ and the classical models are open. All
+      Moirai 2.0 (CC BY-NC 4.0) for non-commercial use; the other foundation models, laplace, granger and the classical models are open. All
       evaluation here is non-commercial benchmarking. TimeH2O is h2oai/timeh2o-v1 at Hugging Face
       revision c556990, whose weights are unchanged since revision 60b68fa of 2026-10-22, run zero-shot
       on CPU on 2026-11-03 and 2026-11-04 by the protocol above.</p>
@@ -127,7 +127,7 @@
         forecasting data (<a href="https://arxiv.org/abs/2605.20119">paper</a>).</li>
       <li><b>Timestral, t0-gamma, TimeH2O, TimesFM, Chronos-Bolt and TiRex</b>: not yet checked against
         these panels.</li>
-      <li><b>laplace++</b>: runs on the weekly, monthly and M4 hourly panels. It is trained on one half
+      <li><b>granger</b>: runs on the weekly, monthly and M4 hourly panels. It is trained on one half
         of each, split by series family, and scored on the other; the weekly run also trained on
         GIFT-Eval's weekly pretraining series (NN5, road and web traffic), none of them in the panels.</li>
     </ul>

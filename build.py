@@ -180,7 +180,7 @@ NAV = """  <header class="site-header">
         <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
           <span class="drop">
             <a href="./laplace.html">laplace</a>
-            <a href="./laplacepp.html">laplace++</a>
+            <a href="./laplacepp.html">granger</a>
           </span>
         </span>
         <a href="./methodology.html">Methodology</a>
@@ -299,7 +299,7 @@ def index(vs, cov, warm, mb, prov, perf_meta):
 def methodology(prov):
     body = """
     <h1>Methodology</h1>
-    <p class="lede">How the leaderboards are scored. How laplace and laplace++ (granger) are built, and the
+    <p class="lede">How the leaderboards are scored. How laplace and granger (the trained laplace, formerly shown here as laplace++) are built, and the
       transforms and ensembles underneath them, is in the
       <a href="https://skaters.microprediction.org/guide.html">skaters guide</a>.</p>
     <h2>The question</h2>
@@ -325,17 +325,17 @@ def methodology(prov):
       between foundation models and classical methods shown here is therefore the gap a practitioner
       running a stream would see. AutoARIMA, AutoETS, AutoTheta and GARCH-t are refit at every step.</p>
     <h2>Trained models</h2>
-    <p>laplace++ is the one trained model here. It is trained on half of each panel, split by series
+    <p>granger (formerly labelled laplace++ on this site) is the one trained model here. It is trained on half of each panel, split by series
       family, and every number shown for it is on the other half. Training data added from outside the
       panel is never one of the held-out series. How it is built and what it guarantees are on the
-      <a href="laplacepp.html">laplace++</a> page.</p>
+      <a href="laplacepp.html">granger</a> page.</p>
     <h2>Roster</h2>
     <p>Only the best models in each class, each with public code and a pinned checkpoint that was run
       here. Submissions that cannot be rerun are not listed.</p>
     <h2>Licences and versions</h2>
     <p>The licence column gives each model's terms. Timestral and TiRex are free below a revenue
       threshold; TimesFM 3.0 and TimeH2O are licensed for testing, evaluation and research only, and
-      Moirai 2.0 (CC BY-NC 4.0) for non-commercial use; the other foundation models, laplace, laplace++ and the classical models are open. All
+      Moirai 2.0 (CC BY-NC 4.0) for non-commercial use; the other foundation models, laplace, granger and the classical models are open. All
       evaluation here is non-commercial benchmarking. TimeH2O is h2oai/timeh2o-v1 at Hugging Face
       revision c556990, whose weights are unchanged since revision 60b68fa of 2026-10-22, run zero-shot
       on CPU on 2026-11-03 and 2026-11-04 by the protocol above.</p>
@@ -361,7 +361,7 @@ def methodology(prov):
         forecasting data (<a href="https://arxiv.org/abs/2605.20119">paper</a>).</li>
       <li><b>Timestral, t0-gamma, TimeH2O, TimesFM, Chronos-Bolt and TiRex</b>: not yet checked against
         these panels.</li>
-      <li><b>laplace++</b>: runs on the weekly, monthly and M4 hourly panels. It is trained on one half
+      <li><b>granger</b>: runs on the weekly, monthly and M4 hourly panels. It is trained on one half
         of each, split by series family, and scored on the other; the weekly run also trained on
         GIFT-Eval's weekly pretraining series (NN5, road and web traffic), none of them in the panels.</li>
     </ul>
@@ -404,7 +404,7 @@ def gift():
 
 # store arm -> (display name, kind) for every model the explorer can show
 FP_MODELS = {
-    "laplace": ("laplace", "ours"), "learned(e2)": ("laplace++", "ours"),
+    "laplace": ("laplace", "ours"), "learned(e2)": ("granger", "ours"),
     "Timestral-209M(q21)": ("Timestral-209M", "foundation"), "t0-gamma(q21)": ("t0-gamma", "foundation"),
     "TimesFM3(wide)": ("TimesFM 3.0", "foundation"), "TimesFM(wide)": ("TimesFM 2.5", "foundation"),
     "TiRex(wide)": ("TiRex", "foundation"), "Chronos(wide)": ("Chronos-Bolt", "foundation"),
@@ -414,6 +414,12 @@ FP_MODELS = {
     "Toto2-2.5B(wide)": ("Toto 2.0 2.5B", "foundation"), "Toto2-313m(wide)": ("Toto 2.0 313M", "foundation"),
     "TTM-R3(wide)": ("TTM-R3", "foundation"), "Moirai-2.0-small(wide)": ("Moirai 2.0 small", "foundation"),
     "TinyCast(wide)": ("TinyCast", "foundation"),
+    # #355 additions (November 2026): nine-decile models through the generous
+    # nozzle, iAmTime on its 21 native levels, and the conformal baseline
+    "Simons-297M(wide)": ("Simons 297M", "foundation"), "Simons-60M(wide)": ("Simons 60M", "foundation"),
+    "ci-proto(wide)": ("ci-proto", "foundation"), "Hirondel-7M(wide)": ("Hirondel-7M", "foundation"),
+    "iAmTime-base": ("iAmTime-base", "foundation"), "TimeSSM-2.5M(wide)": ("TimeSSM-2.5M", "foundation"),
+    "CSP": ("CSP", "conformal"), "CSP&lap": ("CSP & laplace portfolio", "conformal"),
     "AutoARIMA": ("AutoARIMA", "classical"), "AutoETS": ("AutoETS", "classical"),
     "AutoTheta": ("AutoTheta", "classical"), "GARCH-t": ("GARCH-t", "classical"),
 }
@@ -442,6 +448,15 @@ FP_LICENSES = {
     "Moirai-2.0-small(wide)": ("CC BY-NC 4.0", "noncommercial", "https://huggingface.co/Salesforce/moirai-2.0-R-small",
                                "Creative Commons Attribution-NonCommercial 4.0: non-commercial use only"),
     "TinyCast(wide)": _APACHE[:2] + ("https://huggingface.co/raws-labs/tinycast",) + _APACHE[3:],
+    "Simons-297M(wide)": _APACHE[:2] + ("https://huggingface.co/abel-lab/Simons-297M",) + _APACHE[3:],
+    "Simons-60M(wide)": _APACHE[:2] + ("https://huggingface.co/abel-lab/Simons-60M",) + _APACHE[3:],
+    "ci-proto(wide)": ("ci-proto licence", "restricted", "https://huggingface.co/ContinuousIntelligence/ci-proto",
+                       "ci-proto Code and Model Licence v1.0: Apache-2.0 terms plus a public attribution notice and a one-time e-mail to the vendor when a product, service or model using its code, weights or outputs is distributed"),
+    "Hirondel-7M(wide)": _APACHE[:2] + ("https://huggingface.co/Tncrd/Hirondel-7M",) + _APACHE[3:],
+    "iAmTime-base": _APACHE[:2] + ("https://huggingface.co/anishsaha/iAmTime-base-forecast",) + _APACHE[3:],
+    "TimeSSM-2.5M(wide)": _APACHE[:2] + ("https://huggingface.co/IUseAMouse/timessm-2.5m",) + _APACHE[3:],
+    "CSP": ("MIT", "open", "https://github.com/valeman/csp-forecaster", "MIT (csp-forecaster, the author's reference package): commercial use allowed"),
+    "CSP&lap": ("MIT", "open", "https://github.com/valeman/csp-forecaster", "MIT (csp-forecaster) for the CSP half; the portfolio weights and laplace are MIT (skaters)"),
     "AutoARIMA": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
     "AutoETS": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
     "AutoTheta": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
@@ -456,6 +471,18 @@ _LAPLACEPP_DEFAULT = ["learned(wswa2)", "learned(swa6)", "learned(swa5)", "learn
 # beats wswa2 head to head 238-62 on 1,522 held-out series; hourly's gpswa is
 # worse than e3, so the order is per stratum
 LAPLACEPP_RUNS = {"weekly:econ": ["learned(gpswa)"] + _LAPLACEPP_DEFAULT, "*": _LAPLACEPP_DEFAULT}
+
+# the explorer's menu: the strongest size of each family plus the classical and
+# conformal arms. Every pair of these is shipped per series, so the list stays
+# short; the leaderboards above list every arm in FP_MODELS from the summary.
+EXPLORER_MODELS = [
+    "laplace", "learned(e2)",
+    "Timestral-209M(q21)", "t0-gamma(q21)", "TimesFM3(wide)", "TimesFM(wide)", "TiRex(wide)", "Chronos(wide)",
+    "TimeH2O-v1(wide)", "Chronos-2", "Toto2-2.5B(wide)", "Simons-297M(wide)", "iAmTime-base",
+    "ci-proto(wide)", "Hirondel-7M(wide)",
+    "CSP", "CSP&lap",
+    "AutoARIMA", "AutoETS", "AutoTheta", "GARCH-t",
+]
 
 FP_STRATA = [
     {"id": "weekly:econ", "kind": "Economic", "freq": "Weekly"},
@@ -482,7 +509,7 @@ def leaderboard(prov, written):
           <span class="lab">Frequency</span><span class="segs" id="ex-freq"></span></span>
       </div>
       <span class="lab">Reference</span><div><select id="ex-ref"></select>
-        <label class="small muted" style="margin-left:14px" title="laplace++ is trained on one half of the series and scored only on the other. Tick to score every model on that held-out half, so all rows cover the same series.">
+        <label class="small muted" style="margin-left:14px" title="granger is trained on one half of the series and scored only on the other. Tick to score every model on that held-out half, so all rows cover the same series.">
         <input type="checkbox" id="ex-held"> held-out series only</label></div>
     </div>
     <details><summary class="small muted">Series types <button class="linkbtn" id="ex-clear">clear</button></summary>
@@ -501,13 +528,13 @@ def leaderboard(prov, written):
     </table>
     </div>
     <p class="foot" id="ex-runs"></p>
-    <p class="foot">laplace++ is trained on one half of each panel (split by series family) and scored only on the other
+    <p class="foot">granger is trained on one half of each panel (split by series family) and scored only on the other
       half, so its row covers fewer series; tick <i>held-out series only</i> to put every model on that same half.</p>
     <p class="foot">* By log score: a per-series Diebold&ndash;Mariano test on the log predictive density, 64 one-step
       points per series. Click a column to sort.</p>
     <div class="legend"><span><span class="dot foundation"></span>foundation model</span>
       <span><span class="dot classical"></span>classical, refit every step</span>
-      <span><span class="dot ours"></span>laplace and laplace++</span>
+      <span><span class="dot ours"></span>laplace and granger</span>
       <span><span class="lic open">open</span> commercial use allowed</span>
       <span><span class="lic restricted">restricted</span> free below a revenue threshold</span>
       <span><span class="lic noncommercial">non-commercial</span> research and evaluation only</span></div>
@@ -552,7 +579,7 @@ def _kind_of(name):
     return "foundation"
 
 
-_KCOL = {"ours": "#1a8c4a", "foundation": "#8f84ff", "classical": "#e09b2d"}
+_KCOL = {"ours": "#1a8c4a", "foundation": "#8f84ff", "classical": "#e09b2d", "conformal": "#d9534f"}
 
 
 def _times(r):
@@ -717,7 +744,7 @@ def laplace_page(prov, perf):
     <h2>Why it is the reference</h2>
     <p>It sees every observation before forecasting the next, as a deployed forecaster would, and it
       costs microseconds. A model that cannot beat it on the next data point is not worth its weight for
-      that job. laplace is also one of the two components of <a href="laplacepp.html">laplace++</a>.</p>
+      that job. laplace is also one of the two components of <a href="laplacepp.html">granger</a>.</p>
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']}.</p>
 """
     return page("laplace", body, "laplace: the training-free online forecaster used as the reference on every leaderboard.")
@@ -749,7 +776,8 @@ def laplacepp_page(prov):
     notes = "".join(f"<li><b>{name.replace('learned(', '').rstrip(')')}</b>: {LAPLACEPP_TRAINING.get(name, 'see the skaters repository')}.</li>"
                     for name in dict.fromkeys(shown))
     body = f"""
-    <h1>laplace++</h1>
+    <h1>granger</h1>
+    <p class="lede">The trained laplace. Shown on this site as laplace++ until November 2026; the package calls it <code>granger</code>.</p>
     <p class="lede">laplace with its parameters learned from data, mixed with the original so that it can
       never do much worse.</p>
     <p>It ships in the skaters package as <code>granger</code>, in all five ports; the
@@ -758,14 +786,14 @@ def laplacepp_page(prov):
     <h2>The mixture</h2>
     <p>Two forecasters each issue a predictive density for the next value: the original laplace,
       <i>p</i><sub>lap</sub>, and a trained copy of laplace's own machinery, <i>p</i><sub>exp</sub>.
-      laplace++ issues</p>
+      granger issues</p>
     <p class="pick"><i>q<sub>t</sub></i>(<i>y</i>) = <i>w<sub>t</sub></i> <i>p</i><sub>lap,t</sub>(<i>y</i>)
       + (1 &minus; <i>w<sub>t</sub></i>) <i>p</i><sub>exp,t</sub>(<i>y</i>),</p>
     <p>where <i>w<sub>t</sub></i> is the posterior weight on laplace given the series so far: a prior
       &pi; = 0.25 times laplace's likelihood on the observations to date, against 0.75 times the trained
       model's. This is Vovk's Aggregating Algorithm for log loss. Multiplying the mixture densities along
       a series telescopes the weights, so for every series, whatever the data,</p>
-    <p class="pick">total log score of laplace++ &ge; total log score of laplace &minus; log 4,</p>
+    <p class="pick">total log score of granger &ge; total log score of laplace &minus; log 4,</p>
     <p>and it is never more than log(4/3) behind the trained model. The bound needs the exact log
       densities in the weights (no floor). It concerns log score, not coverage; the coverage below is
       measured, not guaranteed.</p>
@@ -775,7 +803,7 @@ def laplacepp_page(prov):
       below is on the other half. Training data from outside the panel is never one of the held-out
       series, and series derived from FRED are screened out if they nearly duplicate one.</p>
     <h2>Against laplace, held-out series</h2>
-    <table class="lb"><thead><tr><th>panel</th><th class="num">series</th><th class="num">laplace++ wins</th>
+    <table class="lb"><thead><tr><th>panel</th><th class="num">series</th><th class="num">granger wins</th>
       <th class="num">laplace wins</th><th class="num">median gain</th><th class="num">trained model alone</th>
       <th class="num">cov<sub>90</sub></th></tr></thead><tbody>{"".join(trs)}</tbody></table>
     <p class="foot">Wins are per-series Diebold&ndash;Mariano tests on log score; the rest are draws. Median
@@ -784,7 +812,7 @@ def laplacepp_page(prov):
     <ul class="small">{notes}</ul>
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']}.</p>
 """
-    return page("laplace++", body, "laplace++: a learned laplace mixed with the original by the Aggregating Algorithm, with a log-score guarantee against laplace.")
+    return page("granger", body, "granger: a learned laplace mixed with the original by the Aggregating Algorithm, with a log-score guarantee against laplace.")
 
 
 def main():
@@ -794,7 +822,7 @@ def main():
     shutil.copy(os.path.join(SKATERS, "docs", "academic.css"), os.path.join(OUT, "academic.css"))
     shutil.copy(os.path.join(SKATERS, "docs", "assets", "frontier3d.js"), os.path.join(OUT, "frontier3d.js"))
     import explorer
-    written = explorer.export(BENCH, OUT, list(FP_MODELS), aliases={"learned(e2)": LAPLACEPP_RUNS})
+    written = explorer.export(BENCH, OUT, EXPLORER_MODELS, aliases={"learned(e2)": LAPLACEPP_RUNS})
     open(os.path.join(OUT, "index.html"), "w").write(leaderboard(prov, written))
     open(os.path.join(OUT, "frontier.html"), "w").write(frontier_page(prov))
     perf = json.load(open(os.path.join(BENCH, "perf_results.json")))
