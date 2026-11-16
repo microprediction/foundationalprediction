@@ -184,6 +184,7 @@ NAV = """  <header class="site-header">
           </span>
         </span>
         <a href="./methodology.html">Methodology</a>
+        <a href="./papers.html">Papers</a>
         <a href="https://skaters.microprediction.org/">skaters</a>
         <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
       </nav>
@@ -818,6 +819,41 @@ def laplacepp_page(prov):
     return page("granger", body, "granger: a learned laplace mixed with the original by the Aggregating Algorithm, with a log-score guarantee against laplace.")
 
 
+PAPERS = [
+    dict(slug="horizon-note",
+         title="On the Importance of Evaluating Time-Series Models One Step Ahead in an Investment Context",
+         authors="Peter Cotton", status="technical note, November 2026",
+         abstract="Popular benchmarks for foundation time-series models pool forecast errors over long horizons. An investor who can trade every interval in a liquid market does not use those horizons. Under log utility the optimal position depends only on the conditional distribution of the next return; later horizons enter only through transaction costs, with weights that shrink as the market gets more liquid. One-step accuracy is therefore the quantity to evaluate for that investor, and a score pooled over horizons does not establish superiority for them. Two examples show that neither coherence across horizons nor a better proper score orders decisions, and one identity shows how a better one-step model improves a multi-step model's path forecasts. We recommend reporting one step ahead on its own and including an iterated one-step model among multi-step baselines."),
+]
+
+
+def papers_page(prov):
+    cards = []
+    for p in PAPERS:
+        cards.append(f"""
+    <div class="paper">
+      <h2><a href="./{p['slug']}.pdf">{p['title']}</a></h2>
+      <p class="meta muted small">{p['authors']} &middot; {p['status']} &middot;
+        <a href="./{p['slug']}.pdf">PDF</a> &middot;
+        <a href="https://github.com/microprediction/foundationalprediction/blob/main/papers/{p['slug']}/{p['slug']}.tex">tex</a> &middot;
+        <a href="https://github.com/microprediction/foundationalprediction/blob/main/papers/{p['slug']}/{p['slug']}.bib">bib</a></p>
+      <p class="abstract">{p['abstract']}</p>
+    </div>""")
+    body = f"""
+    <h1>Papers</h1>
+    <p class="lede">Notes and papers behind the leaderboards. Each lives in its own folder under
+      <code>papers/</code> in the repository, with the PDF served from this site.</p>
+{''.join(cards)}
+    <h2>Related</h2>
+    <p>The benchmark paper that defines the protocol used here,
+      <a href="https://skaters.microprediction.org/papers.html">A stronger univariate benchmark for
+      foundational time-series model evaluation</a>, lives with the <code>skaters</code> package.</p>
+    <p class="stamp">Built {prov['built']}.</p>
+"""
+    return page("Foundational prediction: papers", body,
+                "Notes and papers behind the leaderboards: the one-step case for evaluating time-series models in an investment context.")
+
+
 def main():
     vs, cov, warm, mb, perf_meta, f3_meta = load()
     prov = provenance()
@@ -836,6 +872,7 @@ def main():
     open(os.path.join(OUT, "laplace.html"), "w").write(laplace_page(prov, perf))
     open(os.path.join(OUT, "laplacepp.html"), "w").write(laplacepp_page(prov))
     open(os.path.join(OUT, "gift.html"), "w").write(gift())
+    open(os.path.join(OUT, "papers.html"), "w").write(papers_page(prov))
     open(os.path.join(OUT, ".nojekyll"), "w").write("")
     json.dump(prov, open(os.path.join(OUT, "provenance.json"), "w"), indent=1)
     print(f"[build] docs/ written from skaters {prov['skaters_commit']}")

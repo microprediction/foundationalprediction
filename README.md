@@ -15,6 +15,13 @@ the site is typed by hand.
 - `docs/methodology.html`: the protocol, the paired test, online baselines, the family split
 - `docs/horizons.html`: per-horizon scores, each step isolated (filling in)
 - `docs/gift.html`: the published GIFT-Eval numbers beside the added columns (filling in)
+- `docs/papers.html`: notes and papers behind the leaderboards
+
+## Papers
+
+One folder per paper under `papers/` (tex, bib, notes; PDFs are gitignored there and committed under `docs/`, which serves them).
+
+- `papers/horizon-note/`: *On the Importance of Evaluating Time-Series Models One Step Ahead in an Investment Context* (technical note, November 2026). [PDF](https://foundationalprediction.com/horizon-note.pdf).
 
 The older list of foundation-model resources that lived in this README is in
 `resources.md`.
