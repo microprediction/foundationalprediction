@@ -25,7 +25,7 @@
 \maketitle
 
 \begin{abstract}
-Popular benchmarks for foundation time-series models pool forecast errors over long horizons. An investor who can trade every interval in a liquid market does not use those horizons. Under log utility the optimal position depends only on the conditional distribution of the next return; later horizons enter only through transaction costs, with weights that shrink as the market gets more liquid. One-step accuracy is therefore the quantity to evaluate for that investor, and a score pooled over horizons does not establish superiority for them. Two examples show that neither coherence across horizons nor a better proper score orders decisions, and one identity shows how a better one-step model improves a multi-step model's path forecasts. We recommend reporting one step ahead on its own and including an iterated one-step model among multi-step baselines.
+Popular benchmarks for foundation time-series models pool forecast errors over long horizons. An investor who can trade every interval in a liquid market does not use those horizons. Under log utility the optimal position depends only on the conditional distribution of the next return. With transaction costs, in the quadratic model of G\^arleanu and Pedersen, later horizons enter through the expected-return path with weights that shrink as the market gets more liquid. The one-step predictive is therefore the object to evaluate for that investor, a proper score of it is a proxy for the decision, and a score pooled over horizons does not establish superiority for them. Two examples show that neither coherence across horizons nor a better proper score orders decisions, and one identity shows how a better one-step model improves a multi-step model's path forecasts. We recommend reporting one step ahead on its own and including an iterated one-step model among multi-step baselines.
 \end{abstract}
 
 \section{Setting}
@@ -74,7 +74,7 @@ The decision interval and the remaining horizon $T - t$ are different quantities
 
 \subsection{Transaction costs}
 
-Add a cost of trading and keep the trader once per interval in a liquid market. \citet{garleanu2013} study a trader holding $n_t$ shares with quadratic cost $\tfrac{1}{2}\Delta n_t^\top \Lambda \Delta n_t$, mean-variance preferences over excess price changes with risk aversion $\gamma$ and covariance $\Sigma$, discount rate $\rho$, and expected price changes driven by mean-reverting factors. The optimal policy moves the holding a fixed fraction of the way toward an \emph{aim portfolio},
+Add a cost of trading and keep the trader once per interval in a liquid market. There is no closed form for the log-utility trader with costs, so we change the objective to the one that has been solved. \citet{garleanu2013} study a trader holding $n_t$ shares with quadratic cost $\tfrac{1}{2}\Delta n_t^\top \Lambda \Delta n_t$, mean-variance preferences over excess price changes with risk aversion $\gamma$ and covariance $\Sigma$, discount rate $\rho$, and expected price changes driven by mean-reverting factors. The optimal policy moves the holding a fixed fraction of the way toward an \emph{aim portfolio},
 \begin{equation}
 n_t = n_{t-1} + \Lambda^{-1} A\,(\mathrm{aim}_t - n_{t-1}), \qquad
 \mathrm{aim}_t = \sum_{h \ge 0} w_h\, \E_t\!\big[\mathrm{Markowitz}_{t+h}\big],
@@ -82,7 +82,7 @@ n_t = n_{t-1} + \Lambda^{-1} A\,(\mathrm{aim}_t - n_{t-1}), \qquad
 \end{equation}
 where $\mathrm{Markowitz}_{t+h} = (\gamma \Sigma)^{-1} \E_{t+h}[\Delta P_{t+h+1}]$ and the matrix $A$ solves a quadratic matrix equation in $\gamma$, $\Lambda$, $\Sigma$ and $\rho$. In the scalar case with $\Lambda = \lambda \Sigma$ the weights are $w_h = z(1-z)^h$ with $z$ a function of $\gamma$, $\lambda$ and $\rho$. The model's $n_t$ is a share holding and our $x_t$ a wealth fraction, so we quote \eqref{eq:gp} in its own units.
 
-In English: expected price changes at every horizon enter today's trade, weighted by how long the position will be carried. Costs are the one channel through which later horizons reach this trader's position, and the weights decay faster the more liquid the market. What enters is the mean path; the shape of the predictive beyond the mean acts only through $\Sigma$, which is constant in that model.
+In English: expected price changes at every horizon enter today's trade, weighted by how long the position will be carried. The weights are a property of this quadratic model; what carries over to other objectives is the mechanism, that later horizons reach today's position through the cost of moving it, and the direction, that the weights decay faster the more liquid the market. What enters is the mean path; the shape of the predictive beyond the mean acts only through $\Sigma$, which is constant in that model.
 
 Figure~\ref{fig:weights} plots the weights. In the scalar case \citet{garleanu2013} give $a = \big[-(\gamma(1-\rho) + \lambda\rho) + \sqrt{(\gamma(1-\rho) + \lambda\rho)^2 + 4\gamma\lambda(1-\rho)^2}\,\big]/\big(2(1-\rho)\big)$ and $z = \gamma/(\gamma + a)$, so the weight on horizon $h$ is $z(1-z)^h$ and depends on the cost only through the ratio $\lambda/\gamma$. The half-life of the weights, $\ln 2 / (-\ln(1-z))$, is $0.3$ steps at $\lambda/\gamma = 0.1$, $0.7$ at $1$, $2.2$ at $10$ and $6.9$ at $100$. The weight beyond twelve steps is under two percent of the total at $\lambda/\gamma = 10$ and about a quarter at $100$. In a liquid market the aim portfolio is the next expected price change and little else.
 
@@ -148,7 +148,7 @@ Three objects need separate names: a single interval's return $r_{t+h}$, the cum
 
 \section{Forecast quality and decision quality}
 
-Let model $A$ be the better one-step forecaster and model $B$ the better twelve-step forecaster under a benchmark's score. For the log-utility trader of Section~2.1, $B$'s output has no incremental value if, and only if, conditioning on it leaves the true conditional law of $r_{t+1}$ given the trader's existing information unchanged. A fitted combination that fails to improve a benchmark log score is evidence toward that condition and is weaker than it.
+Let model $A$ be the better one-step forecaster and model $B$ the better twelve-step forecaster under a benchmark's score. For the log-utility trader of Section~2.1, $B$'s output has no incremental value if conditioning on it leaves the true conditional law of $r_{t+1}$ given the trader's existing information unchanged. A change in that law is necessary for value and not sufficient: the law can move without moving the argmax. A fitted combination that fails to improve a benchmark log score is evidence toward the first condition and is weaker than it.
 
 A better one-step score does not imply a better one-step position. Proposition~1 names the distribution that determines the optimal action; it does not rank the actions induced by imperfect distributions.
 
@@ -172,7 +172,7 @@ $A$'s first-step marginal with $B$'s conditional law of the rest of the path giv
 \[
 \E_P\big[\log q(X_{1:H}) - \log p_B(X_{1:H})\big] = \E_P\big[\log p_A(X_1) - \log p_{B,1}(X_1)\big],
 \]
-so an improvement in expected first-step log score transfers exactly to the path log score. The identity says nothing about later marginals, cumulative-return scores or utility. The construction needs $p_A$ to dominate $p_{B,1}$ in support, evaluable first-step densities, and control of weight degeneracy.
+so an improvement in expected first-step log score transfers exactly to the path log score. The identity says nothing about later marginals, cumulative-return scores or utility. The construction needs $p_{B,1}$ to be positive wherever $p_A$ is, so that $B$'s paths cover $A$'s first-step support; evaluable first-step densities; and control of weight degeneracy.
 
 \emph{Revision by the one-step innovation.} A stale $h$-step forecast made at $t$ can be revised, once $r_{t+1}$ is seen, by the regression of its error on the surprise $r_{t+1} - \E^A_t[r_{t+1}]$. Rerunning $B$ at $t+1$ makes this redundant only if the rerun absorbs the new observation adequately, and a misspecified model gives no such guarantee.
 
@@ -185,7 +185,7 @@ GIFT-Eval \citep{aksu2024gifteval} evaluates on non-overlapping rolling windows 
 For the once-per-interval trader in a liquid market four statements hold.
 
 \begin{enumerate}
-\item One step ahead at the decision interval should be reported on its own. For the log-utility trader it is the whole frictionless problem, and a model strong at $h = 24$ and weak at $h = 1$ is weak for that trader. The decision interval belongs to the trader; a daily dataset scored at $h = 1$ speaks to a trader who trades daily.
+\item One step ahead at the decision interval should be reported on its own. For the log-utility trader the one-step predictive is the only input to the decision, so a benchmark that reports $h = 1$ separately scores the right object; a proper score of that object is a proxy for the decision, and Example~2 shows how far the proxy can be from the decision. The decision interval belongs to the trader; a daily dataset scored at $h = 1$ speaks to a trader who trades daily.
 \item An equal-weight average over horizons has economic readings. An unnormalised sum of pinball losses is the objective of a collection of quantile decisions with additive asymmetric costs at different dates, and a uniformly distributed compulsory liquidation date gives an equal-weight average of horizon utilities. Neither reading is this trader's, so a pooled headline does not establish superiority for this trader.
 \item The multi-step baseline should include an iterated one-step model with specified state dynamics, compared at identical origins and information on $r_{t+h}$, on $R_{t,h}$ and on the path functional the application names. Section~3.2 is the reason the comparison has to be run.
 \item Where a decision is named, its regret belongs next to the score. Neither the aim portfolio's weights nor a proper score stands in for it (Sections 2.3 and 4).
