@@ -21,7 +21,7 @@ the site is typed by hand.
 
 One folder per paper under `papers/` (tex, bib, notes; PDFs are gitignored there and committed under `docs/`, which serves them).
 
-- `papers/horizon-note/`: *On the Importance of Evaluating Time-Series Models One Step Ahead in an Investment Context* (technical note, November 2026). [PDF](https://foundationalprediction.com/horizon-note.pdf).
+- `papers/horizon-note/`: *On the Importance of Evaluating Foundational Time-Series Models One Step Ahead in an Investment Context* (technical note, November 2026). [PDF](https://foundationalprediction.com/horizon-note.pdf).
 
 The older list of foundation-model resources that lived in this README is in
 `resources.md`.
