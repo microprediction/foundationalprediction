@@ -5,6 +5,8 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{booktabs}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
 \newtheorem{proposition}{Proposition}
 \newtheorem{remark}{Remark}
@@ -81,6 +83,32 @@ n_t = n_{t-1} + \Lambda^{-1} A\,(\mathrm{aim}_t - n_{t-1}), \qquad
 where $\mathrm{Markowitz}_{t+h} = (\gamma \Sigma)^{-1} \E_{t+h}[\Delta P_{t+h+1}]$ and the matrix $A$ solves a quadratic matrix equation in $\gamma$, $\Lambda$, $\Sigma$ and $\rho$. In the scalar case with $\Lambda = \lambda \Sigma$ the weights are $w_h = z(1-z)^h$ with $z$ a function of $\gamma$, $\lambda$ and $\rho$. The model's $n_t$ is a share holding and our $x_t$ a wealth fraction, so we quote \eqref{eq:gp} in its own units.
 
 In English: expected price changes at every horizon enter today's trade, weighted by how long the position will be carried. Costs are the one channel through which later horizons reach this trader's position, and the weights decay faster the more liquid the market. What enters is the mean path; the shape of the predictive beyond the mean acts only through $\Sigma$, which is constant in that model.
+
+Figure~\ref{fig:weights} plots the weights. In the scalar case \citet{garleanu2013} give $a = \big[-(\gamma(1-\rho) + \lambda\rho) + \sqrt{(\gamma(1-\rho) + \lambda\rho)^2 + 4\gamma\lambda(1-\rho)^2}\,\big]/\big(2(1-\rho)\big)$ and $z = \gamma/(\gamma + a)$, so the weight on horizon $h$ is $z(1-z)^h$ and depends on the cost only through the ratio $\lambda/\gamma$. The half-life of the weights, $\ln 2 / (-\ln(1-z))$, is $0.3$ steps at $\lambda/\gamma = 0.1$, $0.7$ at $1$, $2.2$ at $10$ and $6.9$ at $100$. The weight beyond twelve steps is under two percent of the total at $\lambda/\gamma = 10$ and about a quarter at $100$. In a liquid market the aim portfolio is the next expected price change and little else.
+
+\begin{figure}[t!]
+\centering
+\begin{tikzpicture}
+\pgfmathsetmacro{\rhoo}{0.0004}
+\pgfmathsetmacro{\za}{1/(1+(-(1*(1-\rhoo)+0.1*\rhoo)+sqrt((1*(1-\rhoo)+0.1*\rhoo)^2+4*1*0.1*(1-\rhoo)^2))/(2*(1-\rhoo)))}
+\pgfmathsetmacro{\zb}{1/(1+(-(1*(1-\rhoo)+1*\rhoo)+sqrt((1*(1-\rhoo)+1*\rhoo)^2+4*1*1*(1-\rhoo)^2))/(2*(1-\rhoo)))}
+\pgfmathsetmacro{\zc}{1/(1+(-(1*(1-\rhoo)+10*\rhoo)+sqrt((1*(1-\rhoo)+10*\rhoo)^2+4*1*10*(1-\rhoo)^2))/(2*(1-\rhoo)))}
+\pgfmathsetmacro{\zd}{1/(1+(-(1*(1-\rhoo)+100*\rhoo)+sqrt((1*(1-\rhoo)+100*\rhoo)^2+4*1*100*(1-\rhoo)^2))/(2*(1-\rhoo)))}
+\begin{axis}[width=0.86\textwidth,height=0.5\textwidth,
+  xlabel={horizon $h$ (intervals ahead)}, ylabel={weight $w_h = z(1-z)^h$ on $\E_t[\mathrm{Markowitz}_{t+h}]$},
+  xmin=0, xmax=24, ymin=0, ymax=1, samples at={0,...,24}, only marks=false,
+  legend style={draw=none, fill=none, at={(0.97,0.95)}, anchor=north east, font=\small},
+  grid=major, grid style={draw=black!8}, tick label style={font=\small}, label style={font=\small},
+  every axis plot/.append style={thick, mark=*, mark size=1.2pt}]
+\addplot+[black] {\za*(1-\za)^x}; \addlegendentry{$\lambda/\gamma = 0.1$}
+\addplot+[blue!70!black] {\zb*(1-\zb)^x}; \addlegendentry{$\lambda/\gamma = 1$}
+\addplot+[red!70!black] {\zc*(1-\zc)^x}; \addlegendentry{$\lambda/\gamma = 10$}
+\addplot+[orange!90!black] {\zd*(1-\zd)^x}; \addlegendentry{$\lambda/\gamma = 100$}
+\end{axis}
+\end{tikzpicture}
+\caption{Weight of each horizon's expected price change in the aim portfolio of equation~\eqref{eq:gp}, scalar case $\Lambda = \lambda\Sigma$, per-interval discount rate $\rho = 0.0004$ (about ten percent a year at daily intervals). Lower cost puts the weight on the next interval; at $\lambda/\gamma = 1$ the first two horizons carry 85 percent of it.}
+\label{fig:weights}
+\end{figure}
 
 The weights are not a scoring rule. Suppose a policy is $x^\ast = c \sum_h w_h \mu_h$ and a forecaster supplies $\hat\mu_h = \mu_h + e_h$. The action error is $c \sum_h w_h e_h$, and for an objective quadratic in the action the regret is proportional to
 \[
