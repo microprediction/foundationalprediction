@@ -25,14 +25,14 @@
 \maketitle
 
 \begin{abstract}
-Popular benchmarks for foundation time-series models pool forecast errors over long horizons. An investor who can trade every interval in a liquid market does not use those horizons. Under log utility the optimal position depends only on the conditional distribution of the next return. With transaction costs, in the quadratic model of G\^arleanu and Pedersen, later horizons enter through the expected-return path with weights that shrink as the market gets more liquid. The one-step predictive is therefore the object to evaluate for that investor, a proper score of it is a proxy for the decision, and a score pooled over horizons does not establish superiority for them. Two examples show that neither coherence across horizons nor a better proper score orders decisions, and one identity shows how a better one-step model improves a multi-step model's path forecasts. We recommend reporting one step ahead on its own and including an iterated one-step model among multi-step baselines.
+Popular benchmarks for foundational time-series models pool forecast errors over long horizons. Under frictionless log utility, an investor who can trade every interval in a liquid market does not use those horizons: the optimal position depends only on the conditional distribution of the next return, and the investor's expected log-wealth regret from trading on a forecast is bounded by the forecast's relative entropy from the truth. With transaction costs, in the quadratic model of G\^arleanu and Pedersen, later horizons enter through the expected-return path with weights that shift toward the next interval as costs fall. The one-step predictive is therefore the object to evaluate for that investor, its log score controls the investor's regret without ranking imperfect forecasts' decisions, and a score pooled over horizons does not establish superiority for that decision. Two examples mark the limits: a model better at one step can be worse at twelve while iterating its own dynamics, and a forecast closer to the truth in relative entropy can induce the worse position. We recommend reporting one step ahead on its own and including an iterated one-step model among multi-step baselines.
 \end{abstract}
 
 \section{Setting}
 
-A trader observes a liquid security at intervals (a day, an hour, a tick) and can trade once per interval at the quoted price. There is no market impact and, until Section~2.3, no transaction cost. Write $P_t$ for the price, $r_{t+1} = P_{t+1}/P_t - 1$ for the return over the next interval, $\F_t$ for the information at $t$, and $x_t$ for the fraction of wealth held from $t$ to $t+1$. We call the interval between trades the \emph{decision interval}.
+A trader observes a liquid security at intervals (a day, an hour, a tick) and can trade once per interval at the quoted price. There is no market impact and, until Section~2.3, no transaction cost. Write $P_t$ for the price, $r_{t+1} = P_{t+1}/P_t - 1$ for the return over the next interval, $\F_t$ for the trader's information at $t$, and $x_t$ for the fraction of wealth held from $t$ to $t+1$. We call the interval between trades the \emph{decision interval}.
 
-Does a forecast of $r_{t+2}, r_{t+3}, \dots$ change the choice of $x_t$? If it does not, a benchmark that scores such forecasts says nothing to this trader. The contribution is deliberately small. The sufficiency result is Mossin, Samuelson and Merton; the hedging demand is Merton; the cost-weighted aim portfolio is Gârleanu and Pedersen; the comparison of direct and iterated forecasts is Marcellino, Stock and Watson. We line these up against the way multi-step forecasts of foundation time-series models are scored, and we keep three questions apart that are easy to merge: which distribution determines the optimal action, whether iterated or direct multi-step forecasts are better, and which loss evaluates a forecast for a stated decision.
+Does a forecast of $r_{t+2}, r_{t+3}, \dots$ change the choice of $x_t$? If it does not, a benchmark that scores such forecasts does not by itself establish performance for today's decision. The contribution is deliberately small. The sufficiency result is Mossin, Samuelson and Merton; the regret bound is Barron and Cover; the hedging demand is Merton; the cost-weighted aim portfolio is G\^arleanu and Pedersen; the comparison of direct and iterated forecasts is Marcellino, Stock and Watson. We line these up against the way multi-step forecasts of foundational time-series models are scored, keeping apart three questions: which distribution determines the optimal action, whether iterated or direct multi-step forecasts are better, and which loss evaluates a forecast for a stated decision.
 
 \section{Which distribution determines the position}
 
@@ -58,11 +58,11 @@ Induct backward from $V_T = \log W$. If $V_{t+1} = \log W + g_{t+1}(s)$ then
 and because the opportunity process is exogenous only the middle term depends on $x_t$. Hence $g_t(s) = \max_x \E[\log(1 + x r_{t+1}) \mid s] + \E[g_{t+1}(s_{t+1}) \mid s]$.
 \end{proof}
 
-In English: the trader collects any predictability in later returns by trading when those intervals arrive, so today's position only has to be right about $r_{t+1}$. The state must be sufficient for the continuation value as well as for the next return's law; a state that carries only the latter does not support the recursion. Predictability of $r_{t+12}$ from $\F_t$ changes $g_t$ and leaves the argmax alone. Kelly sizing \citep{kelly1956} is the same statement with $r$ a bet.
+In English: the trader collects any predictability in later returns by trading when those intervals arrive, so today's position only has to be right about $r_{t+1}$. The state must be sufficient for the continuation value as well as for the next return's law. Holding the conditional law of $r_{t+1}$ and the feasible set fixed, predictability of $r_{t+12}$ from $\F_t$ changes $g_t$ and leaves the argmax alone; a signal about $r_{t+12}$ that also moves the conditional law of $r_{t+1}$ enters through that law. Kelly sizing \citep{kelly1956} is the same statement with $r$ a bet.
 
 \subsection{Other utilities}
 
-For $u(W) = W^{1-\gamma}/(1-\gamma)$ with $\gamma \ne 1$ the value function factorises as $V_t(W, s) = W^{1-\gamma} H_t(s)$. When returns are independent across intervals $H_{t+1}$ is constant and the problem is again one-period \citep{samuelson1969}. When returns are predictable, $H_{t+1}(s_{t+1})$ covaries with $r_{t+1}$ and \citet{merton1971,merton1973} obtain, in continuous time with one state variable,
+For $u(W) = W^{1-\gamma}/(1-\gamma)$ with $\gamma \ne 1$ the value function factorises as $V_t(W, s) = W^{1-\gamma} H_t(s)$. When returns are independent across intervals $H_{t+1}$ is constant and the problem is again one-period \citep{samuelson1969}. When returns are predictable, $H_{t+1}(s_{t+1})$ can covary with $r_{t+1}$ and \citet{merton1971,merton1973} obtain, in continuous time with one state variable,
 \[
 x_t^\ast = \frac{\mu_t - r^f}{\gamma \sigma_t^2} \;+\; \frac{\rho\, \sigma_{s}}{\sigma_t}\,\frac{-J_{Ws}}{W J_{WW}},
 \]
@@ -74,17 +74,21 @@ The decision interval and the remaining horizon $T - t$ are different quantities
 
 \subsection{Transaction costs}
 
-Add a cost of trading and keep the trader once per interval in a liquid market. There is no closed form for the log-utility trader with costs, so we change the objective to the one that has been solved. \citet{garleanu2013} study a trader holding $n_t$ shares with quadratic cost $\tfrac{1}{2}\Delta n_t^\top \Lambda \Delta n_t$, mean-variance preferences over excess price changes with risk aversion $\gamma$ and covariance $\Sigma$, discount rate $\rho$, and expected price changes driven by mean-reverting factors. The optimal policy moves the holding a fixed fraction of the way toward an \emph{aim portfolio},
+Add a cost of trading and keep the trader once per interval in a liquid market. We switch to a tractable quadratic model and to one security. \citet{garleanu2013} study a trader holding $n_t$ shares with trading cost $\tfrac{1}{2}\lambda\sigma^2 (n_t - n_{t-1})^2$, mean-variance preferences with risk aversion $\gamma$ over the excess price change $\Delta P_{t+1}$ (net of financing; equivalently take the risk-free rate to be zero), variance $\sigma^2$, discount rate $\rho$, and expected excess price changes driven by mean-reverting factors. Write $m_h = \E_t[\mathrm{Markowitz}_{t+h}]$ with $\mathrm{Markowitz}_{t+h} = \E_{t+h}[\Delta P_{t+h+1}]/(\gamma\sigma^2)$, so that forecast lead $j = h + 1$. The optimal policy moves the holding a fixed fraction of the way toward an \emph{aim portfolio},
 \begin{equation}
-n_t = n_{t-1} + \Lambda^{-1} A\,(\mathrm{aim}_t - n_{t-1}), \qquad
-\mathrm{aim}_t = \sum_{h \ge 0} w_h\, \E_t\!\big[\mathrm{Markowitz}_{t+h}\big],
+n_t = n_{t-1} + \frac{a}{\lambda}\,(\mathrm{aim}_t - n_{t-1}), \qquad
+\mathrm{aim}_t = \sum_{h \ge 0} z(1-z)^h\, m_h,
 \label{eq:gp}
 \end{equation}
-where $\mathrm{Markowitz}_{t+h} = (\gamma \Sigma)^{-1} \E_{t+h}[\Delta P_{t+h+1}]$ and the matrix $A$ solves a quadratic matrix equation in $\gamma$, $\Lambda$, $\Sigma$ and $\rho$. In the scalar case with $\Lambda = \lambda \Sigma$ the weights are $w_h = z(1-z)^h$ with $z$ a function of $\gamma$, $\lambda$ and $\rho$. The model's $n_t$ is a share holding and our $x_t$ a wealth fraction, so we quote \eqref{eq:gp} in its own units.
+with
+\[
+a = \frac{-\big(\gamma(1-\rho) + \lambda\rho\big) + \sqrt{\big(\gamma(1-\rho) + \lambda\rho\big)^2 + 4\gamma\lambda(1-\rho)^2}}{2(1-\rho)}, \qquad z = \frac{\gamma}{\gamma + a}.
+\]
+The model's $n_t$ is a share holding and our $x_t$ a wealth fraction, so we quote \eqref{eq:gp} in its own units.
 
-In English: expected price changes at every horizon enter today's trade, weighted by how long the position will be carried. The weights are a property of this quadratic model; what carries over to other objectives is the mechanism, that later horizons reach today's position through the cost of moving it, and the direction, that the weights decay faster the more liquid the market. What enters is the mean path; the shape of the predictive beyond the mean acts only through $\Sigma$, which is constant in that model.
+In English: the expected excess price change at every lead enters today's trade, weighted by how long the position will be carried, and the weights depend on the cost only through $\lambda/\gamma$. Within this model, holding the other parameters fixed, lowering the cost shifts the weight distribution toward the nearer leads. Figure~\ref{fig:weights} plots the weights by lead. Their half-life is $0.28$ leads at $\lambda/\gamma = 0.1$, $0.72$ at $1$, $2.2$ at $10$ and $6.9$ at $100$; the mass beyond lead twelve is $0.001$ percent at $\lambda/\gamma = 1$, $2.3$ percent at $10$ and $30$ percent at $100$. The figure is a sensitivity analysis; we do not map a particular security and interval to a value of $\lambda/\gamma$.
 
-Figure~\ref{fig:weights} plots the weights. In the scalar case \citet{garleanu2013} give $a = \big[-(\gamma(1-\rho) + \lambda\rho) + \sqrt{(\gamma(1-\rho) + \lambda\rho)^2 + 4\gamma\lambda(1-\rho)^2}\,\big]/\big(2(1-\rho)\big)$ and $z = \gamma/(\gamma + a)$, so the weight on horizon $h$ is $z(1-z)^h$ and depends on the cost only through the ratio $\lambda/\gamma$. The half-life of the weights, $\ln 2 / (-\ln(1-z))$, is $0.3$ steps at $\lambda/\gamma = 0.1$, $0.7$ at $1$, $2.2$ at $10$ and $6.9$ at $100$. The weight beyond twelve steps is under two percent of the total at $\lambda/\gamma = 10$ and about a quarter at $100$. In a liquid market the aim portfolio is the next expected price change and little else.
+Concentrated weights bound the absolute contribution of later leads and nothing more. Since $\mathrm{aim}_t - m_0 = \sum_{h \ge 1} z(1-z)^h (m_h - m_0)$, a bound $\sup_{h \ge 1} |m_h - m_0| \le C$ gives $|\mathrm{aim}_t - m_0| \le C(1-z)$. When $m_0$ is near zero the relative error is not small: two predictive factors can cancel today and decay at different rates, leaving the whole aim to later leads. Other objectives need not admit fixed horizon weights at all; with proportional costs, constraints or nonlinear utility the policy can involve state-dependent trading regions.
 
 \begin{figure}[t!]
 \centering
@@ -95,30 +99,24 @@ Figure~\ref{fig:weights} plots the weights. In the scalar case \citet{garleanu20
 \pgfmathsetmacro{\zc}{1/(1+(-(1*(1-\rhoo)+10*\rhoo)+sqrt((1*(1-\rhoo)+10*\rhoo)^2+4*1*10*(1-\rhoo)^2))/(2*(1-\rhoo)))}
 \pgfmathsetmacro{\zd}{1/(1+(-(1*(1-\rhoo)+100*\rhoo)+sqrt((1*(1-\rhoo)+100*\rhoo)^2+4*1*100*(1-\rhoo)^2))/(2*(1-\rhoo)))}
 \begin{axis}[width=0.86\textwidth,height=0.5\textwidth,
-  xlabel={horizon $h$ (intervals ahead)}, ylabel={weight $w_h = z(1-z)^h$ on $\E_t[\mathrm{Markowitz}_{t+h}]$},
-  xmin=0, xmax=24, ymin=0, ymax=1, samples at={0,...,24}, only marks=false,
+  xlabel={forecast lead $j = h+1$ (intervals ahead)}, ylabel={weight $z(1-z)^{j-1}$ on $m_{j-1}$},
+  xmin=1, xmax=24, ymin=0, ymax=1, samples at={1,...,24},
   legend style={draw=none, fill=none, at={(0.97,0.95)}, anchor=north east, font=\small},
   grid=major, grid style={draw=black!8}, tick label style={font=\small}, label style={font=\small},
   every axis plot/.append style={thick, mark=*, mark size=1.2pt}]
-\addplot+[black] {\za*(1-\za)^x}; \addlegendentry{$\lambda/\gamma = 0.1$}
-\addplot+[blue!70!black] {\zb*(1-\zb)^x}; \addlegendentry{$\lambda/\gamma = 1$}
-\addplot+[red!70!black] {\zc*(1-\zc)^x}; \addlegendentry{$\lambda/\gamma = 10$}
-\addplot+[orange!90!black] {\zd*(1-\zd)^x}; \addlegendentry{$\lambda/\gamma = 100$}
+\addplot+[black] {\za*(1-\za)^(x-1)}; \addlegendentry{$\lambda/\gamma = 0.1$}
+\addplot+[blue!70!black] {\zb*(1-\zb)^(x-1)}; \addlegendentry{$\lambda/\gamma = 1$}
+\addplot+[red!70!black] {\zc*(1-\zc)^(x-1)}; \addlegendentry{$\lambda/\gamma = 10$}
+\addplot+[orange!90!black] {\zd*(1-\zd)^(x-1)}; \addlegendentry{$\lambda/\gamma = 100$}
 \end{axis}
 \end{tikzpicture}
-\caption{Weight of each horizon's expected price change in the aim portfolio of equation~\eqref{eq:gp}, scalar case $\Lambda = \lambda\Sigma$, per-interval discount rate $\rho = 0.0004$ (about ten percent a year at daily intervals). Lower cost puts the weight on the next interval; at $\lambda/\gamma = 1$ the first two horizons carry 85 percent of it.}
+\caption{Weight of each forecast lead's expected excess price change in the aim portfolio of equation~\eqref{eq:gp}, per-interval discount rate $\rho = 0.0004$ (about ten percent a year at daily intervals). Lower cost puts the weight on the first lead; at $\lambda/\gamma = 1$ the first two leads carry 85 percent of it.}
 \label{fig:weights}
 \end{figure}
 
-The weights are not a scoring rule. Suppose a policy is $x^\ast = c \sum_h w_h \mu_h$ and a forecaster supplies $\hat\mu_h = \mu_h + e_h$. The action error is $c \sum_h w_h e_h$, and for an objective quadratic in the action the regret is proportional to
-\[
-\Big(\sum_h w_h e_h\Big)^2 = \sum_{h,j} w_h w_j\, e_h e_j,
-\]
-a sum of cross-horizon products in which errors cancel or reinforce. The geometric weights of the aim portfolio give neither a geometrically weighted quantile score nor a geometrically weighted squared error. A decision loss has to be derived from the stated policy and objective.
+\subsection{Excluded constraints and payoffs}
 
-\subsection{Decisions outside the setting}
-
-A lock-up, a monthly mandate or a position too large to unwind in one interval fixes a holding period, and the decision then depends on the cumulative return $R_{t,k} = \prod_{j=1}^{k}(1 + r_{t+j}) - 1$. A futures expiry does not fix one; the position can be closed before it. Horizon risk limits and derivatives attach future-dependent valuation or constraints to today's choice, and drawdown and barrier contracts depend on path functionals rather than on cumulative-return marginals. These decisions are outside the once-per-interval setting and we do not treat them.
+A lock-up or a monthly mandate fixes a holding period, and the decision then depends on the cumulative return $R_{t,k} = \prod_{j=1}^{k}(1 + r_{t+j}) - 1$; a position too large to unwind in one interval imposes a liquidation schedule instead, which is a path problem. A futures expiry fixes neither; the position can be closed before it. Horizon risk limits and derivatives are compatible with trading once per interval and attach future-dependent valuation or constraints to today's choice; drawdown and barrier contracts depend on path functionals rather than on cumulative-return marginals. We exclude these constraints and payoffs.
 
 \section{Direct and iterated multi-step forecasts}
 
@@ -148,54 +146,70 @@ Three objects need separate names: a single interval's return $r_{t+h}$, the cum
 
 \section{Forecast quality and decision quality}
 
-Let model $A$ be the better one-step forecaster and model $B$ the better twelve-step forecaster under a benchmark's score. For the log-utility trader of Section~2.1, $B$'s output has no incremental value if conditioning on it leaves the true conditional law of $r_{t+1}$ given the trader's existing information unchanged. A change in that law is necessary for value and not sufficient: the law can move without moving the argmax. A fitted combination that fails to improve a benchmark log score is evidence toward the first condition and is weaker than it.
+Proposition~1 names the distribution that determines the optimal action. Two further facts fix what a score of that distribution does and does not tell the trader.
 
-A better one-step score does not imply a better one-step position. Proposition~1 names the distribution that determines the optimal action; it does not rank the actions induced by imperfect distributions.
+\begin{proposition}[Relative entropy bounds the log-utility regret; \citealt{barron1988}]
+Let $P$ be the true conditional law of $r$ and $Q$ a forecast, let the feasible set of fractions be convex and common to both, with $1 + xr > 0$ on it, and let the expectations below be finite. With $x_P \in \arg\max_x \E_P \log(1 + xr)$ and $x_Q \in \arg\max_x \E_Q \log(1 + xr)$,
+\[
+0 \le \E_P\!\left[\log \frac{1 + x_P r}{1 + x_Q r}\right] \le \KL(P \,\|\, Q).
+\]
+\end{proposition}
+\begin{proof}
+Optimality of $x_Q$ under $Q$ over a convex set gives the first-order condition $\E_Q\big[(1 + x r)/(1 + x_Q r)\big] \le 1$ for every feasible $x$, in particular for $x_P$. Then, writing $p$ and $q$ for the densities,
+\[
+\E_P\!\left[\log \frac{1 + x_P r}{1 + x_Q r}\right]
+= \KL(P\|Q) + \E_P\!\left[\log\Big(\frac{q}{p}\,\frac{1 + x_P r}{1 + x_Q r}\Big)\right]
+\le \KL(P\|Q) + \log \E_Q\!\left[\frac{1 + x_P r}{1 + x_Q r}\right] \le \KL(P\|Q),
+\]
+by Jensen's inequality and the first-order condition. The lower bound is optimality of $x_P$ under $P$.
+\end{proof}
+
+In English: the expected log-wealth lost by trading on a forecast is at most the forecast's excess expected log loss. A better one-step log score tightens the trader's guarantee. It does not rank decisions.
 
 \begin{example}[The better forecast induces the worse position]
-Let returns take the values $\{-0.2, 0, 0.2\}$ with truth $(0.20, 0.50, 0.30)$, forecast $A = (0.21, 0.50, 0.29)$ and forecast $B = (0.32, 0.20, 0.48)$. The log-optimal fraction is $x^\ast(q) = \big(q(0.2) - q(-0.2)\big)/\big(0.2\,[q(0.2) + q(-0.2)]\big)$, which equals $1.00$ under the truth, $0.80$ under $A$ and $1.00$ under $B$, while $\KL(P\|A) \approx 0.0004$ and $\KL(P\|B) \approx 0.223$.
+Let returns take the values $\{-0.2, 0, 0.2\}$ with truth $(0.20, 0.50, 0.30)$, forecast $A = (0.21, 0.50, 0.29)$ and forecast $B = (0.32, 0.20, 0.48)$. The log-optimal fraction is $x^\ast(q) = \big(q(0.2) - q(-0.2)\big)/\big(0.2\,[q(0.2) + q(-0.2)]\big)$, which equals $1.00$ under the truth, $0.80$ under $A$ and $1.00$ under $B$, while $\KL(P\|A) \approx 0.0004$ and $\KL(P\|B) \approx 0.223$. Proposition~2 bounds $A$'s regret by $0.0004$ and $B$'s by $0.223$; $B$'s regret is zero.
 \end{example}
 
-Forecast quality and decision regret are different evaluation targets. The same applies to mixture weights chosen by predictive log score; a trader with a stated objective would in general choose others. With costs, Section~2.3 gives the role of each model's mean path and shows that no per-horizon score weighting follows from it.
+The bound is specific to logarithmic scoring under these conditions and says nothing about other proper scores. The same distinction applies to a model $B$ that is the better forecaster at twelve steps while $A$ is better at one. If $B$'s output is measurable with respect to the trader's information $\F_t$, it adds nothing to the oracle conditional law of $r_{t+1}$; its practical value is in improving a model's approximation to that law, and conditioning $A$ on it has no value when the true conditional law of $r_{t+1}$ given $\F_t$ is unchanged. Mixture weights chosen by predictive log score are likewise a forecasting choice; a trader with a stated objective would in general choose others.
 
-\section{Improving a multi-step model with a one-step one}
+\section{Testing a one-step model against a multi-step one}
 
-Three constructions use a one-step model $A$ to improve a multi-step model $B$ without retraining either.
+Three constructions use a one-step model $A$ with a multi-step model $B$ and can be tested for improvement without retraining either. Each is evaluated at the information set it uses.
 
-\emph{A portfolio per horizon.} At each $h$, mix the two predictive densities with weights that follow realised score at that horizon. The weights report where each model is better. The mixed marginals do not specify a joint path law.
+\emph{A portfolio per horizon.} At each $h$, mix the two predictive marginals with weights that follow realised score at that horizon. This needs $A$'s marginal at every horizon, so $A$ must be iterated as a generative model (Section~3.1) or supplied with separate horizon forecasts; we iterate. The weights report where each model is better. The mixed marginals do not specify a joint path law, so the construction is evaluated on marginals unless a dependence structure is added.
 
 \emph{Marginal replacement.} If $B$ emits sample paths from a joint law $p_B$ with first-step marginal $p_{B,1}$, give each path the importance weight $p_A(x_1)/p_{B,1}(x_1)$. The weighted law is
 \[
 q(x_{1:H}) = p_B(x_{1:H})\,\frac{p_A(x_1)}{p_{B,1}(x_1)} = p_A(x_1)\, p_B(x_{2:H} \mid x_1),
 \]
-$A$'s first-step marginal with $B$'s conditional law of the rest of the path given the first observation. It preserves that conditional and nothing else of $B$'s dependence structure. Under the true law $P$,
+$A$'s first-step marginal with $B$'s conditional law of the rest of the path given the first observation. It preserves that conditional law and need not preserve $B$'s copula or unconditional correlations. Under the true law $P$, when the expectations are well defined and finite,
 \[
 \E_P\big[\log q(X_{1:H}) - \log p_B(X_{1:H})\big] = \E_P\big[\log p_A(X_1) - \log p_{B,1}(X_1)\big],
 \]
-so an improvement in expected first-step log score transfers exactly to the path log score. The identity says nothing about later marginals, cumulative-return scores or utility. The construction needs $p_{B,1}$ to be positive wherever $p_A$ is, so that $B$'s paths cover $A$'s first-step support; evaluable first-step densities; and control of weight degeneracy.
+so the path log score improves by exactly the first-step improvement, when there is one. The identity says nothing about later marginals, cumulative-return scores or utility. The construction needs $p_{B,1}$ to be positive wherever $p_A$ is, evaluable first-step densities, and control of weight degeneracy; it is made at time $t$.
 
-\emph{Revision by the one-step innovation.} A stale $h$-step forecast made at $t$ can be revised, once $r_{t+1}$ is seen, by the regression of its error on the surprise $r_{t+1} - \E^A_t[r_{t+1}]$. Rerunning $B$ at $t+1$ makes this redundant only if the rerun absorbs the new observation adequately, and a misspecified model gives no such guarantee.
+\emph{Revision by the one-step innovation.} A stale $h$-step forecast made at $t$ can be revised, once $r_{t+1}$ is seen, by the regression of its error on the surprise $r_{t+1} - \E^A_t[r_{t+1}]$. The revised forecast is an object of time $t+1$ and is compared with competitors that hold the same information at $t+1$ for the same target date. Rerunning $B$ at $t+1$ makes the revision redundant only if the rerun absorbs the new observation adequately.
 
-Each construction is a measurable experiment at identical origins and information sets: $B$ alone, $A$ iterated alone, and the construction, scored per horizon on $r_{t+h}$, on $R_{t,h}$ and on the path functional the application names.
+The experiment is then: $B$ alone, $A$ iterated alone, and each construction, at identical origins and information sets, scored on $r_{t+h}$ per horizon, with cumulative-return and path-functional scores for the constructions that supply a joint law.
 
-\section{Benchmarks of foundation time-series models}
+\section{Benchmarks of foundational time-series models}
 
 GIFT-Eval \citep{aksu2024gifteval} evaluates on non-overlapping rolling windows in the test portion of each series, one window in some configurations and several in others; averages a quantile loss over nine levels and over every position of a window that spans several seasonal periods; normalises each metric against a seasonal naive per configuration; and aggregates across configurations by geometric mean, with average ranks alongside. The suites surveyed in \citet{cotton2026stronger} share the pooling of positions within a window.
 
 For the once-per-interval trader in a liquid market four statements hold.
 
 \begin{enumerate}
-\item One step ahead at the decision interval should be reported on its own. For the log-utility trader the one-step predictive is the only input to the decision, so a benchmark that reports $h = 1$ separately scores the right object; a proper score of that object is a proxy for the decision, and Example~2 shows how far the proxy can be from the decision. The decision interval belongs to the trader; a daily dataset scored at $h = 1$ speaks to a trader who trades daily.
+\item One step ahead at the decision interval should be reported on its own. For the log-utility trader the one-step predictive is the only input to the decision, and by Proposition~2 its log score bounds the trader's regret. The decision interval belongs to the trader; a daily dataset scored at $h = 1$ speaks to a trader who trades daily.
 \item An equal-weight average over horizons has economic readings. An unnormalised sum of pinball losses is the objective of a collection of quantile decisions with additive asymmetric costs at different dates, and a uniformly distributed compulsory liquidation date gives an equal-weight average of horizon utilities. Neither reading is this trader's, so a pooled headline does not establish superiority for this trader.
-\item The multi-step baseline should include an iterated one-step model with specified state dynamics, compared at identical origins and information on $r_{t+h}$, on $R_{t,h}$ and on the path functional the application names. Section~3.2 is the reason the comparison has to be run.
-\item Where a decision is named, its regret belongs next to the score. Neither the aim portfolio's weights nor a proper score stands in for it (Sections 2.3 and 4).
+\item The multi-step baseline should include an iterated one-step model with specified state dynamics, compared at identical origins and information on $r_{t+h}$, and on $R_{t,h}$ and path functionals where the models supply a joint law. Section~3.2 is the reason the comparison has to be run.
+\item Where a decision is named, its regret belongs next to the score. Proposition~2 bounds it for the log-utility trader; Section~2.3 shows that the aim portfolio's weights do not convert into a per-horizon score.
 \end{enumerate}
 
-This is why the \texttt{skaters} package scores \texttt{laplace(k=1)} and why its comparison with foundation models on \url{https://foundationalprediction.com} is made one step ahead and never pooled across horizons. The package's twelve-step limit and its decimated multi-scale fans are engineering choices documented in the package; nothing here derives them. We leave to future work the experiment of Section~5 on the canonical panel: direct forecasts, iterated forecasts and marginal replacement at identical origins, with predictive scores next to the regret of a stated trading rule.
+This is why the \texttt{skaters} package scores \texttt{laplace(k=1)} and why its comparison with foundational time-series models on \url{https://foundationalprediction.com} is made one step ahead and never pooled across horizons. The package's twelve-step limit and its decimated multi-scale fans are engineering choices documented in the package; nothing here derives them. We leave to future work the experiment of Section~5 on the canonical panel, with predictive scores next to the regret of a stated trading rule.
 
 \section*{Disclosure}
 
-Drafting, the two examples and the identity in Section~5 were produced with AI assistance (Anthropic's Claude), under the author's direction and checking.
+Drafting was assisted by Anthropic's Claude. The two examples, the marginal-replacement identity and the pointer to the Barron--Cover bound came from reviews produced by OpenAI's ChatGPT. The author directed and checked the work.
 
 \bibliographystyle{plainnat}
 \bibliography{horizon-note}

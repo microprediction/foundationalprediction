@@ -822,9 +822,18 @@ def laplacepp_page(prov):
 PAPERS = [
     dict(slug="horizon-note",
          title="On the Importance of Evaluating Foundational Time-Series Models One Step Ahead in an Investment Context",
-         authors="Peter Cotton", status="technical note, November 2026",
-         abstract="Popular benchmarks for foundation time-series models pool forecast errors over long horizons. An investor who can trade every interval in a liquid market does not use those horizons. Under log utility the optimal position depends only on the conditional distribution of the next return; later horizons enter only through transaction costs, with weights that shrink as the market gets more liquid. One-step accuracy is therefore the quantity to evaluate for that investor, and a score pooled over horizons does not establish superiority for them. Two examples show that neither coherence across horizons nor a better proper score orders decisions, and one identity shows how a better one-step model improves a multi-step model's path forecasts. We recommend reporting one step ahead on its own and including an iterated one-step model among multi-step baselines."),
+         authors="Peter Cotton", status="technical note, November 2026"),
 ]
+
+
+def _abstract(slug):
+    """The paper's abstract, read from its tex so the card never goes stale."""
+    import re as _re
+    tex = open(os.path.join(HERE, "papers", slug, slug + ".tex")).read()
+    ab = _re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", tex, _re.S).group(1).strip()
+    ab = _re.sub(r"\\(?:code|texttt|emph)\{([^}]*)\}", r"\1", ab)
+    ab = ab.replace("G\\^arleanu", "G&acirc;rleanu").replace("$", "").replace("~", " ")
+    return ab
 
 
 def papers_page(prov):
@@ -837,7 +846,7 @@ def papers_page(prov):
         <a href="./{p['slug']}.pdf">PDF</a> &middot;
         <a href="https://github.com/microprediction/foundationalprediction/blob/main/papers/{p['slug']}/{p['slug']}.tex">tex</a> &middot;
         <a href="https://github.com/microprediction/foundationalprediction/blob/main/papers/{p['slug']}/{p['slug']}.bib">bib</a></p>
-      <p class="abstract">{p['abstract']}</p>
+      <p class="abstract">{_abstract(p['slug'])}</p>
     </div>""")
     body = f"""
     <h1>Papers</h1>
