@@ -5,6 +5,7 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{booktabs}
+\usepackage{needspace}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
@@ -25,7 +26,7 @@
 \maketitle
 
 \begin{abstract}
-Popular benchmarks for foundational time-series models pool forecast errors over long horizons. Under frictionless log utility, an investor who can trade every interval in a liquid market does not use those horizons: the optimal position depends only on the conditional distribution of the next return, and the investor's expected log-wealth regret from trading on a forecast is bounded by the forecast's excess expected log loss, its relative entropy from the truth. With transaction costs, in the quadratic model of G\^arleanu and Pedersen, later horizons enter through the expected-return path with weights that shift toward the next interval as costs fall. The one-step predictive is therefore the object to evaluate for that investor, its excess expected log loss controls the investor's regret without ranking imperfect forecasts' decisions, and a score pooled over horizons does not establish superiority for that decision. Two examples mark the limits: a model better at one step can be worse at twelve while iterating its own dynamics, and a forecast closer to the truth in relative entropy can induce the worse position. We recommend reporting one step ahead on its own and including an iterated one-step model among multi-step baselines.
+Popular benchmarks for foundational time-series models pool forecast errors over long horizons. Under frictionless log utility, an investor who can trade every interval in a liquid market does not use those horizons: the optimal position depends only on the conditional distribution of the next return, and the investor's expected log-wealth regret from trading on a forecast is bounded by the forecast's excess expected log loss, the relative entropy $D_{\mathrm{KL}}(P\|Q)$ of the truth $P$ from the forecast $Q$. With transaction costs, in the quadratic model of G\^arleanu and Pedersen, later horizons enter through the expected-return path with weights that shift toward the next interval as costs fall. The one-step predictive is therefore the object to evaluate for that investor, its excess expected log loss controls the investor's regret without ranking imperfect forecasts' decisions, and a score pooled over horizons does not establish superiority for that decision. Two examples mark the limits: a model better at one step can be worse at twelve while iterating its own dynamics, and a forecast closer to the truth in relative entropy can induce the worse position. We recommend reporting one step ahead on its own and including an iterated one-step model among multi-step baselines.
 \end{abstract}
 
 \section{Setting}
@@ -38,7 +39,7 @@ Does a forecast of $r_{t+2}, r_{t+3}, \dots$ change the choice of $x_t$? If it d
 
 \subsection{Log utility}
 
-Wealth evolves as $W_{t+1} = W_t(1 + x_t r_{t+1})$ and the trader maximises $\E[\log W_T]$. Assume positive wealth, integrability of $\log(1 + x r_{t+1})$ on the feasible set, a feasible set of fractions that does not depend on wealth, and an exogenous opportunity process: a state $s_t$ adapted to $\F_t$ such that the conditional law of $(r_{t+1}, s_{t+1})$ given $\F_t$ depends on $\F_t$ only through $s_t$ and is unaffected by the trader's choices. The dynamic programme is
+Wealth evolves as $W_{t+1} = W_t(1 + x_t r_{t+1})$ and the trader maximises $\E[\log W_T]$. Assume positive wealth, integrability of $\log(1 + x r_{t+1})$ on the feasible set, a feasible set $x_t \in \mathcal{X}_t(s_t)$ that does not depend on wealth and whose future members are unaffected by current choices (so no turnover constraint couples $x_t$ to $x_{t+1}$), and an exogenous opportunity process: a state $s_t$ adapted to $\F_t$ such that the conditional law of $(r_{t+1}, s_{t+1})$ given $\F_t$ depends on $\F_t$ only through $s_t$ and is unaffected by the trader's choices. The dynamic programme is
 \begin{equation}
 V_t(W_t, s_t) = \max_{x_t} \E\big[\,V_{t+1}(W_{t+1}, s_{t+1}) \,\big|\, s_t\big].
 \label{eq:dp}
@@ -88,7 +89,13 @@ The model's $n_t$ is a share holding and our $x_t$ a wealth fraction, so we quot
 
 In English: the expected excess price change at every lead enters today's trade, weighted by how long the position will be carried, and the weights depend on the cost only through $\lambda/\gamma$. Within this model, holding the other parameters fixed, lowering the cost shifts the weight distribution toward the nearer leads. Figure~\ref{fig:weights} plots the weights by lead. Their half-life is $0.28$ leads at $\lambda/\gamma = 0.1$, $0.72$ at $1$, $2.2$ at $10$ and $6.9$ at $100$; the mass beyond lead twelve is $0.001$ percent at $\lambda/\gamma = 1$, $2.3$ percent at $10$ and $30$ percent at $100$. The figure is a sensitivity analysis; we do not map a particular security and interval to a value of $\lambda/\gamma$.
 
-Concentrated weights bound the absolute contribution of later leads and nothing more. Since $\mathrm{aim}_t - m_0 = \sum_{h \ge 1} z(1-z)^h (m_h - m_0)$, a bound $\sup_{h \ge 1} |m_h - m_0| \le C$ gives $|\mathrm{aim}_t - m_0| \le C(1-z)$. When $m_0$ is near zero the relative error is not small: two predictive factors can cancel today and decay at different rates, leaving the whole aim to later leads. Other objectives need not admit fixed horizon weights at all; with proportional costs, constraints or nonlinear utility the policy can involve state-dependent trading regions.
+Concentrated weights bound the absolute contribution of later leads and nothing more. Since $\mathrm{aim}_t - m_0 = \sum_{h \ge 1} z(1-z)^h (m_h - m_0)$, a bound $\sup_{h \ge 1} |m_h - m_0| \le C$ gives $|\mathrm{aim}_t - m_0| \le C(1-z)$. When $m_0$ is near zero the relative error need not be small: two predictive factors can cancel today and decay at different rates, leaving the whole aim to later leads. Other objectives need not admit fixed horizon weights at all; with proportional costs, constraints or nonlinear utility the policy can involve state-dependent trading regions.
+
+The weights are a policy, and they do not convert into a per-horizon forecast score. If the policy is $x^\ast = c \sum_h w_h \mu_h$ and a forecaster supplies $\hat\mu_h = \mu_h + e_h$, the action error is $c \sum_h w_h e_h$, and for an objective quadratic in the action the regret is proportional to
+\[
+\Big(\sum_h w_h e_h\Big)^2 = \sum_{h,j} w_h w_j\, e_h e_j,
+\]
+a sum of cross-horizon products in which errors cancel or reinforce. A decision loss has to be derived from the stated policy and objective; a weighted sum of separate horizon losses is a different object.
 
 \begin{figure}[t!]
 \centering
@@ -134,6 +141,7 @@ The chain rule also removes an apparent dichotomy. Any joint law admits an autor
 
 A correct transition model gives correct forecasts at every horizon. Among imperfect models no ordering follows, with or without Markov structure in the truth.
 
+\Needspace{9\baselineskip}
 \begin{example}[Better at one step, worse at twelve]
 Let returns take the values $\pm a$ as the states of a two-state chain with transition matrix $M(p)$, $p$ the probability of staying, so that $\Pr(X_{t+h} = X_t) = \tfrac{1}{2}\big(1 + (2p-1)^h\big)$. Let the truth be $M(0.9)$, model $A$ be $M(0.8)$ and model $B$ be $M(0.1)$, each iterating its own matrix. At one step $A$ is far better: its excess expected log loss is about $0.037$ against $1.758$ for $B$. At twelve steps $B$ is exactly right, because $M(0.1)^{12} = M(0.9)^{12}$.
 \end{example}
@@ -149,28 +157,28 @@ Three objects need separate names: a single interval's return $r_{t+h}$, the cum
 Proposition~1 names the distribution that determines the optimal action. Two further facts fix what a score of that distribution does and does not tell the trader.
 
 \begin{proposition}[Relative entropy bounds the log-utility regret; \citealt{barron1988}]
-Let $P$ be the true conditional law of $r$ and $Q$ a forecast, let the feasible set of fractions be convex and common to both, with $1 + xr > 0$ on it, and let the expectations below be finite. With $x_P \in \arg\max_x \E_P \log(1 + xr)$ and $x_Q \in \arg\max_x \E_Q \log(1 + xr)$,
+Let $P$ be the true conditional law of $r$ and $Q$ a forecast with $P \ll Q$ and $\KL(P\|Q) < \infty$, with densities $p$ and $q$ taken relative to a common dominating measure; let the feasible set of fractions be convex and common to both, with $1 + xr > 0$ on it; and let the expectations below be finite. With $x_P \in \arg\max_x \E_P \log(1 + xr)$ and $x_Q \in \arg\max_x \E_Q \log(1 + xr)$,
 \[
 0 \le \E_P\!\left[\log \frac{1 + x_P r}{1 + x_Q r}\right] \le \KL(P \,\|\, Q).
 \]
 \end{proposition}
 \begin{proof}
-Optimality of $x_Q$ under $Q$ over a convex set gives the first-order condition $\E_Q\big[(1 + x r)/(1 + x_Q r)\big] \le 1$ for every feasible $x$, in particular for $x_P$. Then, writing $p$ and $q$ for the densities,
-\[
+Optimality of $x_Q$ under $Q$ over a convex set gives the first-order condition $\E_Q\big[(1 + x r)/(1 + x_Q r)\big] \le 1$ for every feasible $x$, in particular for $x_P$. Then
+\begin{align*}
 \E_P\!\left[\log \frac{1 + x_P r}{1 + x_Q r}\right]
-= \KL(P\|Q) + \E_P\!\left[\log\Big(\frac{q}{p}\,\frac{1 + x_P r}{1 + x_Q r}\Big)\right]
-\le \KL(P\|Q) + \log \E_Q\!\left[\frac{1 + x_P r}{1 + x_Q r}\right] \le \KL(P\|Q),
-\]
+&= \KL(P\|Q) + \E_P\!\left[\log\Big(\frac{q}{p}\,\frac{1 + x_P r}{1 + x_Q r}\Big)\right] \\
+&\le \KL(P\|Q) + \log \E_Q\!\left[\frac{1 + x_P r}{1 + x_Q r}\right] \;\le\; \KL(P\|Q),
+\end{align*}
 by Jensen's inequality and the first-order condition. The lower bound is optimality of $x_P$ under $P$.
 \end{proof}
 
-In English: the expected log-wealth lost by trading on a forecast is at most the forecast's excess expected log loss. A smaller excess loss tightens the trader's guarantee; a realised log score on a sample estimates it with error. It does not rank decisions.
+In English: the expected log-wealth lost over one interval by trading on a forecast is at most the forecast's excess expected log loss under the true law, $L_P(Q) - L_P(P) = \KL(P\|Q)$ with $L_P(Q) = -\E_P \log q(r)$. The raw expected loss $L_P(Q)$ does not bound anything: it can be negative for a density, it depends on the units of $r$, and $L_P(P)$ is unknown. A smaller excess loss tightens the bound; an observed benchmark difference estimates the improvement with sampling error. Over many intervals in the same frictionless exogenous setting the regret in terminal log wealth is bounded by the sum of the expected conditional divergences, $\E \log(W_T^\ast / W_T^Q) \le \sum_{t < T} \E[\KL(P_t \| Q_t)]$. None of this ranks decisions.
 
 \begin{example}[The better forecast induces the worse position]
-Let returns take the values $\{-0.2, 0, 0.2\}$ with truth $(0.20, 0.50, 0.30)$, forecast $A = (0.21, 0.50, 0.29)$ and forecast $B = (0.32, 0.20, 0.48)$. The log-optimal fraction is $x^\ast(q) = \big(q(0.2) - q(-0.2)\big)/\big(0.2\,[q(0.2) + q(-0.2)]\big)$, which equals $1.00$ under the truth, $0.80$ under $A$ and $1.00$ under $B$, while $\KL(P\|A) \approx 0.0004$ and $\KL(P\|B) \approx 0.223$. Proposition~2 bounds $A$'s regret by $0.0004$ and $B$'s by $0.223$; $B$'s regret is zero.
+Let returns take the values $\{-0.2, 0, 0.2\}$ with truth $(0.20, 0.50, 0.30)$, forecast $A = (0.21, 0.50, 0.29)$ and forecast $B = (0.32, 0.20, 0.48)$. The log-optimal fraction is $x^\ast(q) = \big(q(0.2) - q(-0.2)\big)/\big(0.2\,[q(0.2) + q(-0.2)]\big)$, which equals $1.00$ under the truth, $0.80$ under $A$ and $1.00$ under $B$, while $\KL(P\|A) \approx 0.0004$ and $\KL(P\|B) \approx 0.223$. Proposition~2 bounds $A$'s regret by $0.0004124$, which $A$ attains, and $B$'s by $0.223$; $B$'s regret is zero.
 \end{example}
 
-The bound is specific to logarithmic scoring under these conditions and says nothing about other proper scores. The same distinction applies to a model $B$ that is the better forecaster at twelve steps while $A$ is better at one. Let $\mathcal{I}_A \subseteq \F_t$ be the inputs model $A$ uses. $B$'s output is $\F_t$-measurable, so it adds nothing to the oracle law $p(r_{t+1} \mid \F_t)$; it can still improve $A$, and conditioning $A$ on it has value exactly when the conditional law of $r_{t+1}$ given $\mathcal{I}_A$ and $B$'s output differs from the law given $\mathcal{I}_A$ alone. Mixture weights chosen by predictive log score are likewise a forecasting choice; a trader with a stated objective would in general choose others.
+The bound is specific to logarithmic scoring under these conditions and says nothing about other proper scores. The same distinction applies to a model $B$ that is the better forecaster at twelve steps while $A$ is better at one. Let $\mathcal{G}_t \subseteq \F_t$ be the information model $A$ uses. $B$'s output is $\F_t$-measurable, so it adds nothing to the oracle law $p(r_{t+1} \mid \F_t)$. It carries no information beyond $\mathcal{G}_t$ when the law of $r_{t+1}$ given $\mathcal{G}_t$ and $B$'s output equals the law given $\mathcal{G}_t$ alone, which is a statement about an investor who already holds the exact $\mathcal{G}_t$-conditional law; an imperfect implementation of that law can still be improved by $B$'s output. Mixture weights chosen by predictive log score are likewise a forecasting choice; a trader with a stated objective would in general choose others.
 
 \section{Testing a one-step model against a multi-step one}
 
@@ -202,7 +210,7 @@ For the once-per-interval trader in a liquid market four statements hold.
 \item One step ahead at the decision interval should be reported on its own. For the log-utility trader the one-step predictive is the only input to the decision, and by Proposition~2 its excess expected log loss bounds the trader's regret. The decision interval belongs to the trader; a daily dataset scored at $h = 1$ speaks to a trader who trades daily.
 \item An equal-weight average over horizons has economic readings. An unnormalised sum of pinball losses is the objective of a collection of quantile decisions with additive asymmetric costs at different dates, and a uniformly distributed compulsory liquidation date gives an equal-weight average of horizon utilities. Neither reading is this trader's, so a pooled headline does not establish superiority for this trader.
 \item The multi-step baseline should include an iterated one-step model with specified state dynamics, compared at identical origins and information on $r_{t+h}$, and on $R_{t,h}$ and path functionals where the models supply a joint law. Section~3.2 is the reason the comparison has to be run.
-\item Where a decision is named, its regret belongs next to the score. Proposition~2 bounds it for the log-utility trader; Section~2.3 shows that the aim portfolio's weights do not convert into a per-horizon score.
+\item Where a decision is named, its regret belongs next to the score. Proposition~2 bounds it for the log-utility trader; Section~2.3 derives policy weights and shows why they do not convert into a per-horizon score.
 \end{enumerate}
 
 This is why the \texttt{skaters} package scores \texttt{laplace(k=1)} and why its comparison with foundational time-series models on \url{https://foundationalprediction.com} is made one step ahead and never pooled across horizons. The package's twelve-step limit and its decimated multi-scale fans are engineering choices documented in the package; nothing here derives them. We leave to future work the experiment of Section~5 on the canonical panel, with predictive scores next to the regret of a stated trading rule.
