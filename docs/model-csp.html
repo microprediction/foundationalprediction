@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Run from the author's package as its README directs, default configuration, refit at every step on the trailing 750 observations with 256 samples; season 24 on hourly, 5 on daily, 52 on weekly, 12 on monthly. The combination arms join it with laplace: &amp;lap is the likelihood-weighted portfolio, +lap stacks CSP on laplace's residuals, ~lap the reverse, @lap recalibrates CSP's PIT against laplace.</p>
     <p>A same-phase pool and a residual pool around the seasonal naive, mixed and sampled. Its density is conditional on the phase for free, which is where it beats laplace on strongly seasonal series; on series that do not repeat, the pool describes a regime that has moved on.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://arxiv.org/abs/2605.03789">Paper</a> &mdash; <span class="muted small">https://arxiv.org/abs/2605.03789</span></li><li><a href="https://github.com/valeman/csp-forecaster">Code</a> &mdash; <span class="muted small">https://github.com/valeman/csp-forecaster</span></li><li><a href="https://conformalprediction.net/csp.html">Review</a> &mdash; <span class="muted small">https://conformalprediction.net/csp.html</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/CSP">interactive leaderboard</a> you can make Conformal Seasonal Pools the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

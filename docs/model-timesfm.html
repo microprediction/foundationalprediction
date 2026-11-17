@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Run zero-shot with a fixed 128-length context.</p>
     <p>TimesFM is a decoder-only transformer in the style of a language model. It splits the context into fixed-length patches, treats each patch as a token, and is pretrained on a large corpus of real and synthetic series. This study scores version 2.5 (200M parameters) with its continuous quantile head, which emits the predictive spread directly.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://github.com/google-research/timesfm">GitHub</a> &mdash; <span class="muted small">https://github.com/google-research/timesfm</span></li><li><a href="https://arxiv.org/abs/2310.10688">Paper (arXiv 2310.10688)</a> &mdash; <span class="muted small">https://arxiv.org/abs/2310.10688</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/TimesFM%28wide%29">interactive leaderboard</a> you can make TimesFM the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

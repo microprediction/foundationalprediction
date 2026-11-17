@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Run zero-shot on CPU with a fixed 128-length context through the continuousintelligence package at a pinned weights revision. The licence is Apache-2.0 plus a public attribution notice and a one-time e-mail to the vendor when a product, service or model using its code, weights or outputs is distributed. Training data is undisclosed beyond 'a large corpus of real-world and synthetic time series'; its fev-bench submission declares no fev-bench data.</p>
     <p>Nine native deciles, xLSTM backbone adapted from TiRex-2. The tight arm reconstructs the deciles with quantile_dist, the original study's reconstruction.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://huggingface.co/ContinuousIntelligence/ci-proto">Model card</a> &mdash; <span class="muted small">https://huggingface.co/ContinuousIntelligence/ci-proto</span></li><li><a href="https://github.com/continuousintelligence/ci">Code</a> &mdash; <span class="muted small">https://github.com/continuousintelligence/ci</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/ci-proto%28wide%29">interactive leaderboard</a> you can make ci-proto the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

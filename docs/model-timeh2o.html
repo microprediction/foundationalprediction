@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Run zero-shot on CPU with a fixed 128-length context through h2ofm's forecast_many, with the nonnegativity clip and integer snapping off and the package's own patch ensemble and flip-equivariant blend kept. The weights are gated and licensed for testing, evaluation and research only.</p>
     <p>The architecture is described on the model card. Two sizes are run here; the tight arm reconstructs the nine deciles with quantile_dist, the original study's reconstruction. Pretraining contamination is unchecked.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://huggingface.co/h2oai/timeh2o-v1">Model card</a> &mdash; <span class="muted small">https://huggingface.co/h2oai/timeh2o-v1</span></li><li><a href="https://pypi.org/project/h2ofm/">Package (h2ofm)</a> &mdash; <span class="muted small">https://pypi.org/project/h2ofm/</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/TimeH2O-v1%28wide%29">interactive leaderboard</a> you can make TimeH2O the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

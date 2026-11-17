@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Run zero-shot on CPU with a fixed 128-length context, univariate. Its deciles are not constrained to be monotone; crossings are rearranged by sorting. The weights are licensed for research use only.</p>
     <p>Pretraining includes GIFT-Eval's pretraining set, which contains fred_md (107 FRED-MD monthly series), and GIFT-Eval's training split, which covers every M4 frequency, so its monthly and hourly rows measure recall as well as forecasting.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://github.com/SalesforceAIResearch/uni2ts">GitHub (uni2ts)</a> &mdash; <span class="muted small">https://github.com/SalesforceAIResearch/uni2ts</span></li><li><a href="https://huggingface.co/Salesforce/moirai-2.0-R-small">Model card</a> &mdash; <span class="muted small">https://huggingface.co/Salesforce/moirai-2.0-R-small</span></li><li><a href="https://arxiv.org/abs/2511.11698">Paper (arXiv 2511.11698)</a> &mdash; <span class="muted small">https://arxiv.org/abs/2511.11698</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/Moirai-2.0-small%28wide%29">interactive leaderboard</a> you can make Moirai 2.0 the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

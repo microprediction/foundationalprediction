@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Loaded from NX-AI/TiRex on CPU. Commercial use is gated above &euro;100M revenue; included here under research use with the required attribution.</p>
     <p>TiRex is built on the xLSTM recurrent architecture rather than attention, at 35M parameters. It ingests the context and emits nine quantiles directly in one pass, and is trained for in-context zero-shot forecasting across both short and long horizons. Its small size is the notable part: it leads public leaderboards while being an order of magnitude smaller than the transformer foundation models.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://github.com/NX-AI/tirex">GitHub</a> &mdash; <span class="muted small">https://github.com/NX-AI/tirex</span></li><li><a href="https://huggingface.co/NX-AI/TiRex">Model card</a> &mdash; <span class="muted small">https://huggingface.co/NX-AI/TiRex</span></li><li><a href="https://arxiv.org/abs/2505.23719">Paper (arXiv 2505.23719)</a> &mdash; <span class="muted small">https://arxiv.org/abs/2505.23719</span></li><li><a href="https://huggingface.co/NX-AI/TiRex/blob/main/LICENSE">License</a> &mdash; <span class="muted small">https://huggingface.co/NX-AI/TiRex/blob/main/LICENSE</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/TiRex%28wide%29">interactive leaderboard</a> you can make TiRex the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

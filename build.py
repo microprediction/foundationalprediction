@@ -1026,6 +1026,13 @@ def model_page(spec, prov, perf, mb):
             cost += f"<li>{m}: {v:,.0f} MB of weights and runtime (<a href=\"size.html\">size</a>)</li>"
         cost += "</ul>"
     links = " &middot; ".join(f'<a href="{u}">{t}</a>' for t, u in spec.get("links", []))
+    from urllib.parse import quote as _q
+    head_arm = next((a for a, _ in spec["arms"] if a in FP_MODELS), spec["arms"][0][0] if spec["arms"] else None)
+    res = "".join(f'<li><a href="{u}">{t}</a> &mdash; <span class="muted small">{u}</span></li>' for t, u in spec.get("links", []))
+    resources = (f'<h2>Resources</h2><ul class="refs">{res}</ul>') if res else ""
+    tool = (f'<p>On the <a href="https://foundationalprediction.com/#All/All/{_q(head_arm)}">interactive leaderboard</a> '
+            f'you can make {spec["name"]} the reference and see every other model paired against it, on any panel or subset '
+            f'of series; the tables below keep laplace as the reference.</p>') if head_arm else ""
     body = f"""
     <h1>{spec['name']}</h1>
     <p class="muted small">{spec['kind']} &middot; {spec['vendor']} &middot; {spec['version']} &middot; licence: {spec['license']}{(' &middot; ' + links) if links else ''}</p>
@@ -1033,7 +1040,9 @@ def model_page(spec, prov, perf, mb):
     <h2>How it was run</h2>
     <p>{spec['note']}</p>
     {('<p>' + spec['arch'] + '</p>') if spec.get('arch') else ''}
+    {resources}
     <h2>Against laplace, one step ahead</h2>
+    {tool}
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

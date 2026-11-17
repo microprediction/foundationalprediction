@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Run zero-shot on CPU with a fixed 128-length context, which the package left-pads to its 2048-step input with the first value; no downsampling, no frequency hint, sign-flip averaging off in the headline arm and on in TinyCast(flip), the setting behind its published GIFT-Eval numbers.</p>
     <p>An attention-free model: a dilated causal convolution encoder, a periodogram phase prior with no parameters, and a nine-decile decoder rolled out in 48-step blocks. Trained on GIFT-Eval's pretraining set, with the datasets overlapping the GIFT-Eval and Chronos zero-shot test sets removed (the exclusion list is not published), plus Chronos KernelSynth and synthetic series.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://github.com/raws-labs/tinycast">GitHub</a> &mdash; <span class="muted small">https://github.com/raws-labs/tinycast</span></li><li><a href="https://huggingface.co/raws-labs/tinycast">Model card</a> &mdash; <span class="muted small">https://huggingface.co/raws-labs/tinycast</span></li><li><a href="https://arxiv.org/abs/2608.15767">Paper (arXiv 2608.15767)</a> &mdash; <span class="muted small">https://arxiv.org/abs/2608.15767</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/TinyCast%28wide%29">interactive leaderboard</a> you can make TinyCast the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

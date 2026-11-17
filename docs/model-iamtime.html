@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Run zero-shot on CPU with a fixed 128-length context from the iamtime package at a pinned commit, scored on its own 21 levels with no reconstruction choice to make. Trained on the Chronos pretraining corpus (which includes M4 Monthly and several Monash sets) plus 2.5M series from a listed subset of GiftEvalPretrain; no FRED or FRED-MD in its training lists.</p>
     <p>12+12 layer encoder-decoder, d_model 768, 21 native quantile levels. M4 Monthly is in its pretraining corpus, so its monthly row is not a clean zero-shot read.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://huggingface.co/anishsaha/iAmTime-base-forecast">Model card</a> &mdash; <span class="muted small">https://huggingface.co/anishsaha/iAmTime-base-forecast</span></li><li><a href="https://arxiv.org/abs/2603.22586">Paper</a> &mdash; <span class="muted small">https://arxiv.org/abs/2603.22586</span></li><li><a href="https://github.com/anishsaha12/iAmTime">Code</a> &mdash; <span class="muted small">https://github.com/anishsaha12/iAmTime</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/iAmTime-base">interactive leaderboard</a> you can make iAmTime the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.

@@ -375,6 +375,7 @@
   var okFreq = h[1] === ALL || STRATA.some(function (s) { return s.freq === h[1] && (h[0] === ALL || s.kind === h[0]); });
   if (okKind && okFreq) { state.kind = h[0]; state.freq = h[1]; }
   else { state.kind = STRATA[0].kind; state.freq = STRATA[0].freq; }
+  if (h[2]) state.ref = h[2];          // #kind/freq/reference-model, used by the model pages
   go();
 })();
 </script>

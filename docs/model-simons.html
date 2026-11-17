@@ -102,7 +102,9 @@
     <h2>How it was run</h2>
     <p>Run zero-shot on CPU with a fixed 128-length context, which the package left-pads to its own window. Pretrained on abel-lab/Simons-Pretrain, synthetic series plus real data; the published list has no FRED, FRED-MD or M4, and carries Monash copies. The four sizes score within 0.02 nats of each other on every stratum.</p>
     <p>Nine native deciles; context 16,384 (25M, 60M) or 32,768 (178M, 297M). The tight arm reconstructs the deciles with quantile_dist, the original study's reconstruction.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://huggingface.co/abel-lab/Simons-297M">Model card (297M)</a> &mdash; <span class="muted small">https://huggingface.co/abel-lab/Simons-297M</span></li><li><a href="https://github.com/Abel-ai-lab/Simons">Code</a> &mdash; <span class="muted small">https://github.com/Abel-ai-lab/Simons</span></li><li><a href="https://huggingface.co/datasets/abel-lab/Simons-Pretrain">Pretraining data</a> &mdash; <span class="muted small">https://huggingface.co/datasets/abel-lab/Simons-Pretrain</span></li></ul>
     <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/Simons-297M%28wide%29">interactive leaderboard</a> you can make Simons the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
     <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
       errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
       CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.
