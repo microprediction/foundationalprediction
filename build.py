@@ -218,6 +218,7 @@ STYLE = """
     header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
            letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
     header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
+    ol.refs li, ul.refs li { font-size:.92rem; margin-bottom:6px; }
 """
 
 
@@ -962,6 +963,34 @@ def _norm(s):
     return "".join(ch for ch in s.lower() if ch.isalnum())
 
 
+# Papers behind each model, beyond the paper links in the shared metadata. Only
+# references with a verified venue or arXiv number are listed; models with no
+# published paper say so.
+MODEL_REFS = {
+    "ttm3": ['Ekambaram, V., Jati, A., Dayama, P., et al. (2024). Tiny Time Mixers (TTMs): fast pre-trained models for enhanced zero/few-shot forecasting of multivariate time series. <i>NeurIPS 2024</i>. <a href="https://arxiv.org/abs/2401.03955">arXiv:2401.03955</a>'],
+    "timesfm3": ['Das, A., Kong, W., Sen, R., and Zhou, Y. (2024). A decoder-only foundation model for time-series forecasting. <i>ICML 2024</i>. <a href="https://arxiv.org/abs/2310.10688">arXiv:2310.10688</a> (the TimesFM architecture; version 3.0 is documented on its model card).'],
+    "autoarima": ['Hyndman, R. J. and Khandakar, Y. (2008). Automatic time series forecasting: the forecast package for R. <i>Journal of Statistical Software</i> 27(3). <a href="https://doi.org/10.18637/jss.v027.i03">doi:10.18637/jss.v027.i03</a>'],
+    "autoets": ['Hyndman, R. J., Koehler, A. B., Snyder, R. D. and Grose, S. (2002). A state space framework for automatic forecasting using exponential smoothing methods. <i>International Journal of Forecasting</i> 18(3), 439&ndash;454. <a href="https://doi.org/10.1016/S0169-2070(01)00110-8">doi:10.1016/S0169-2070(01)00110-8</a>'],
+    "autotheta": ['Assimakopoulos, V. and Nikolopoulos, K. (2000). The theta model: a decomposition approach to forecasting. <i>International Journal of Forecasting</i> 16(4), 521&ndash;530. <a href="https://doi.org/10.1016/S0169-2070(00)00066-2">doi:10.1016/S0169-2070(00)00066-2</a>',
+                  'Hyndman, R. J. and Billah, B. (2003). Unmasking the Theta method. <i>International Journal of Forecasting</i> 19(2), 287&ndash;290. <a href="https://doi.org/10.1016/S0169-2070(01)00143-1">doi:10.1016/S0169-2070(01)00143-1</a>'],
+    "garcht": ['Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. <i>Journal of Econometrics</i> 31(3), 307&ndash;327. <a href="https://doi.org/10.1016/0304-4076(86)90063-1">doi:10.1016/0304-4076(86)90063-1</a>',
+               'Bollerslev, T. (1987). A conditionally heteroskedastic time series model for speculative prices and rates of return. <i>Review of Economics and Statistics</i> 69(3), 542&ndash;547. <a href="https://doi.org/10.2307/1925546">doi:10.2307/1925546</a>'],
+}
+NO_PAPER = {"timestral", "timeh2o", "ciproto", "hirondel", "simons", "timessm"}
+SITE_PAPERS = ['Cotton, P. (2026). A stronger univariate benchmark for foundational time-series model evaluation. <a href="https://skaters.microprediction.org/papers.html">skaters papers</a> (the protocol and the reconstruction question used on every table here).',
+               'Cotton, P. (2026). On the importance of evaluating foundational time-series models one step ahead in an investment context. <a href="./horizon-note.pdf">PDF</a> (why the leaderboards are one step ahead).']
+
+
+def references_block(spec):
+    items = [f'{t}: <a href="{u}">{u}</a>' for t, u in spec.get("links", []) if t.lower().startswith(("paper", "report"))]
+    items += MODEL_REFS.get(spec["slug"], [])
+    if not items and spec["slug"] in NO_PAPER:
+        items = ["No paper has been published for this model; the model card and code linked above are its documentation."]
+    out = "<h2>References</h2><ol class='refs'>" + "".join(f"<li>{x}</li>" for x in items) + "</ol>" if items else ""
+    out += "<h3>Evaluated on this site in</h3><ul class='refs'>" + "".join(f"<li>{x}</li>" for x in SITE_PAPERS) + "</ul>"
+    return out
+
+
 def model_page(spec, prov, perf, mb):
     vs, cov = _summary_rows()
     trs = []
@@ -1012,6 +1041,7 @@ def model_page(spec, prov, perf, mb):
       the model among the rest.</p>
     {table}
     {cost}
+    {references_block(spec)}
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']}.</p>
 """
     return page(f"Foundational prediction: {spec['name']}", body, f"{spec['name']}: how it was run and how it compares with laplace one step ahead on every panel.")
