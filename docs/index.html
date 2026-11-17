@@ -292,17 +292,22 @@
     document.getElementById('ex-body').innerHTML = body;
     // the pick must cover most of the selection: a model scored on a fraction of a pooled view
     // (laplace++ has no price or daily rows) cannot stand for all of it
-    var best = rs.filter(function (r) { return !r.ref && r.n >= 0.5 * nsel; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
+    // the denominator is the series the REFERENCE is scored on, not the whole selection: a reference
+    // with fewer rows (granger's held-out half) would otherwise disqualify every pairing
+    var nref = 0; rs.forEach(function (r) { if (r.ref) nref = r.n; });
+    var best = rs.filter(function (r) { return !r.ref && r.n >= 0.5 * nref; }).sort(function (a, b) { return b.dll - a.dll; }).filter(function (r) { return r.dll > 0 && r.w > r.l; })[0];
+    var scope = nref < nsel ? nsel.toLocaleString() + ' series selected; ' + name(state.ref) + ' is scored on ' + nref.toLocaleString() + ' of them. '
+                            : nsel.toLocaleString() + ' series. ';
     var runs = d.runs || {}, notes = [];
     Object.keys(runs).forEach(function (k) {
       notes.push(d.stratum ? name(k) + ' on this stratum: run ' + runs[k].replace(/^learned\(|\)$/g, '') + '.'
                            : name(k) + ' runs by stratum: ' + runs[k] + '.'); });
     document.getElementById('ex-runs').textContent = notes.join(' ');
     document.getElementById('ex-pick').innerHTML = best
-      ? nsel.toLocaleString() + ' series. Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b> (' +
+      ? scope + 'Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b> (' +
         best.n.toLocaleString() + ' series), ' +
         (best.dll >= 0 ? '+' : '') + best.dll.toFixed(3) + ' nats at the median, ahead on ' + pct(best.win) + ', behind on ' + pct(best.loss) + '.'
-      : nsel.toLocaleString() + ' series. Nothing beats ' + dot(state.ref) + '<b>' + name(state.ref) + '</b> both at the median and on more series than it loses.';
+      : scope + 'Nothing beats ' + dot(state.ref) + '<b>' + name(state.ref) + '</b> both at the median and on more series than it loses.';
     Array.prototype.forEach.call(document.querySelectorAll('#ex-table th[data-col]'), function (th) {
       th.classList.toggle('sorted', th.dataset.col === state.sort.col);
       th.setAttribute('data-dir', th.dataset.col === state.sort.col ? (state.sort.dir > 0 ? '▲' : '▼') : '');
