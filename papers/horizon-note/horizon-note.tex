@@ -33,7 +33,7 @@ Popular benchmarks for foundational time-series models pool forecast errors over
 
 A trader observes a liquid security at intervals (a day, an hour, a tick) and can trade once per interval at the quoted price. There is no market impact and, until Section~2.3, no transaction cost. Write $P_t$ for the price, $r_{t+1} = P_{t+1}/P_t - 1$ for the return over the next interval, $\F_t$ for the trader's information at $t$, and $x_t$ for the fraction of wealth held from $t$ to $t+1$. We call the interval between trades the \emph{decision interval}.
 
-Does a forecast of $r_{t+2}, r_{t+3}, \dots$ change the choice of $x_t$? If it does not, a benchmark that scores such forecasts does not by itself establish performance for today's decision. The contribution is deliberately small. The sufficiency result is Mossin, Samuelson and Merton; the regret bound is Barron and Cover; the hedging demand is Merton; the cost-weighted aim portfolio is G\^arleanu and Pedersen; the comparison of direct and iterated forecasts is Marcellino, Stock and Watson. We line these up against the way multi-step forecasts of foundational time-series models are scored, keeping apart three questions: which distribution determines the optimal action, whether iterated or direct multi-step forecasts are better, and which loss evaluates a forecast for a stated decision.
+Does a forecast of $r_{t+2}, r_{t+3}, \dots$ change the choice of $x_t$? If it does not, a benchmark that scores such forecasts does not by itself establish performance for today's decision. The contribution is deliberately small. The sufficiency result is Mossin, Samuelson, Merton and Hakansson; the regret bound is Barron and Cover; the hedging demand is Merton; the cost-weighted aim portfolio is G\^arleanu and Pedersen; the comparison of direct and iterated forecasts is Marcellino, Stock and Watson. The case for evaluating forecasts by the decision they serve is \citet{granger2000} and \citet{pesaran2002}. We line these up against the way multi-step forecasts of foundational time-series models are scored, keeping apart three questions: which distribution determines the optimal action, whether iterated or direct multi-step forecasts are better, and which loss evaluates a forecast for a stated decision.
 
 \section{Which distribution determines the position}
 
@@ -70,7 +70,7 @@ x_t^\ast = \frac{\mu_t - r^f}{\gamma \sigma_t^2} \;+\; \frac{\rho\, \sigma_{s}}{
 where $\rho$ is the correlation between the return and the state innovation and $J$ is the value function. The second term is the hedging demand. It vanishes for $\gamma = 1$ and for $\rho = 0$, and it depends on how the opportunity set moves, through $J_{Ws}$.
 
 \begin{remark}[Frequent trading does not shrink the hedging demand]
-The decision interval and the remaining horizon $T - t$ are different quantities. Merton's formulation already allows continuous trading, and the hedging term is a function of the state dynamics with no factor in the trading interval. \citet{campbell1999} find in calibrated models with persistent expected returns that the hedging demand roughly doubles average stock demand for some investors, with a material loss from a myopic policy. The term can also be large relative to a myopic position that is itself near zero. The exact statement of this section is for log utility; for other utilities the frictionless position depends on the law of motion of the opportunity set.
+The decision interval and the remaining horizon $T - t$ are different quantities. Merton's formulation already allows continuous trading, and the hedging term is a function of the state dynamics with no factor in the trading interval. \citet{campbell1999} find in calibrated models with persistent expected returns that the hedging demand may double average stock demand for investors with risk aversion above one, with a material loss from a myopic policy; \citet{hakansson1971} shows that with serially correlated returns only log utility is myopic in general. The term can also be large relative to a myopic position that is itself near zero. The exact statement of this section is for log utility; for other utilities the frictionless position depends on the law of motion of the opportunity set.
 \end{remark}
 
 \subsection{Transaction costs}
@@ -146,7 +146,7 @@ A correct transition model gives correct forecasts at every horizon. Among imper
 Let returns take the values $\pm a$ as the states of a two-state chain with transition matrix $M(p)$, $p$ the probability of staying, so that $\Pr(X_{t+h} = X_t) = \tfrac{1}{2}\big(1 + (2p-1)^h\big)$. Let the truth be $M(0.9)$, model $A$ be $M(0.8)$ and model $B$ be $M(0.1)$, each iterating its own matrix. At one step $A$ is far better: its excess expected log loss is about $0.037$ against $1.758$ for $B$. At twelve steps $B$ is exactly right, because $M(0.1)^{12} = M(0.9)^{12}$.
 \end{example}
 
-Whether a direct $h$-step forecast beats an iterated one-step model is therefore a question about estimation efficiency and misspecification. \citet{marcellino2006} treat it as such and find no universal winner. It has to be measured.
+Whether a direct $h$-step forecast beats an iterated one-step model is therefore a question about estimation efficiency and misspecification. \citet{marcellino2006} find iterated forecasts usually better on macroeconomic panels, more so at long horizons, and direct forecasts more robust when the one-step model is misspecified; \citet{chevillon2007} surveys the conditions on each side. It has to be measured.
 
 \subsection{Three targets}
 
@@ -154,7 +154,7 @@ Three objects need separate names: a single interval's return $r_{t+h}$, the cum
 
 \section{Forecast quality and decision quality}
 
-Proposition~1 names the distribution that determines the optimal action. Two further facts fix what a score of that distribution does and does not tell the trader.
+Proposition~1 names the distribution that determines the optimal action. Two further facts fix what a score of that distribution does and does not tell the trader. Among misspecified forecasts the ranking depends on the loss used to make it \citep{patton2020}; the two facts make that concrete for this trader.
 
 \begin{proposition}[Relative entropy bounds the log-utility regret; \citealt{barron1988}]
 Let $P$ be the true conditional law of $r$ and $Q$ a forecast with $P \ll Q$ and $\KL(P\|Q) < \infty$, with densities $p$ and $q$ taken relative to a common dominating measure; let the feasible set of fractions be convex and common to both, with $1 + xr > 0$ on it; and let the expectations below be finite. With $x_P \in \arg\max_x \E_P \log(1 + xr)$ and $x_Q \in \arg\max_x \E_Q \log(1 + xr)$,
@@ -194,7 +194,7 @@ $A$'s first-step marginal with $B$'s conditional law of the rest of the path giv
 \[
 \E_P\big[\log q(X_{1:H}) - \log p_B(X_{1:H})\big] = \E_P\big[\log p_A(X_1) - \log p_{B,1}(X_1)\big],
 \]
-so the path log score improves by exactly the first-step improvement, when there is one. The identity says nothing about later marginals, cumulative-return scores or utility. The construction needs $p_{B,1}$ to be positive wherever $p_A$ is, evaluable first-step densities, and control of weight degeneracy; it is made at time $t$.
+so the path log score improves by exactly the first-step improvement, when there is one. The weighted law is the information projection of $p_B$ onto the laws with first marginal $p_A$ \citep{csiszar1975}, and the identity is its Pythagorean equality; \citet{kruger2017} tilt path forecasts toward external nowcasts in the same spirit, with moment targets. The identity says nothing about later marginals, cumulative-return scores or utility. The construction needs $p_{B,1}$ to be positive wherever $p_A$ is, evaluable first-step densities, and control of weight degeneracy; it is made at time $t$.
 
 \emph{Revision by the one-step innovation.} A stale $h$-step forecast made at $t$ can be revised, once $r_{t+1}$ is seen, by the regression of its error on the surprise $r_{t+1} - \E^A_t[r_{t+1}]$. The revised forecast is an object of time $t+1$ and is compared with competitors that hold the same information at $t+1$ for the same target date. Rerunning $B$ at $t+1$ makes the revision redundant only if the rerun absorbs the new observation adequately.
 
@@ -202,7 +202,7 @@ The experiment is then: $B$ alone, $A$ iterated alone, and each construction, at
 
 \section{Benchmarks of foundational time-series models}
 
-GIFT-Eval \citep{aksu2024gifteval} evaluates on non-overlapping rolling windows in the test portion of each series, one window in some configurations and several in others; averages a quantile loss over nine levels and over every position of a window that spans several seasonal periods; normalises each metric against a seasonal naive per configuration; and aggregates across configurations by geometric mean, with average ranks alongside. The suites surveyed in \citet{cotton2026stronger} share the pooling of positions within a window.
+GIFT-Eval \citep{aksu2024gifteval} evaluates on non-overlapping rolling windows in the test portion of each series, one window in some configurations and several in others; averages a quantile loss over nine levels and over every position of a window that spans several seasonal periods; normalises each metric against a seasonal naive per configuration; and reports average ranks, with the public leaderboard aggregating the normalised metrics across configurations by geometric mean. The suites surveyed in \citet{cotton2026stronger} share the pooling of positions within a window.
 
 For the once-per-interval trader in a liquid market four statements hold.
 
