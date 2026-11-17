@@ -63,7 +63,7 @@ In English: the trader collects any predictability in later returns by trading w
 
 \subsection{Other utilities}
 
-For $u(W) = W^{1-\gamma}/(1-\gamma)$ with $\gamma \ne 1$ the value function factorises as $V_t(W, s) = W^{1-\gamma} H_t(s)$. When returns are independent across intervals $H_{t+1}$ is constant and the problem is again one-period \citep{samuelson1969}. When returns are predictable, $H_{t+1}(s_{t+1})$ can covary with $r_{t+1}$ and \citet{merton1971,merton1973} obtain, in continuous time with one state variable,
+For $u(W) = W^{1-\gamma}/(1-\gamma)$ with $\gamma \ne 1$ the value function factorises as $V_t(W, s) = W^{1-\gamma} H_t(s)$. When the conditional investment opportunity set is deterministic, for example independent returns with the filtration they generate and deterministic feasible sets, $H_{t+1}$ is constant and the problem is again one-period \citep{samuelson1969}. Independence of the realised returns is not enough under a larger filtration: a signal that is informative about later returns in some states and not in others makes $H_{t+1}$ vary with the state, and the position hedges against the less informed branch even though the returns themselves are independent. When returns are predictable, $H_{t+1}(s_{t+1})$ can covary with $r_{t+1}$ and \citet{merton1971,merton1973} obtain, in continuous time with one state variable,
 \[
 x_t^\ast = \frac{\mu_t - r^f}{\gamma \sigma_t^2} \;+\; \frac{\rho\, \sigma_{s}}{\sigma_t}\,\frac{-J_{Ws}}{W J_{WW}},
 \]
