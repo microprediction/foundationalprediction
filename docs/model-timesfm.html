@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: TimesFM</title>
+  <meta name="description" content="TimesFM: how it was run and how it compares with laplace one step ahead on every panel." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">foundational prediction</a>
+      <nav>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <span class="drop-head">Reference</span>
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">granger</a>
+            <span class="drop-head">Foundational models</span>
+            <a href="./model-chronos.html">Chronos</a>
+            <a href="./model-chronos2.html">Chronos-2</a>
+            <a href="./model-ciproto.html">ci-proto</a>
+            <a href="./model-hirondel.html">Hirondel-7M</a>
+            <a href="./model-iamtime.html">iAmTime</a>
+            <a href="./model-moirai2.html">Moirai 2.0</a>
+            <a href="./model-simons.html">Simons</a>
+            <a href="./model-t0gamma.html">t0-gamma</a>
+            <a href="./model-timeh2o.html">TimeH2O</a>
+            <a href="./model-timesfm.html">TimesFM</a>
+            <a href="./model-timesfm3.html">TimesFM3</a>
+            <a href="./model-timessm.html">TimeSSM</a>
+            <a href="./model-timestral.html">Timestral</a>
+            <a href="./model-tinycast.html">TinyCast</a>
+            <a href="./model-tirex.html">TiRex</a>
+            <a href="./model-tirex2.html">TiRex-2</a>
+            <a href="./model-toto2.html">Toto 2.0</a>
+            <a href="./model-ttm3.html">TTM-R3</a>
+            <span class="drop-head">Conformal</span>
+            <a href="./model-csp.html">Conformal Seasonal Pools</a>
+            <span class="drop-head">Classical</span>
+            <a href="./model-autoarima.html">AutoARIMA</a>
+            <a href="./model-autoets.html">AutoETS</a>
+            <a href="./model-autotheta.html">AutoTheta</a>
+            <a href="./model-garcht.html">GARCH-t</a>
+          </span>
+        </span>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./papers.html">Papers</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>TimesFM</h1>
+    <p class="muted small">foundation &middot; Google &middot; 2.5 &middot; licence: Apache-2.0 &middot; <a href="https://github.com/google-research/timesfm">GitHub</a> &middot; <a href="https://arxiv.org/abs/2310.10688">Paper (arXiv 2310.10688)</a></p>
+    <p class="lede">TimesFM is a decoder-only, patched time-series transformer; we score version 2.5.</p>
+    <h2>How it was run</h2>
+    <p>Run zero-shot with a fixed 128-length context.</p>
+    <p>TimesFM is a decoder-only transformer in the style of a language model. It splits the context into fixed-length patches, treats each patch as a token, and is pretrained on a large corpus of real and synthetic series. This study scores version 2.5 (200M parameters) with its continuous quantile head, which emits the predictive spread directly.</p>
+    <h2>Against laplace, one step ahead</h2>
+    <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
+      errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
+      CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.
+      The <a href="methodology.html">methodology</a> page has the protocol; the <a href="index.html">leaderboards</a> place
+      the model among the rest.</p>
+    <table class="lb"><thead><tr><th>arm</th><th>panel</th><th class="num">series</th><th>wins / losses vs laplace</th><th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">coverage 90</th></tr></thead><tbody><tr><td><code>TimesFM(wide)</code><br><span class="muted small">headline</span></td><td>Economic, Weekly</td><td class="num">2,920</td><td><span class="wdl"><i class="w" style="width:28.4%"></i><i class="d" style="width:47.7%"></i><i class="l" style="width:23.8%"></i></span><span class="wdlnum">28% / 24%</span></td><td class="num">-0.024</td><td class="num">0.952</td><td class="num">0.872</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">2,920</td><td><span class="wdl"><i class="w" style="width:18.8%"></i><i class="d" style="width:66.4%"></i><i class="l" style="width:14.8%"></i></span><span class="wdlnum">19% / 15%</span></td><td class="num">-0.009</td><td class="num">0.941</td><td class="num">0.856</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">1,381</td><td><span class="wdl"><i class="w" style="width:10.3%"></i><i class="d" style="width:57.6%"></i><i class="l" style="width:32.1%"></i></span><span class="wdlnum">10% / 32%</span></td><td class="num">-0.086</td><td class="num">0.991</td><td class="num">0.884</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:12.8%"></i><i class="d" style="width:62.6%"></i><i class="l" style="width:24.6%"></i></span><span class="wdlnum">13% / 25%</span></td><td class="num">-0.023</td><td class="num">0.989</td><td class="num">0.878</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">1,539</td><td><span class="wdl"><i class="w" style="width:5.5%"></i><i class="d" style="width:90.1%"></i><i class="l" style="width:4.4%"></i></span><span class="wdlnum">5% / 4%</span></td><td class="num">-0.023</td><td class="num">1.009</td><td class="num">0.864</td></tr><tr><td><code>TimesFM</code><br><span class="muted small">tight reconstruction</span></td><td>Economic, Weekly</td><td class="num">2,912</td><td><span class="wdl"><i class="w" style="width:18.6%"></i><i class="d" style="width:38.6%"></i><i class="l" style="width:42.8%"></i></span><span class="wdlnum">19% / 43%</span></td><td class="num">-0.758</td><td class="num">0.960</td><td class="num">0.829</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">2,910</td><td><span class="wdl"><i class="w" style="width:4.6%"></i><i class="d" style="width:57.6%"></i><i class="l" style="width:37.8%"></i></span><span class="wdlnum">5% / 38%</span></td><td class="num">-0.740</td><td class="num">0.947</td><td class="num">0.801</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">1,378</td><td><span class="wdl"><i class="w" style="width:4.9%"></i><i class="d" style="width:42.5%"></i><i class="l" style="width:52.5%"></i></span><span class="wdlnum">5% / 53%</span></td><td class="num">-0.788</td><td class="num">0.996</td><td class="num">0.835</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:1.4%"></i><i class="d" style="width:61.1%"></i><i class="l" style="width:37.4%"></i></span><span class="wdlnum">1% / 37%</span></td><td class="num">-0.514</td><td class="num">0.996</td><td class="num">0.816</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">1,529</td><td><span class="wdl"><i class="w" style="width:0.6%"></i><i class="d" style="width:57.2%"></i><i class="l" style="width:42.2%"></i></span><span class="wdlnum">1% / 42%</span></td><td class="num">-0.672</td><td class="num">1.015</td><td class="num">0.798</td></tr></tbody></table>
+    <h2>Cost and size</h2><ul><li>TimesFM-2.5-200M: 317.1 ms per forecast on one CPU thread (<a href="speed.html">speed</a>)</li><li>TimesFM-3.0: 66.9 ms per forecast on one CPU thread (<a href="speed.html">speed</a>)</li><li>TimesFM 3.0: 3,969 MB of weights and runtime (<a href="size.html">size</a>)</li><li>TimesFM 2.5: 925 MB of weights and runtime (<a href="size.html">size</a>)</li></ul>
+    <p class="stamp">Built 2026-11-17 from skaters commit 6ae5e2a.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>

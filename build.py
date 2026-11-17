@@ -215,6 +215,9 @@ STYLE = """
     .tab:hover { color:#111; }
     .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
     .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
 """
 
 
@@ -865,9 +868,173 @@ def papers_page(prov):
                 "Notes and papers behind the leaderboards: the one-step case for evaluating time-series models in an investment context.")
 
 
+# ---------------------------------------------------------------- model pages
+# One page per model used on the site. Foundation-model metadata (vendor, size,
+# licence, how it was run, links) is read from the skaters repository's
+# benchmarks/foundation_pages.py (its MODELS dict), so the two sites say the
+# same thing; the classical and conformal arms are described here.
+FM_META_PATH = os.environ.get("SKATERS_PAGES", os.path.join(SKATERS, "benchmarks", "foundation_pages.py"))
+
+
+def _fm_meta():
+    try:
+        src = open(FM_META_PATH).read()
+    except OSError:
+        return {}
+    i = src.index("\nMODELS = {"); j = src.index("\n}\n", i) + 3
+    ns = {"dict": dict, "_fixed_tight": lambda arm: ""}
+    return eval(src[i + len("\nMODELS = "):j], ns)
+
+
+_LOCAL_MODELS = {
+    "csp": dict(name="Conformal Seasonal Pools", kind="conformal", perf_names=("CSP",), vendor="Valeriy Manokhin (csp-forecaster)",
+                version="0.2.0", license="MIT",
+                blurb="CSP forecasts a series by drawing from its own past at the same phase of the cycle, around a "
+                      "seasonal-naive forecast. Nothing is trained; the pool is the predictive.",
+                note="Run from the author's package as its README directs, default configuration, refit at every "
+                     "step on the trailing 750 observations with 256 samples; season 24 on hourly, 5 on daily, 52 "
+                     "on weekly, 12 on monthly. The combination arms join it with laplace: &amp;lap is the "
+                     "likelihood-weighted portfolio, +lap stacks CSP on laplace's residuals, ~lap the reverse, "
+                     "@lap recalibrates CSP's PIT against laplace.",
+                links=[("Paper", "https://arxiv.org/abs/2605.03789"), ("Code", "https://github.com/valeman/csp-forecaster"),
+                       ("Review", "https://conformalprediction.net/csp.html")],
+                arch="A same-phase pool and a residual pool around the seasonal naive, mixed and sampled. Its density "
+                     "is conditional on the phase for free, which is where it beats laplace on strongly seasonal "
+                     "series; on series that do not repeat, the pool describes a regime that has moved on.",
+                arms=[("CSP", "default configuration"), ("CSP(paper)", "paper-exact pool"), ("CSP&lap", "portfolio with laplace"),
+                      ("CSP@lap", "PIT-recalibrated against laplace"), ("CSP+lap", "on laplace's residuals"), ("CSP~lap", "laplace on its residuals")]),
+    "autoarima": dict(name="AutoARIMA", kind="classical", vendor="Nixtla (statsforecast)", version="statsforecast", license="Apache-2.0",
+                      blurb="Automatic ARIMA order selection by AICc, the classical workhorse.",
+                      note="Refit at every step on the full history to date, so it is online in the sense every arm here is: it "
+                           "sees every observation before forecasting the next. The +id, +aci and +pid arms add a conformal "
+                           "interval, adaptive conformal inference and a PID-controlled conformal interval on top.",
+                      links=[("Code", "https://github.com/Nixtla/statsforecast")],
+                      arch="Gaussian predictive from the fitted ARIMA; the conformal wrappers adjust its quantiles.",
+                      arms=[("AutoARIMA", "refit every step"), ("AutoARIMA+id", "with a conformal interval"), ("AutoARIMA+aci", "with ACI"), ("AutoARIMA+pid", "with a PID conformal interval")]),
+    "autoets": dict(name="AutoETS", kind="classical", vendor="Nixtla (statsforecast)", version="statsforecast", license="Apache-2.0",
+                    blurb="Automatic exponential smoothing with error, trend and seasonal components chosen by AICc.",
+                    note="Refit at every step on the full history to date.", links=[("Code", "https://github.com/Nixtla/statsforecast")],
+                    arch="Gaussian predictive from the fitted state-space form.", arms=[("AutoETS", "refit every step")]),
+    "autotheta": dict(name="AutoTheta", kind="classical", vendor="Nixtla (statsforecast)", version="statsforecast", license="Apache-2.0",
+                      blurb="The Theta method, the M3 competition winner, with its parameters chosen automatically.",
+                      note="Refit at every step on the full history to date.", links=[("Code", "https://github.com/Nixtla/statsforecast")],
+                      arch="Gaussian predictive around the theta-line forecast.", arms=[("AutoTheta", "refit every step")]),
+    "garcht": dict(name="GARCH-t", kind="classical", vendor="Kevin Sheppard (arch)", version="arch", license="NCSA",
+                   blurb="GARCH(1,1) with Student-t innovations: the standard model for returns with volatility clustering.",
+                   note="Refit at every step. On price and return series it is the recommendation, and laplace ties it there.",
+                   links=[("Code", "https://github.com/bashtage/arch")],
+                   arch="Conditional-variance recursion with heavy-tailed innovations; a fitted scale, not a mean model.",
+                   arms=[("GARCH-t", "refit every step")]),
+}
+
+
+def model_specs():
+    """Ordered list of page specs: foundation models from the skaters metadata that have an arm on the
+    site, then the conformal baseline, then the classical arms."""
+    vs, _ = _summary_rows()
+    arms_in_store = {m for (_, m) in vs}
+    out = []
+    for slug, m in _fm_meta().items():
+        arms = []
+        for a, lab in [(m.get("key"), "headline"), (m.get("tight_key"), "tight reconstruction")] + list(m.get("variants", [])):
+            if a and a in arms_in_store and a not in [x for x, _ in arms]:
+                arms.append((a, lab))
+        if not arms or not any(a in FP_MODELS for a, _ in arms):
+            continue
+        out.append(dict(slug=slug, name=m["name"], kind="foundation", vendor=m.get("vendor", ""), version=m.get("version", ""),
+                        license=m.get("license", ""), blurb=m.get("blurb", ""), note=m.get("note", ""), links=m.get("links", []),
+                        arch=m.get("arch", ""), arms=arms))
+    out.sort(key=lambda d: d["name"].lower())
+    for slug in ("csp", "autoarima", "autoets", "autotheta", "garcht"):
+        m = dict(_LOCAL_MODELS[slug]); m["slug"] = slug
+        m["arms"] = [(a, lab) for a, lab in m["arms"] if a in arms_in_store]
+        out.append(m)
+    return out
+
+
+def _bar(w, d, l):
+    tot = (w + d + l) or 1
+    return (f'<span class="wdl"><i class="w" style="width:{w/tot*100:.1f}%"></i><i class="d" style="width:{d/tot*100:.1f}%"></i>'
+            f'<i class="l" style="width:{l/tot*100:.1f}%"></i></span><span class="wdlnum">{fmt_pct(w/tot)} / {fmt_pct(l/tot)}</span>')
+
+
+def _norm(s):
+    return "".join(ch for ch in s.lower() if ch.isalnum())
+
+
+def model_page(spec, prov, perf, mb):
+    vs, cov = _summary_rows()
+    trs = []
+    for arm, lab in spec["arms"]:
+        first = True
+        for x in FP_STRATA:
+            r = vs.get((x["id"], arm))
+            if r is None:
+                continue
+            c = cov.get((x["id"], arm))
+            w, d, l = int(r["win"]), int(r["draw"]), int(r["loss"])
+            med = float(r["med_dLL"]); crps = r.get("med_crps_ratio", "")
+            cov90 = f'{c:.3f}' if c is not None else "&ndash;"
+            armcell = f'<td><code>{arm}</code><br><span class="muted small">{lab}</span></td>' if first else '<td></td>'
+            first = False
+            trs.append(f'<tr>{armcell}<td>{x["kind"]}, {x["freq"]}</td><td class="num">{int(r["n_series"]):,}</td>'
+                       f'<td>{_bar(w, d, l)}</td><td class="num">{med:+.3f}</td><td class="num">{float(crps):.3f}</td><td class="num">{cov90}</td></tr>')
+    table = ('<table class="lb"><thead><tr><th>arm</th><th>panel</th><th class="num">series</th><th>wins / losses vs laplace</th>'
+             '<th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">coverage 90</th></tr></thead>'
+             f'<tbody>{"".join(trs)}</tbody></table>') if trs else '<p class="muted">No scored arm on the current panel.</p>'
+    # cost and size, best-effort name match against the perf and footprint records
+    key = _norm(spec["name"])
+    names = spec.get("perf_names")
+    match = (lambda m: m in names) if names else (lambda m: _norm(m).startswith(key[:6]) or key.startswith(_norm(m)[:6]))
+    warm = [(m, ms) for (m, reg), ms in perf.items() if reg == "warm" and match(m)]
+    size = [(m, v) for m, v in mb.items() if _norm(m).startswith(key[:6]) or key.startswith(_norm(m)[:6])]
+    cost = ""
+    if warm or size:
+        cost = "<h2>Cost and size</h2><ul>"
+        for m, ms in warm[:3]:
+            cost += f"<li>{m}: {_fmt_ms(ms)} per forecast on one CPU thread (<a href=\"speed.html\">speed</a>)</li>"
+        for m, v in size[:3]:
+            cost += f"<li>{m}: {v:,.0f} MB of weights and runtime (<a href=\"size.html\">size</a>)</li>"
+        cost += "</ul>"
+    links = " &middot; ".join(f'<a href="{u}">{t}</a>' for t, u in spec.get("links", []))
+    body = f"""
+    <h1>{spec['name']}</h1>
+    <p class="muted small">{spec['kind']} &middot; {spec['vendor']} &middot; {spec['version']} &middot; licence: {spec['license']}{(' &middot; ' + links) if links else ''}</p>
+    <p class="lede">{spec['blurb']}</p>
+    <h2>How it was run</h2>
+    <p>{spec['note']}</p>
+    {('<p>' + spec['arch'] + '</p>') if spec.get('arch') else ''}
+    <h2>Against laplace, one step ahead</h2>
+    <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
+      errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
+      CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.
+      The <a href="methodology.html">methodology</a> page has the protocol; the <a href="index.html">leaderboards</a> place
+      the model among the rest.</p>
+    {table}
+    {cost}
+    <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']}.</p>
+"""
+    return page(f"Foundational prediction: {spec['name']}", body, f"{spec['name']}: how it was run and how it compares with laplace one step ahead on every panel.")
+
+
+def models_nav_block(specs):
+    head = lambda t: f'<span class="drop-head">{t}</span>'
+    items = [head("Reference"), '<a href="./laplace.html">laplace</a>', '<a href="./laplacepp.html">granger</a>']
+    for kind, title in (("foundation", "Foundational models"), ("conformal", "Conformal"), ("classical", "Classical")):
+        group = [s for s in specs if s["kind"] == kind]
+        if group:
+            items.append(head(title))
+            items += [f'<a href="./model-{s["slug"]}.html">{s["name"]}</a>' for s in group]
+    return "\n".join("            " + it for it in items)
+
+
 def main():
     vs, cov, warm, mb, perf_meta, f3_meta = load()
     prov = provenance()
+    specs = model_specs()
+    global NAV
+    i0 = NAV.index('<a href="./laplace.html">laplace</a>'); i1 = NAV.index('<a href="./laplacepp.html">granger</a>') + len('<a href="./laplacepp.html">granger</a>')
+    NAV = NAV[:NAV.rfind("\n", 0, i0) + 1] + models_nav_block(specs) + NAV[i1:]
     os.makedirs(OUT, exist_ok=True)
     shutil.copy(os.path.join(SKATERS, "docs", "academic.css"), os.path.join(OUT, "academic.css"))
     shutil.copy(os.path.join(SKATERS, "docs", "assets", "frontier3d.js"), os.path.join(OUT, "frontier3d.js"))
@@ -882,6 +1049,9 @@ def main():
     open(os.path.join(OUT, "methodology.html"), "w").write(methodology(prov))
     open(os.path.join(OUT, "laplace.html"), "w").write(laplace_page(prov, perf))
     open(os.path.join(OUT, "laplacepp.html"), "w").write(laplacepp_page(prov))
+    perf_by = {(r["model"], r["regime"]): r["ms"] for r in perf["rows"]}
+    for spec in specs:
+        open(os.path.join(OUT, f"model-{spec['slug']}.html"), "w").write(model_page(spec, prov, perf_by, mb))
     open(os.path.join(OUT, "gift.html"), "w").write(gift())
     open(os.path.join(OUT, "papers.html"), "w").write(papers_page(prov))
     open(os.path.join(OUT, ".nojekyll"), "w").write("")

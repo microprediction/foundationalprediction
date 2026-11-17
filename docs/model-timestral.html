@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: Timestral</title>
+  <meta name="description" content="Timestral: how it was run and how it compares with laplace one step ahead on every panel." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">foundational prediction</a>
+      <nav>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <span class="drop-head">Reference</span>
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">granger</a>
+            <span class="drop-head">Foundational models</span>
+            <a href="./model-chronos.html">Chronos</a>
+            <a href="./model-chronos2.html">Chronos-2</a>
+            <a href="./model-ciproto.html">ci-proto</a>
+            <a href="./model-hirondel.html">Hirondel-7M</a>
+            <a href="./model-iamtime.html">iAmTime</a>
+            <a href="./model-moirai2.html">Moirai 2.0</a>
+            <a href="./model-simons.html">Simons</a>
+            <a href="./model-t0gamma.html">t0-gamma</a>
+            <a href="./model-timeh2o.html">TimeH2O</a>
+            <a href="./model-timesfm.html">TimesFM</a>
+            <a href="./model-timesfm3.html">TimesFM3</a>
+            <a href="./model-timessm.html">TimeSSM</a>
+            <a href="./model-timestral.html">Timestral</a>
+            <a href="./model-tinycast.html">TinyCast</a>
+            <a href="./model-tirex.html">TiRex</a>
+            <a href="./model-tirex2.html">TiRex-2</a>
+            <a href="./model-toto2.html">Toto 2.0</a>
+            <a href="./model-ttm3.html">TTM-R3</a>
+            <span class="drop-head">Conformal</span>
+            <a href="./model-csp.html">Conformal Seasonal Pools</a>
+            <span class="drop-head">Classical</span>
+            <a href="./model-autoarima.html">AutoARIMA</a>
+            <a href="./model-autoets.html">AutoETS</a>
+            <a href="./model-autotheta.html">AutoTheta</a>
+            <a href="./model-garcht.html">GARCH-t</a>
+          </span>
+        </span>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./papers.html">Papers</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>Timestral</h1>
+    <p class="muted small">foundation &middot; Mistral AI &middot; 209M &middot; licence: code Apache-2.0; weights Modified MIT &middot; <a href="https://github.com/mistralai/timestral">GitHub</a> &middot; <a href="https://huggingface.co/mistralai/Timestral-28M">Model card</a></p>
+    <p class="lede">Timestral is Mistral's zero-shot time-series model, released 15 October 2026 in four sizes; it emits 21 non-crossing quantiles per step, from the 1st to the 99th percentile.</p>
+    <h2>How it was run</h2>
+    <p>Run zero-shot on CPU with a fixed 128-length context, symmetric averaging and the nonnegativity clip switched off (the series are signed changes). The headline row is the 209M checkpoint scored on all 21 native levels; the other sizes and the nine-decile reconstruction are tabled below.</p>
+    <p>Timestral is a patched transformer with an hourglass encoder, trained to emit 21 quantile levels per step with a context of up to 32,768 points and support for covariates and multiple variates, none of which this univariate study uses. Its 1% and 99% quantiles are native outputs, so its density needs no bandwidth inflation to carry tails. Scored on all 21 levels, the 123M and 209M are ahead of Laplace at the median on weekly, monthly and M4-hourly series, level on price, and a few hundredths behind on daily econ, with the same coverage as Laplace. On the nine deciles alone it reads like every other quantile model, about half a nat behind. Pretraining contamination is unchecked.</p>
+    <h2>Against laplace, one step ahead</h2>
+    <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
+      errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
+      CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.
+      The <a href="methodology.html">methodology</a> page has the protocol; the <a href="index.html">leaderboards</a> place
+      the model among the rest.</p>
+    <table class="lb"><thead><tr><th>arm</th><th>panel</th><th class="num">series</th><th>wins / losses vs laplace</th><th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">coverage 90</th></tr></thead><tbody><tr><td><code>Timestral-209M(q21)</code><br><span class="muted small">headline</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:33.3%"></i><i class="d" style="width:42.8%"></i><i class="l" style="width:23.9%"></i></span><span class="wdlnum">33% / 24%</span></td><td class="num">+0.045</td><td class="num">0.857</td><td class="num">0.908</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:36.4%"></i><i class="d" style="width:56.8%"></i><i class="l" style="width:6.8%"></i></span><span class="wdlnum">36% / 7%</span></td><td class="num">+0.108</td><td class="num">0.882</td><td class="num">0.897</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:9.3%"></i><i class="d" style="width:63.6%"></i><i class="l" style="width:27.1%"></i></span><span class="wdlnum">9% / 27%</span></td><td class="num">-0.036</td><td class="num">0.974</td><td class="num">0.908</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:20.3%"></i><i class="d" style="width:69.8%"></i><i class="l" style="width:9.9%"></i></span><span class="wdlnum">20% / 10%</span></td><td class="num">+0.036</td><td class="num">0.946</td><td class="num">0.875</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:2.5%"></i><i class="d" style="width:93.5%"></i><i class="l" style="width:4.0%"></i></span><span class="wdlnum">3% / 4%</span></td><td class="num">-0.012</td><td class="num">1.002</td><td class="num">0.893</td></tr><tr><td><code>Timestral-209M</code><br><span class="muted small">tight reconstruction</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:8.4%"></i><i class="d" style="width:52.6%"></i><i class="l" style="width:39.0%"></i></span><span class="wdlnum">8% / 39%</span></td><td class="num">-0.465</td><td class="num">0.852</td><td class="num">0.831</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:5.2%"></i><i class="d" style="width:66.9%"></i><i class="l" style="width:27.9%"></i></span><span class="wdlnum">5% / 28%</span></td><td class="num">-0.510</td><td class="num">0.888</td><td class="num">0.814</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:2.2%"></i><i class="d" style="width:47.4%"></i><i class="l" style="width:50.5%"></i></span><span class="wdlnum">2% / 50%</span></td><td class="num">-0.784</td><td class="num">0.982</td><td class="num">0.830</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:1.4%"></i><i class="d" style="width:68.4%"></i><i class="l" style="width:30.2%"></i></span><span class="wdlnum">1% / 30%</span></td><td class="num">-0.553</td><td class="num">0.953</td><td class="num">0.787</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:0.1%"></i><i class="d" style="width:61.0%"></i><i class="l" style="width:38.8%"></i></span><span class="wdlnum">0% / 39%</span></td><td class="num">-0.608</td><td class="num">1.011</td><td class="num">0.806</td></tr><tr><td><code>Timestral-5M(q21)</code><br><span class="muted small">5M, 21 levels</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:22.6%"></i><i class="d" style="width:49.1%"></i><i class="l" style="width:28.2%"></i></span><span class="wdlnum">23% / 28%</span></td><td class="num">+0.000</td><td class="num">0.920</td><td class="num">0.912</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:27.2%"></i><i class="d" style="width:62.1%"></i><i class="l" style="width:10.8%"></i></span><span class="wdlnum">27% / 11%</span></td><td class="num">+0.054</td><td class="num">0.910</td><td class="num">0.904</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:4.8%"></i><i class="d" style="width:64.6%"></i><i class="l" style="width:30.6%"></i></span><span class="wdlnum">5% / 31%</span></td><td class="num">-0.111</td><td class="num">0.991</td><td class="num">0.893</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:9.7%"></i><i class="d" style="width:57.7%"></i><i class="l" style="width:32.6%"></i></span><span class="wdlnum">10% / 33%</span></td><td class="num">-0.111</td><td class="num">1.039</td><td class="num">0.899</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:2.7%"></i><i class="d" style="width:93.4%"></i><i class="l" style="width:4.0%"></i></span><span class="wdlnum">3% / 4%</span></td><td class="num">-0.015</td><td class="num">1.006</td><td class="num">0.872</td></tr><tr><td><code>Timestral-28M(q21)</code><br><span class="muted small">28M, 21 levels</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:29.7%"></i><i class="d" style="width:43.8%"></i><i class="l" style="width:26.5%"></i></span><span class="wdlnum">30% / 26%</span></td><td class="num">+0.019</td><td class="num">0.894</td><td class="num">0.919</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:32.4%"></i><i class="d" style="width:59.1%"></i><i class="l" style="width:8.5%"></i></span><span class="wdlnum">32% / 9%</span></td><td class="num">+0.084</td><td class="num">0.897</td><td class="num">0.900</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:6.7%"></i><i class="d" style="width:65.3%"></i><i class="l" style="width:28.0%"></i></span><span class="wdlnum">7% / 28%</span></td><td class="num">-0.044</td><td class="num">0.980</td><td class="num">0.906</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:18.1%"></i><i class="d" style="width:53.9%"></i><i class="l" style="width:28.0%"></i></span><span class="wdlnum">18% / 28%</span></td><td class="num">-0.007</td><td class="num">0.985</td><td class="num">0.869</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:3.0%"></i><i class="d" style="width:93.9%"></i><i class="l" style="width:3.1%"></i></span><span class="wdlnum">3% / 3%</span></td><td class="num">-0.005</td><td class="num">1.003</td><td class="num">0.899</td></tr><tr><td><code>Timestral-123M(q21)</code><br><span class="muted small">123M, 21 levels</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:31.8%"></i><i class="d" style="width:43.0%"></i><i class="l" style="width:25.2%"></i></span><span class="wdlnum">32% / 25%</span></td><td class="num">+0.035</td><td class="num">0.871</td><td class="num">0.911</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:35.1%"></i><i class="d" style="width:57.5%"></i><i class="l" style="width:7.4%"></i></span><span class="wdlnum">35% / 7%</span></td><td class="num">+0.099</td><td class="num">0.889</td><td class="num">0.897</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:8.1%"></i><i class="d" style="width:64.6%"></i><i class="l" style="width:27.2%"></i></span><span class="wdlnum">8% / 27%</span></td><td class="num">-0.040</td><td class="num">0.978</td><td class="num">0.908</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:21.7%"></i><i class="d" style="width:64.7%"></i><i class="l" style="width:13.5%"></i></span><span class="wdlnum">22% / 14%</span></td><td class="num">+0.017</td><td class="num">0.965</td><td class="num">0.868</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:2.9%"></i><i class="d" style="width:94.3%"></i><i class="l" style="width:2.7%"></i></span><span class="wdlnum">3% / 3%</span></td><td class="num">-0.006</td><td class="num">1.004</td><td class="num">0.897</td></tr><tr><td><code>Timestral-5M</code><br><span class="muted small">5M, nine deciles</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:7.6%"></i><i class="d" style="width:46.9%"></i><i class="l" style="width:45.6%"></i></span><span class="wdlnum">8% / 46%</span></td><td class="num">-0.606</td><td class="num">0.921</td><td class="num">0.839</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:8.1%"></i><i class="d" style="width:59.8%"></i><i class="l" style="width:32.1%"></i></span><span class="wdlnum">8% / 32%</span></td><td class="num">-0.547</td><td class="num">0.915</td><td class="num">0.826</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:2.4%"></i><i class="d" style="width:36.3%"></i><i class="l" style="width:61.3%"></i></span><span class="wdlnum">2% / 61%</span></td><td class="num">-1.029</td><td class="num">0.997</td><td class="num">0.820</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:1.0%"></i><i class="d" style="width:54.6%"></i><i class="l" style="width:44.4%"></i></span><span class="wdlnum">1% / 44%</span></td><td class="num">-0.607</td><td class="num">1.051</td><td class="num">0.817</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:0.1%"></i><i class="d" style="width:45.8%"></i><i class="l" style="width:54.1%"></i></span><span class="wdlnum">0% / 54%</span></td><td class="num">-0.844</td><td class="num">1.015</td><td class="num">0.791</td></tr><tr><td><code>Timestral-28M</code><br><span class="muted small">28M, nine deciles</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:8.4%"></i><i class="d" style="width:51.7%"></i><i class="l" style="width:39.9%"></i></span><span class="wdlnum">8% / 40%</span></td><td class="num">-0.453</td><td class="num">0.891</td><td class="num">0.843</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:5.1%"></i><i class="d" style="width:66.6%"></i><i class="l" style="width:28.3%"></i></span><span class="wdlnum">5% / 28%</span></td><td class="num">-0.488</td><td class="num">0.902</td><td class="num">0.820</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:2.4%"></i><i class="d" style="width:44.9%"></i><i class="l" style="width:52.7%"></i></span><span class="wdlnum">2% / 53%</span></td><td class="num">-0.782</td><td class="num">0.984</td><td class="num">0.834</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:1.9%"></i><i class="d" style="width:58.7%"></i><i class="l" style="width:39.4%"></i></span><span class="wdlnum">2% / 39%</span></td><td class="num">-0.622</td><td class="num">0.996</td><td class="num">0.774</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:0.2%"></i><i class="d" style="width:67.6%"></i><i class="l" style="width:32.3%"></i></span><span class="wdlnum">0% / 32%</span></td><td class="num">-0.538</td><td class="num">1.008</td><td class="num">0.818</td></tr><tr><td><code>Timestral-123M</code><br><span class="muted small">123M, nine deciles</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:8.1%"></i><i class="d" style="width:51.9%"></i><i class="l" style="width:40.0%"></i></span><span class="wdlnum">8% / 40%</span></td><td class="num">-0.488</td><td class="num">0.869</td><td class="num">0.839</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:4.9%"></i><i class="d" style="width:68.0%"></i><i class="l" style="width:27.1%"></i></span><span class="wdlnum">5% / 27%</span></td><td class="num">-0.494</td><td class="num">0.895</td><td class="num">0.816</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:2.8%"></i><i class="d" style="width:45.0%"></i><i class="l" style="width:52.2%"></i></span><span class="wdlnum">3% / 52%</span></td><td class="num">-0.760</td><td class="num">0.983</td><td class="num">0.833</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:4.3%"></i><i class="d" style="width:60.4%"></i><i class="l" style="width:35.3%"></i></span><span class="wdlnum">4% / 35%</span></td><td class="num">-0.692</td><td class="num">0.978</td><td class="num">0.769</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:0.1%"></i><i class="d" style="width:66.4%"></i><i class="l" style="width:33.4%"></i></span><span class="wdlnum">0% / 33%</span></td><td class="num">-0.545</td><td class="num">1.010</td><td class="num">0.815</td></tr></tbody></table>
+    <h2>Cost and size</h2><ul><li>Timestral-209M: 30.5 ms per forecast on one CPU thread (<a href="speed.html">speed</a>)</li><li>Timestral-28M: 5.5 ms per forecast on one CPU thread (<a href="speed.html">speed</a>)</li><li>Timestral-209M: 837 MB of weights and runtime (<a href="size.html">size</a>)</li><li>Timestral-28M: 111 MB of weights and runtime (<a href="size.html">size</a>)</li></ul>
+    <p class="stamp">Built 2026-11-17 from skaters commit 6ae5e2a.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>

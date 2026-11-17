@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: Toto 2.0</title>
+  <meta name="description" content="Toto 2.0: how it was run and how it compares with laplace one step ahead on every panel." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">foundational prediction</a>
+      <nav>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <span class="drop-head">Reference</span>
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">granger</a>
+            <span class="drop-head">Foundational models</span>
+            <a href="./model-chronos.html">Chronos</a>
+            <a href="./model-chronos2.html">Chronos-2</a>
+            <a href="./model-ciproto.html">ci-proto</a>
+            <a href="./model-hirondel.html">Hirondel-7M</a>
+            <a href="./model-iamtime.html">iAmTime</a>
+            <a href="./model-moirai2.html">Moirai 2.0</a>
+            <a href="./model-simons.html">Simons</a>
+            <a href="./model-t0gamma.html">t0-gamma</a>
+            <a href="./model-timeh2o.html">TimeH2O</a>
+            <a href="./model-timesfm.html">TimesFM</a>
+            <a href="./model-timesfm3.html">TimesFM3</a>
+            <a href="./model-timessm.html">TimeSSM</a>
+            <a href="./model-timestral.html">Timestral</a>
+            <a href="./model-tinycast.html">TinyCast</a>
+            <a href="./model-tirex.html">TiRex</a>
+            <a href="./model-tirex2.html">TiRex-2</a>
+            <a href="./model-toto2.html">Toto 2.0</a>
+            <a href="./model-ttm3.html">TTM-R3</a>
+            <span class="drop-head">Conformal</span>
+            <a href="./model-csp.html">Conformal Seasonal Pools</a>
+            <span class="drop-head">Classical</span>
+            <a href="./model-autoarima.html">AutoARIMA</a>
+            <a href="./model-autoets.html">AutoETS</a>
+            <a href="./model-autotheta.html">AutoTheta</a>
+            <a href="./model-garcht.html">GARCH-t</a>
+          </span>
+        </span>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./papers.html">Papers</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>Toto 2.0</h1>
+    <p class="muted small">foundation &middot; Datadog &middot; 4M, 22M, 313M, 1B, 2.5B &middot; licence: Apache-2.0 &middot; <a href="https://github.com/DataDog/toto">GitHub</a> &middot; <a href="https://huggingface.co/Datadog/Toto-2.0-2.5B">Model card</a> &middot; <a href="https://arxiv.org/abs/2605.20119">Paper (arXiv 2605.20119)</a></p>
+    <p class="lede">Toto 2.0 is Datadog's family of forecasting transformers (arXiv 2605.20119, May 2026) in five sizes from 4M to 2.5B parameters, with a nine-decile head. The headline row is the largest size.</p>
+    <h2>How it was run</h2>
+    <p>Run zero-shot on CPU with a fixed 128-length context through the direct forecast path, one variate per series, no covariates, and the GluonTS wrapper's quantile cap off.</p>
+    <p>The base checkpoints are trained on Datadog observability metrics and synthetic series only, with no public forecasting data, so none of the panels here can have been seen in training. The five sizes test the paper's claim that accuracy improves with scale.</p>
+    <h2>Against laplace, one step ahead</h2>
+    <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
+      errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
+      CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.
+      The <a href="methodology.html">methodology</a> page has the protocol; the <a href="index.html">leaderboards</a> place
+      the model among the rest.</p>
+    <table class="lb"><thead><tr><th>arm</th><th>panel</th><th class="num">series</th><th>wins / losses vs laplace</th><th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">coverage 90</th></tr></thead><tbody><tr><td><code>Toto2-2.5B(wide)</code><br><span class="muted small">headline</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:30.5%"></i><i class="d" style="width:50.3%"></i><i class="l" style="width:19.2%"></i></span><span class="wdlnum">31% / 19%</span></td><td class="num">+0.050</td><td class="num">0.829</td><td class="num">0.890</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:28.7%"></i><i class="d" style="width:64.4%"></i><i class="l" style="width:6.8%"></i></span><span class="wdlnum">29% / 7%</span></td><td class="num">+0.078</td><td class="num">0.873</td><td class="num">0.864</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:13.8%"></i><i class="d" style="width:61.5%"></i><i class="l" style="width:24.7%"></i></span><span class="wdlnum">14% / 25%</span></td><td class="num">-0.030</td><td class="num">0.952</td><td class="num">0.888</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:25.1%"></i><i class="d" style="width:73.2%"></i><i class="l" style="width:1.7%"></i></span><span class="wdlnum">25% / 2%</span></td><td class="num">+0.089</td><td class="num">0.891</td><td class="num">0.881</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:10.3%"></i><i class="d" style="width:88.5%"></i><i class="l" style="width:1.1%"></i></span><span class="wdlnum">10% / 1%</span></td><td class="num">-0.000</td><td class="num">0.997</td><td class="num">0.882</td></tr><tr><td><code>Toto2-2.5B</code><br><span class="muted small">tight reconstruction</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:10.9%"></i><i class="d" style="width:56.1%"></i><i class="l" style="width:33.0%"></i></span><span class="wdlnum">11% / 33%</span></td><td class="num">-0.391</td><td class="num">0.833</td><td class="num">0.842</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:4.5%"></i><i class="d" style="width:67.7%"></i><i class="l" style="width:27.8%"></i></span><span class="wdlnum">5% / 28%</span></td><td class="num">-0.614</td><td class="num">0.878</td><td class="num">0.806</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:2.5%"></i><i class="d" style="width:55.1%"></i><i class="l" style="width:42.4%"></i></span><span class="wdlnum">3% / 42%</span></td><td class="num">-0.717</td><td class="num">0.957</td><td class="num">0.834</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:4.1%"></i><i class="d" style="width:83.1%"></i><i class="l" style="width:12.8%"></i></span><span class="wdlnum">4% / 13%</span></td><td class="num">-0.350</td><td class="num">0.895</td><td class="num">0.821</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:0.5%"></i><i class="d" style="width:67.5%"></i><i class="l" style="width:32.0%"></i></span><span class="wdlnum">0% / 32%</span></td><td class="num">-0.563</td><td class="num">1.002</td><td class="num">0.822</td></tr><tr><td><code>Toto2-4m(wide)</code><br><span class="muted small">4m, wide</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:18.9%"></i><i class="d" style="width:52.2%"></i><i class="l" style="width:28.9%"></i></span><span class="wdlnum">19% / 29%</span></td><td class="num">-0.014</td><td class="num">0.910</td><td class="num">0.887</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:24.6%"></i><i class="d" style="width:64.2%"></i><i class="l" style="width:11.2%"></i></span><span class="wdlnum">25% / 11%</span></td><td class="num">+0.035</td><td class="num">0.902</td><td class="num">0.863</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:6.8%"></i><i class="d" style="width:64.2%"></i><i class="l" style="width:29.0%"></i></span><span class="wdlnum">7% / 29%</span></td><td class="num">-0.105</td><td class="num">0.982</td><td class="num">0.880</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:7.0%"></i><i class="d" style="width:60.4%"></i><i class="l" style="width:32.6%"></i></span><span class="wdlnum">7% / 33%</span></td><td class="num">-0.148</td><td class="num">1.049</td><td class="num">0.876</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:8.8%"></i><i class="d" style="width:89.4%"></i><i class="l" style="width:1.7%"></i></span><span class="wdlnum">9% / 2%</span></td><td class="num">-0.004</td><td class="num">0.997</td><td class="num">0.871</td></tr><tr><td><code>Toto2-22m(wide)</code><br><span class="muted small">22m, wide</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:25.4%"></i><i class="d" style="width:49.3%"></i><i class="l" style="width:25.4%"></i></span><span class="wdlnum">25% / 25%</span></td><td class="num">+0.013</td><td class="num">0.864</td><td class="num">0.892</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:28.1%"></i><i class="d" style="width:62.1%"></i><i class="l" style="width:9.8%"></i></span><span class="wdlnum">28% / 10%</span></td><td class="num">+0.056</td><td class="num">0.886</td><td class="num">0.865</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:9.1%"></i><i class="d" style="width:63.2%"></i><i class="l" style="width:27.6%"></i></span><span class="wdlnum">9% / 28%</span></td><td class="num">-0.078</td><td class="num">0.977</td><td class="num">0.883</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:15.2%"></i><i class="d" style="width:72.0%"></i><i class="l" style="width:12.8%"></i></span><span class="wdlnum">15% / 13%</span></td><td class="num">-0.015</td><td class="num">0.985</td><td class="num">0.886</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:9.1%"></i><i class="d" style="width:90.0%"></i><i class="l" style="width:0.9%"></i></span><span class="wdlnum">9% / 1%</span></td><td class="num">-0.007</td><td class="num">0.997</td><td class="num">0.874</td></tr><tr><td><code>Toto2-313m(wide)</code><br><span class="muted small">313m, wide</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:27.7%"></i><i class="d" style="width:50.5%"></i><i class="l" style="width:21.7%"></i></span><span class="wdlnum">28% / 22%</span></td><td class="num">+0.044</td><td class="num">0.839</td><td class="num">0.891</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:29.4%"></i><i class="d" style="width:62.5%"></i><i class="l" style="width:8.1%"></i></span><span class="wdlnum">29% / 8%</span></td><td class="num">+0.071</td><td class="num">0.876</td><td class="num">0.865</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:12.1%"></i><i class="d" style="width:62.3%"></i><i class="l" style="width:25.6%"></i></span><span class="wdlnum">12% / 26%</span></td><td class="num">-0.047</td><td class="num">0.958</td><td class="num">0.885</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:21.3%"></i><i class="d" style="width:73.9%"></i><i class="l" style="width:4.8%"></i></span><span class="wdlnum">21% / 5%</span></td><td class="num">+0.040</td><td class="num">0.924</td><td class="num">0.859</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:9.5%"></i><i class="d" style="width:89.5%"></i><i class="l" style="width:1.0%"></i></span><span class="wdlnum">10% / 1%</span></td><td class="num">-0.003</td><td class="num">0.998</td><td class="num">0.879</td></tr><tr><td><code>Toto2-1B(wide)</code><br><span class="muted small">1B, wide</span></td><td>Economic, Weekly</td><td class="num">3,013</td><td><span class="wdl"><i class="w" style="width:27.9%"></i><i class="d" style="width:51.5%"></i><i class="l" style="width:20.6%"></i></span><span class="wdlnum">28% / 21%</span></td><td class="num">+0.041</td><td class="num">0.831</td><td class="num">0.888</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,600</td><td><span class="wdl"><i class="w" style="width:28.3%"></i><i class="d" style="width:64.3%"></i><i class="l" style="width:7.4%"></i></span><span class="wdlnum">28% / 7%</span></td><td class="num">+0.071</td><td class="num">0.874</td><td class="num">0.862</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,210</td><td><span class="wdl"><i class="w" style="width:13.3%"></i><i class="d" style="width:61.6%"></i><i class="l" style="width:25.1%"></i></span><span class="wdlnum">13% / 25%</span></td><td class="num">-0.033</td><td class="num">0.954</td><td class="num">0.887</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:22.5%"></i><i class="d" style="width:75.6%"></i><i class="l" style="width:1.9%"></i></span><span class="wdlnum">22% / 2%</span></td><td class="num">+0.058</td><td class="num">0.913</td><td class="num">0.871</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">8,703</td><td><span class="wdl"><i class="w" style="width:9.7%"></i><i class="d" style="width:89.2%"></i><i class="l" style="width:1.1%"></i></span><span class="wdlnum">10% / 1%</span></td><td class="num">-0.002</td><td class="num">0.997</td><td class="num">0.880</td></tr></tbody></table>
+    <h2>Cost and size</h2><ul><li>Toto 2.0 313M: 79.2 ms per forecast on one CPU thread (<a href="speed.html">speed</a>)</li><li>Toto 2.0 2.5B: 411.2 ms per forecast on one CPU thread (<a href="speed.html">speed</a>)</li><li>Toto 2.0 2.5B: 9,817 MB of weights and runtime (<a href="size.html">size</a>)</li><li>Toto 2.0 313M: 1,251 MB of weights and runtime (<a href="size.html">size</a>)</li></ul>
+    <p class="stamp">Built 2026-11-17 from skaters commit 6ae5e2a.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>

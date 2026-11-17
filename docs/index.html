@@ -30,6 +30,9 @@
     .tab:hover { color:#111; }
     .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
     .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
 
     .extabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:12px 0 10px; }
     .extab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px; padding:8px 14px;
@@ -84,8 +87,35 @@
         </span>
         <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
           <span class="drop">
+            <span class="drop-head">Reference</span>
             <a href="./laplace.html">laplace</a>
             <a href="./laplacepp.html">granger</a>
+            <span class="drop-head">Foundational models</span>
+            <a href="./model-chronos.html">Chronos</a>
+            <a href="./model-chronos2.html">Chronos-2</a>
+            <a href="./model-ciproto.html">ci-proto</a>
+            <a href="./model-hirondel.html">Hirondel-7M</a>
+            <a href="./model-iamtime.html">iAmTime</a>
+            <a href="./model-moirai2.html">Moirai 2.0</a>
+            <a href="./model-simons.html">Simons</a>
+            <a href="./model-t0gamma.html">t0-gamma</a>
+            <a href="./model-timeh2o.html">TimeH2O</a>
+            <a href="./model-timesfm.html">TimesFM</a>
+            <a href="./model-timesfm3.html">TimesFM3</a>
+            <a href="./model-timessm.html">TimeSSM</a>
+            <a href="./model-timestral.html">Timestral</a>
+            <a href="./model-tinycast.html">TinyCast</a>
+            <a href="./model-tirex.html">TiRex</a>
+            <a href="./model-tirex2.html">TiRex-2</a>
+            <a href="./model-toto2.html">Toto 2.0</a>
+            <a href="./model-ttm3.html">TTM-R3</a>
+            <span class="drop-head">Conformal</span>
+            <a href="./model-csp.html">Conformal Seasonal Pools</a>
+            <span class="drop-head">Classical</span>
+            <a href="./model-autoarima.html">AutoARIMA</a>
+            <a href="./model-autoets.html">AutoETS</a>
+            <a href="./model-autotheta.html">AutoTheta</a>
+            <a href="./model-garcht.html">GARCH-t</a>
           </span>
         </span>
         <a href="./methodology.html">Methodology</a>
@@ -138,7 +168,7 @@
       <span><span class="lic noncommercial">non-commercial</span> research and evaluation only</span></div>
     <p class="foot">TimeH2O: h2oai/timeh2o-v1 at Hugging Face revision c556990 (weights unchanged since 60b68fa, 2026-10-22), evaluated 2026-11-03 to 2026-11-04
       under its non-commercial licence. Method: <a href="methodology.html">methodology</a>.</p>
-    <p class="stamp">Built 2026-11-16 from skaters commit 6ae5e2a (2026-11-11).</p>
+    <p class="stamp">Built 2026-11-17 from skaters commit 6ae5e2a (2026-11-11).</p>
     <script>window.FP_NAMES = {"laplace": "laplace", "learned(e2)": "granger", "Timestral-209M(q21)": "Timestral-209M", "t0-gamma(q21)": "t0-gamma", "TimesFM3(wide)": "TimesFM 3.0", "TimesFM(wide)": "TimesFM 2.5", "TiRex(wide)": "TiRex", "Chronos(wide)": "Chronos-Bolt", "TimeH2O-v1(wide)": "TimeH2O", "Chronos-2": "Chronos-2", "TiRex-2(wide)": "TiRex-2", "Toto2-2.5B(wide)": "Toto 2.0 2.5B", "Toto2-313m(wide)": "Toto 2.0 313M", "TTM-R3(wide)": "TTM-R3", "Moirai-2.0-small(wide)": "Moirai 2.0 small", "TinyCast(wide)": "TinyCast", "Simons-297M(wide)": "Simons 297M", "Simons-60M(wide)": "Simons 60M", "ci-proto(wide)": "ci-proto", "Hirondel-7M(wide)": "Hirondel-7M", "iAmTime-base": "iAmTime-base", "TimeSSM-2.5M(wide)": "TimeSSM-2.5M", "CSP": "CSP", "CSP&lap": "CSP & laplace portfolio", "AutoARIMA": "AutoARIMA", "AutoETS": "AutoETS", "AutoTheta": "AutoTheta", "GARCH-t": "GARCH-t"}; window.FP_KIND = {"laplace": "ours", "learned(e2)": "ours", "Timestral-209M(q21)": "foundation", "t0-gamma(q21)": "foundation", "TimesFM3(wide)": "foundation", "TimesFM(wide)": "foundation", "TiRex(wide)": "foundation", "Chronos(wide)": "foundation", "TimeH2O-v1(wide)": "foundation", "Chronos-2": "foundation", "TiRex-2(wide)": "foundation", "Toto2-2.5B(wide)": "foundation", "Toto2-313m(wide)": "foundation", "TTM-R3(wide)": "foundation", "Moirai-2.0-small(wide)": "foundation", "TinyCast(wide)": "foundation", "Simons-297M(wide)": "foundation", "Simons-60M(wide)": "foundation", "ci-proto(wide)": "foundation", "Hirondel-7M(wide)": "foundation", "iAmTime-base": "foundation", "TimeSSM-2.5M(wide)": "foundation", "CSP": "conformal", "CSP&lap": "conformal", "AutoARIMA": "classical", "AutoETS": "classical", "AutoTheta": "classical", "GARCH-t": "classical"}; window.FP_STRATA = [{"id": "weekly:econ", "kind": "Economic", "freq": "Weekly"}, {"id": "monthly:econ", "kind": "Economic", "freq": "Monthly"}, {"id": "daily:econ", "kind": "Economic", "freq": "Daily"}, {"id": "m4-hourly:econ", "kind": "Economic", "freq": "Hourly (M4)"}, {"id": "daily:price", "kind": "Prices", "freq": "Daily"}]; window.FP_LIC = {"laplace": ["MIT", "open", "https://github.com/microprediction/skaters/blob/main/LICENSE", "MIT: commercial use allowed"], "learned(e2)": ["MIT", "open", "https://github.com/microprediction/skaters/blob/main/LICENSE", "MIT: commercial use allowed"], "Timestral-209M(q21)": ["Modified MIT", "restricted", "https://huggingface.co/mistralai/Timestral-209M/blob/main/LICENSE", "Modified MIT: no rights for companies above $20M monthly revenue"], "t0-gamma(q21)": ["Apache-2.0", "open", "https://huggingface.co/theforecastingcompany/t0-gamma", "Apache License 2.0: commercial use allowed"], "TimesFM3(wide)": ["Non-commercial", "noncommercial", "https://huggingface.co/google/timesfm-3.0-pytorch/blob/main/LICENSE", "TimesFM Non-Commercial License v1.0: testing, evaluation and research only"], "TimesFM(wide)": ["Apache-2.0", "open", "https://huggingface.co/google/timesfm-2.5-200m-pytorch", "Apache License 2.0: commercial use allowed"], "TiRex(wide)": ["NXAI Community", "restricted", "https://huggingface.co/NX-AI/TiRex/blob/main/LICENSE", "NXAI Community License: commercial terms apply above EUR 100M annual revenue"], "Chronos(wide)": ["Apache-2.0", "open", "https://huggingface.co/amazon/chronos-bolt-small", "Apache License 2.0: commercial use allowed"], "TimeH2O-v1(wide)": ["Non-commercial", "noncommercial", "https://huggingface.co/h2oai/timeh2o-v1", "H2O Model Non-Commercial Licence v1.0: testing, evaluation, benchmarking and research only"], "Chronos-2": ["Apache-2.0", "open", "https://huggingface.co/amazon/chronos-2", "Apache License 2.0: commercial use allowed"], "TiRex-2(wide)": ["Apache-2.0", "open", "https://huggingface.co/NX-AI/TiRex-2", "Apache License 2.0: commercial use allowed"], "Toto2-2.5B(wide)": ["Apache-2.0", "open", "https://huggingface.co/Datadog/Toto-2.0-2.5B", "Apache License 2.0: commercial use allowed"], "Toto2-313m(wide)": ["Apache-2.0", "open", "https://huggingface.co/Datadog/Toto-2.0-313m", "Apache License 2.0: commercial use allowed"], "TTM-R3(wide)": ["Apache-2.0", "open", "https://huggingface.co/ibm-granite/granite-timeseries-ttm-r3", "Apache License 2.0: commercial use allowed"], "Moirai-2.0-small(wide)": ["CC BY-NC 4.0", "noncommercial", "https://huggingface.co/Salesforce/moirai-2.0-R-small", "Creative Commons Attribution-NonCommercial 4.0: non-commercial use only"], "TinyCast(wide)": ["Apache-2.0", "open", "https://huggingface.co/raws-labs/tinycast", "Apache License 2.0: commercial use allowed"], "Simons-297M(wide)": ["Apache-2.0", "open", "https://huggingface.co/abel-lab/Simons-297M", "Apache License 2.0: commercial use allowed"], "Simons-60M(wide)": ["Apache-2.0", "open", "https://huggingface.co/abel-lab/Simons-60M", "Apache License 2.0: commercial use allowed"], "ci-proto(wide)": ["ci-proto licence", "restricted", "https://huggingface.co/ContinuousIntelligence/ci-proto", "ci-proto Code and Model Licence v1.0: Apache-2.0 terms plus a public attribution notice and a one-time e-mail to the vendor when a product, service or model using its code, weights or outputs is distributed"], "Hirondel-7M(wide)": ["Apache-2.0", "open", "https://huggingface.co/Tncrd/Hirondel-7M", "Apache License 2.0: commercial use allowed"], "iAmTime-base": ["Apache-2.0", "open", "https://huggingface.co/anishsaha/iAmTime-base-forecast", "Apache License 2.0: commercial use allowed"], "TimeSSM-2.5M(wide)": ["Apache-2.0", "open", "https://huggingface.co/IUseAMouse/timessm-2.5m", "Apache License 2.0: commercial use allowed"], "CSP": ["MIT", "open", "https://github.com/valeman/csp-forecaster", "MIT (csp-forecaster, the author's reference package): commercial use allowed"], "CSP&lap": ["MIT", "open", "https://github.com/valeman/csp-forecaster", "MIT (csp-forecaster) for the CSP half; the portfolio weights and laplace are MIT (skaters)"], "AutoARIMA": ["Apache-2.0", "open", "https://github.com/Nixtla/statsforecast", "Apache License 2.0: commercial use allowed"], "AutoETS": ["Apache-2.0", "open", "https://github.com/Nixtla/statsforecast", "Apache License 2.0: commercial use allowed"], "AutoTheta": ["Apache-2.0", "open", "https://github.com/Nixtla/statsforecast", "Apache License 2.0: commercial use allowed"], "GARCH-t": ["NCSA", "open", "https://github.com/bashtage/arch/blob/main/LICENSE.md", "University of Illinois/NCSA (arch package): commercial use allowed"]};</script>
     <script>
 (function () {

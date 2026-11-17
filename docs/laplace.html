@@ -30,6 +30,9 @@
     .tab:hover { color:#111; }
     .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
     .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
 </style>
 </head>
 <body>
@@ -52,8 +55,35 @@
         </span>
         <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
           <span class="drop">
+            <span class="drop-head">Reference</span>
             <a href="./laplace.html">laplace</a>
             <a href="./laplacepp.html">granger</a>
+            <span class="drop-head">Foundational models</span>
+            <a href="./model-chronos.html">Chronos</a>
+            <a href="./model-chronos2.html">Chronos-2</a>
+            <a href="./model-ciproto.html">ci-proto</a>
+            <a href="./model-hirondel.html">Hirondel-7M</a>
+            <a href="./model-iamtime.html">iAmTime</a>
+            <a href="./model-moirai2.html">Moirai 2.0</a>
+            <a href="./model-simons.html">Simons</a>
+            <a href="./model-t0gamma.html">t0-gamma</a>
+            <a href="./model-timeh2o.html">TimeH2O</a>
+            <a href="./model-timesfm.html">TimesFM</a>
+            <a href="./model-timesfm3.html">TimesFM3</a>
+            <a href="./model-timessm.html">TimeSSM</a>
+            <a href="./model-timestral.html">Timestral</a>
+            <a href="./model-tinycast.html">TinyCast</a>
+            <a href="./model-tirex.html">TiRex</a>
+            <a href="./model-tirex2.html">TiRex-2</a>
+            <a href="./model-toto2.html">Toto 2.0</a>
+            <a href="./model-ttm3.html">TTM-R3</a>
+            <span class="drop-head">Conformal</span>
+            <a href="./model-csp.html">Conformal Seasonal Pools</a>
+            <span class="drop-head">Classical</span>
+            <a href="./model-autoarima.html">AutoARIMA</a>
+            <a href="./model-autoets.html">AutoETS</a>
+            <a href="./model-autotheta.html">AutoTheta</a>
+            <a href="./model-garcht.html">GARCH-t</a>
           </span>
         </span>
         <a href="./methodology.html">Methodology</a>
@@ -81,7 +111,7 @@
     <p>It sees every observation before forecasting the next, as a deployed forecaster would, and it
       costs microseconds. A model that cannot beat it on the next data point is not worth its weight for
       that job. laplace is also one of the two components of <a href="laplacepp.html">granger</a>.</p>
-    <p class="stamp">Built 2026-11-16 from skaters commit 6ae5e2a.</p>
+    <p class="stamp">Built 2026-11-17 from skaters commit 6ae5e2a.</p>
 
   </main>
   <footer>
