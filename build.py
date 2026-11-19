@@ -430,6 +430,12 @@ FP_MODELS = {
     "CSP": ("CSP", "conformal"), "CSP&lap": ("CSP & laplace portfolio", "conformal"),
     "AutoARIMA": ("AutoARIMA", "classical"), "AutoETS": ("AutoETS", "classical"),
     "AutoTheta": ("AutoTheta", "classical"), "GARCH-t": ("GARCH-t", "classical"),
+    # November 2026 additions (skaters #383): headline arms, native levels where the model has 99
+    "PatchTST-FM-r2(q99)": ("PatchTST-FM r2", "foundation"), "Tafsut-base(wide)": ("Tafsut", "foundation"),
+    "Tabby-Pretrain(q99)": ("Tabby-Pretrain", "foundation"), "Yug(wide)": ("Yug", "foundation"),
+    "CITRAS-FM(wide)": ("CITRAS-FM", "foundation"), "TS-ICL(q99)": ("TS-ICL", "foundation"),
+    "Kairos-50m(wide)": ("Kairos 50M", "foundation"), "Timer-S1(wide)": ("Timer-S1", "foundation"),
+    "Kumo-large-reg(q99)": ("Kumo Tabular large", "foundation"),
 }
 # store arm -> (short label, class, link, tooltip). class: open, restricted (free below a
 # revenue threshold), noncommercial
@@ -469,6 +475,21 @@ FP_LICENSES = {
     "AutoETS": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
     "AutoTheta": _APACHE[:2] + ("https://github.com/Nixtla/statsforecast",) + _APACHE[3:],
     "GARCH-t": ("NCSA", "open", "https://github.com/bashtage/arch/blob/main/LICENSE.md", "University of Illinois/NCSA (arch package): commercial use allowed"),
+    "PatchTST-FM-r2(q99)": ("OpenMDW-1.0", "open", "https://huggingface.co/ibm-granite/granite-timeseries-patchtst-fm-r2",
+                            "OpenMDW-1.0 (Open Model, Data and Weights): commercial use allowed"),
+    "Tafsut-base(wide)": ("MIT", "open", "https://huggingface.co/Tafsut-FM/tafsut-univariate-base", "MIT: commercial use allowed"),
+    "Tabby-Pretrain(q99)": ("CC BY-NC 4.0", "noncommercial", "https://huggingface.co/paris-noah/Tabby-Pretrain",
+                            "Creative Commons Attribution-NonCommercial 4.0: non-commercial use only"),
+    "Yug(wide)": ("CC BY-NC 4.0", "noncommercial", "https://huggingface.co/birlaailabs/yug",
+                  "Weights CC BY-NC 4.0 (code Apache-2.0): non-commercial use only"),
+    "CITRAS-FM(wide)": ("CC BY-NC-SA 4.0", "noncommercial", "https://huggingface.co/hitachi-nlp/citras-fm",
+                        "Creative Commons Attribution-NonCommercial-ShareAlike 4.0: non-commercial use only"),
+    "TS-ICL(q99)": ("Non-commercial", "noncommercial", "https://huggingface.co/taharnbl/TS-ICL",
+                    "TS-ICL licence (other): non-commercial use, see the model card"),
+    "Kairos-50m(wide)": _APACHE[:2] + ("https://huggingface.co/mldi-lab/Kairos_50m",) + _APACHE[3:],
+    "Timer-S1(wide)": _APACHE[:2] + ("https://huggingface.co/bytedance-research/Timer-S1",) + _APACHE[3:],
+    "Kumo-large-reg(q99)": ("OpenMDW-1.1", "open", "https://huggingface.co/nvidia/Kumo-Tabular",
+                            "OpenMDW-1.1 (Open Model, Data and Weights): commercial use allowed"),
 }
 # laplace++ runs in priority order: the most-trained run scored on a stratum is shown
 # monthly: the run with the most training data scored so far; weekly: e3 (a third
@@ -488,6 +509,7 @@ EXPLORER_MODELS = [
     "Timestral-209M(q21)", "t0-gamma(q21)", "TimesFM3(wide)", "TimesFM(wide)", "TiRex(wide)", "Chronos(wide)",
     "TimeH2O-v1(wide)", "Chronos-2", "Toto2-2.5B(wide)", "Simons-297M(wide)", "iAmTime-base",
     "ci-proto(wide)", "Hirondel-7M(wide)",
+    "PatchTST-FM-r2(q99)", "Timer-S1(wide)", "Tafsut-base(wide)", "TS-ICL(q99)", "Kumo-large-reg(q99)",
     "CSP", "CSP&lap",
     "AutoARIMA", "AutoETS", "AutoTheta", "GARCH-t",
 ]
@@ -1067,8 +1089,43 @@ def models_nav_block(specs):
     return "\n".join("            " + it for it in items)
 
 
+# A model is listed only once it is scored on at least this share of the series the
+# best-covered model has in every stratum. New arms join the study breadth-first and
+# would otherwise appear with a few dozen series beside rows with thousands.
+MIN_SHARE = 0.5
+# Only arms still filling in are gated. Arms already published stay up while the
+# panel grows under them (the daily:price stratum grew to 8.7k series in November).
+GATED = {"PatchTST-FM-r2(q99)", "Tafsut-base(wide)", "Tabby-Pretrain(q99)", "Yug(wide)",
+         "CITRAS-FM(wide)", "TS-ICL(q99)", "Kairos-50m(wide)", "Timer-S1(wide)",
+         "Kumo-large-reg(q99)"}
+
+
+def gate_by_coverage(vs):
+    """Drop from FP_MODELS / EXPLORER_MODELS every non-reference arm below MIN_SHARE
+    coverage in any stratum; return the held-back arms with their coverage."""
+    global FP_MODELS, EXPLORER_MODELS
+    full = {}
+    for (study, _model), r in vs.items():
+        full[study] = max(full.get(study, 0), int(r["n_series"]))
+    held = {}
+    for arm, (_name, kind) in list(FP_MODELS.items()):
+        if kind == "ours" or arm not in GATED:
+            continue
+        short = [f"{s} {int(vs[(s, arm)]['n_series']) if (s, arm) in vs else 0}/{n}"
+                 for s, n in full.items()
+                 if (s, arm) not in vs or int(vs[(s, arm)]["n_series"]) < MIN_SHARE * n]
+        if short:
+            held[arm] = short
+    FP_MODELS = {k: v for k, v in FP_MODELS.items() if k not in held}
+    EXPLORER_MODELS = [m for m in EXPLORER_MODELS if m not in held]
+    return held
+
+
 def main():
     vs, cov, warm, mb, perf_meta, f3_meta = load()
+    held = gate_by_coverage(vs)
+    for arm, short in held.items():
+        print(f"[build] held back (coverage below {MIN_SHARE:.0%}): {arm}: {', '.join(short)}")
     prov = provenance()
     specs = model_specs()
     global NAV
