@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Models not evaluated</title>
+  <meta name="description" content="Time-series foundation models tracked but not yet scored on the one-step benchmark, with the reason for each." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
+    ol.refs li, ul.refs li { font-size:.92rem; margin-bottom:6px; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">foundational prediction</a>
+      <nav>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <span class="drop-head">Reference</span>
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">granger</a>
+            <span class="drop-head">Foundational models</span>
+            <a href="./model-chronos.html">Chronos</a>
+            <a href="./model-chronos2.html">Chronos-2</a>
+            <a href="./model-ciproto.html">ci-proto</a>
+            <a href="./model-hirondel.html">Hirondel-7M</a>
+            <a href="./model-iamtime.html">iAmTime</a>
+            <a href="./model-moirai2.html">Moirai 2.0</a>
+            <a href="./model-simons.html">Simons</a>
+            <a href="./model-t0gamma.html">t0-gamma</a>
+            <a href="./model-timeh2o.html">TimeH2O</a>
+            <a href="./model-timesfm.html">TimesFM</a>
+            <a href="./model-timesfm3.html">TimesFM3</a>
+            <a href="./model-timessm.html">TimeSSM</a>
+            <a href="./model-timestral.html">Timestral</a>
+            <a href="./model-tinycast.html">TinyCast</a>
+            <a href="./model-tirex.html">TiRex</a>
+            <a href="./model-tirex2.html">TiRex-2</a>
+            <a href="./model-toto2.html">Toto 2.0</a>
+            <a href="./model-ttm3.html">TTM-R3</a>
+            <span class="drop-head">Conformal</span>
+            <a href="./model-csp.html">Conformal Seasonal Pools</a>
+            <span class="drop-head">Classical</span>
+            <a href="./model-autoarima.html">AutoARIMA</a>
+            <a href="./model-autoets.html">AutoETS</a>
+            <a href="./model-autotheta.html">AutoTheta</a>
+            <a href="./model-garcht.html">GARCH-t</a>
+            <span class="drop-head">Absent</span>
+            <a href="./not-evaluated.html">Not evaluated</a>
+          </span>
+        </span>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./papers.html">Papers</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>Models not evaluated</h1>
+    <p class="lede">Models we track but cannot score on this benchmark yet, and why.</p>
+    <p>Every row on the leaderboard is a model run here, on CPU, from pinned public weights under a licence that permits it,
+      producing a predictive distribution for the next point. The models below miss one of those conditions.
+      A model moves to the leaderboard when the blocker clears.</p>
+    <table class="lb"><thead><tr><th>model</th><th>reason</th><th>checked</th></tr></thead><tbody><tr><td><a href="https://arxiv.org/abs/2610.24321">Morpheus-2.0</a> <span class="muted small">(JPMorganChase)</span></td><td>No public weights or inference code. The paper and a GIFT-Eval submission are public; the model is not.</td><td class="small">2026-11-19 &middot; <a href="https://github.com/microprediction/foundationalprediction/issues/6">#6</a></td></tr><tr><td><a href="https://github.com/automl/TempoPFN">TempoPFN 38M</a> <span class="muted small">(AutoML Freiburg)</span></td><td>Inference needs a CUDA GPU: it depends on Triton and flash-linear-attention kernels. This benchmark runs on CPU.</td><td class="small">2026-11-19 &middot; <a href="https://github.com/microprediction/foundationalprediction/issues/7">#7</a></td></tr><tr><td><a href="https://github.com/jjchat/taildart">TailDART Dense-2.68M</a> <span class="muted small">(NTU / A*STAR)</span></td><td>A checkpoint is public but the repository has no licence, so there is no permission to use it. Its continued pretraining also includes FRED-MD and M4 hourly, which overlap this panel.</td><td class="small">2026-11-19 &middot; <a href="https://github.com/microprediction/foundationalprediction/issues/11">#11</a></td></tr><tr><td><a href="https://arxiv.org/abs/2611.14117">Order-flow model (Shabashev)</a></td><td>Paper only: no code, weights or adapters are released. Its inputs are order-book events, not scalar series, and its heads output moments rather than a full predictive distribution.</td><td class="small">2026-11-19 &middot; <a href="https://github.com/microprediction/foundationalprediction/issues/12">#12</a></td></tr><tr><td><a href="https://github.com/Time-MoE/Time-MoE">Time-MoE</a></td><td>Point forecasts only. The leaderboard scores predictive distributions by log score.</td><td class="small">2026-11-19</td></tr></tbody></table>
+    <p class="foot">Models that run but have not yet covered half the series in every stratum are held back from the leaderboard
+      until they do; they are not listed here.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>
