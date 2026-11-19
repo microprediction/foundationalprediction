@@ -560,7 +560,7 @@ def leaderboard(prov, written):
 def frontier_page(prov):
     body = f"""
     <h1>Performance</h1>
-    <p class="lede">One point per model. Drag to rotate.</p>
+    <p class="lede">One point per model. Drag to rotate. <a href="https://lnkd.in/p/ebYmNbPA">Discuss</a>.</p>
     <div id="frontier3d" style="width:100%;min-height:560px;"></div>
     <p id="frontier3d-caption" class="muted small"></p>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
@@ -697,7 +697,7 @@ def size_page(prov, f3):
                    f'<td class="muted small">{q["footprint_how"]}</td></tr>')
     body = f"""
     <h1>Size</h1>
-    <p class="lede">What a deployment carries.</p>
+    <p class="lede">What a deployment carries. <a href="https://lnkd.in/p/et-Thq-a">Discuss</a>.</p>
     {hbars([(q["name"], q["mb"]) for q in pts], _fmt_mb, "bytes each model carries", ref=next((("laplace", q["mb"]) for q in pts if q["name"] == "laplace (pure Python)"), None))}
     <p class="foot">Bar length is the fourth root of the size, between a log and a linear scale.</p>
     <table class="lb">
