@@ -560,7 +560,7 @@ def leaderboard(prov, written):
 def frontier_page(prov):
     body = f"""
     <h1>Performance</h1>
-    <p class="lede">One point per model. Drag to rotate.</p>
+    <p class="lede">One point per model. Drag to rotate. <a href="https://lnkd.in/p/ebYmNbPA">Discuss</a>.</p>
     <div id="frontier3d" style="width:100%;min-height:560px;"></div>
     <p id="frontier3d-caption" class="muted small"></p>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
