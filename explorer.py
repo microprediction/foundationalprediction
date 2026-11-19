@@ -95,6 +95,8 @@ EXPLORER_JS = r"""
   var state = { kind: null, freq: null, ref: 'laplace', tags: {}, data: null, sort: { col: 'net', dir: -1 }, heldOnly: false };
   var cache = {};
   function name(m) { return NAMES[m] || m; }
+  var PAGES = window.FP_PAGES || {};
+  function linked(m) { return PAGES[m] ? '<a href="' + PAGES[m] + '">' + name(m) + '</a>' : name(m); }
   function dot(m) { return '<span class="dot ' + (KIND[m] || 'other') + '"></span>'; }
   function median(a) { if (!a.length) return null; a = a.slice().sort(function (x, y) { return x - y; });
     var k = a.length >> 1; return a.length % 2 ? a[k] : 0.5 * (a[k - 1] + a[k]); }
@@ -197,9 +199,9 @@ EXPLORER_JS = r"""
     var keep = selected(d), nsel = 0; for (var i = 0; i < keep.length; i++) nsel += keep[i];
     var rs = rows(d, keep);
     var body = rs.map(function (r) {
-      if (r.ref) return '<tr class="yard"><td>' + dot(r.m) + '<b>' + name(r.m) + '</b></td><td class="muted" colspan="2">reference</td>' +
+      if (r.ref) return '<tr class="yard"><td>' + dot(r.m) + '<b>' + linked(r.m) + '</b></td><td class="muted" colspan="2">reference</td>' +
         '<td class="num">+0.000</td><td class="num">1.000</td><td class="num">' + (r.cov === null ? '&ndash;' : r.cov.toFixed(2)) + '</td>' + lic(r.m) + '</tr>';
-      return '<tr><td>' + dot(r.m) + '<b>' + name(r.m) + '</b></td><td class="num">' + r.n.toLocaleString() + '</td>' +
+      return '<tr><td>' + dot(r.m) + '<b>' + linked(r.m) + '</b></td><td class="num">' + r.n.toLocaleString() + '</td>' +
         '<td><span class="wdl"><i class="w" style="width:' + (100 * r.win).toFixed(1) + '%"></i><i class="d" style="width:' +
         (100 * r.d / r.n).toFixed(1) + '%"></i><i class="l" style="width:' + (100 * r.loss).toFixed(1) + '%"></i></span>' +
         '<span class="wdlnum">' + pct(r.win) + ' / ' + pct(r.loss) + '</span></td>' +
@@ -222,7 +224,7 @@ EXPLORER_JS = r"""
                            : name(k) + ' runs by stratum: ' + runs[k] + '.'); });
     document.getElementById('ex-runs').textContent = notes.join(' ');
     document.getElementById('ex-pick').innerHTML = best
-      ? scope + 'Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + name(best.m) + '</b> (' +
+      ? scope + 'Best against ' + name(state.ref) + ': ' + dot(best.m) + '<b>' + linked(best.m) + '</b> (' +
         best.n.toLocaleString() + ' series), ' +
         (best.dll >= 0 ? '+' : '') + best.dll.toFixed(3) + ' nats at the median, ahead on ' + pct(best.win) + ', behind on ' + pct(best.loss) + '.'
       : scope + 'Nothing beats ' + dot(state.ref) + '<b>' + name(state.ref) + '</b> both at the median and on more series than it loses.';

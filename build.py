@@ -523,7 +523,7 @@ FP_STRATA = [
 ]
 
 
-def leaderboard(prov, written):
+def leaderboard(prov, written, pages=None):
     import explorer
     strata = [x for x in FP_STRATA if x["id"] in written]
     names = {k: v[0] for k, v in FP_MODELS.items()}
@@ -571,7 +571,7 @@ def leaderboard(prov, written):
     <p class="foot">TimeH2O: h2oai/timeh2o-v1 at Hugging Face revision c556990 (weights unchanged since 60b68fa, 2026-10-22), evaluated 2026-11-03 to 2026-11-04
       under its non-commercial licence. Method: <a href="methodology.html">methodology</a>.</p>
     <p class="stamp">Built {prov['built']} from skaters commit {prov['skaters_commit']} ({prov['skaters_date']}).</p>
-    <script>window.FP_NAMES = {json.dumps(names)}; window.FP_KIND = {json.dumps(kinds)}; window.FP_STRATA = {json.dumps(strata)}; window.FP_LIC = {json.dumps(FP_LICENSES)};</script>
+    <script>window.FP_NAMES = {json.dumps(names)}; window.FP_KIND = {json.dumps(kinds)}; window.FP_STRATA = {json.dumps(strata)}; window.FP_LIC = {json.dumps(FP_LICENSES)}; window.FP_PAGES = {json.dumps(pages or {})};</script>
     <script>{explorer.EXPLORER_JS}</script>
 """
     return page("Foundational prediction: the next data point", body,
@@ -1136,7 +1136,11 @@ def main():
     shutil.copy(os.path.join(SKATERS, "docs", "assets", "frontier3d.js"), os.path.join(OUT, "frontier3d.js"))
     import explorer
     written = explorer.export(BENCH, OUT, EXPLORER_MODELS, aliases={"learned(e2)": LAPLACEPP_RUNS})
-    open(os.path.join(OUT, "index.html"), "w").write(leaderboard(prov, written))
+    pages = {"laplace": "laplace.html", "learned(e2)": "laplacepp.html"}
+    for spec in specs:
+        for a, _lab in spec["arms"]:
+            pages.setdefault(a, f"model-{spec['slug']}.html")
+    open(os.path.join(OUT, "index.html"), "w").write(leaderboard(prov, written, pages))
     open(os.path.join(OUT, "frontier.html"), "w").write(frontier_page(prov))
     perf = json.load(open(os.path.join(BENCH, "perf_results.json")))
     f3 = json.load(open(os.path.join(BENCH, "frontier3d.json")))
