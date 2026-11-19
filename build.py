@@ -697,7 +697,7 @@ def size_page(prov, f3):
                    f'<td class="muted small">{q["footprint_how"]}</td></tr>')
     body = f"""
     <h1>Size</h1>
-    <p class="lede">What a deployment carries.</p>
+    <p class="lede">What a deployment carries. <a href="https://lnkd.in/p/et-Thq-a">Discuss</a>.</p>
     {hbars([(q["name"], q["mb"]) for q in pts], _fmt_mb, "bytes each model carries", ref=next((("laplace", q["mb"]) for q in pts if q["name"] == "laplace (pure Python)"), None))}
     <p class="foot">Bar length is the fourth root of the size, between a log and a linear scale.</p>
     <table class="lb">
