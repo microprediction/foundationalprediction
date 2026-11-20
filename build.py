@@ -849,7 +849,8 @@ def laplacepp_page(prov):
 PAPERS = [
     dict(slug="horizon-note",
          title="On the Importance of Evaluating Foundational Time-Series Models One Step Ahead in an Investment Context",
-         authors="Peter Cotton", status="technical note, November 2026"),
+         authors="Peter Cotton", status="technical note, November 2026",
+         discuss="https://lnkd.in/p/eyQ_AQTB"),
 ]
 
 
@@ -868,13 +869,14 @@ def _abstract(slug):
 def papers_page(prov):
     cards = []
     for p in PAPERS:
+        discuss = f' &middot;\n        <a href="{p['discuss']}">Discuss</a>' if p.get("discuss") else ""
         cards.append(f"""
     <div class="paper">
       <h2><a href="./{p['slug']}.pdf">{p['title']}</a></h2>
       <p class="meta muted small">{p['authors']} &middot; {p['status']} &middot;
         <a href="./{p['slug']}.pdf">PDF</a> &middot;
         <a href="https://github.com/microprediction/foundationalprediction/blob/main/papers/{p['slug']}/{p['slug']}.tex">tex</a> &middot;
-        <a href="https://github.com/microprediction/foundationalprediction/blob/main/papers/{p['slug']}/{p['slug']}.bib">bib</a></p>
+        <a href="https://github.com/microprediction/foundationalprediction/blob/main/papers/{p['slug']}/{p['slug']}.bib">bib</a>{discuss}</p>
       <p class="abstract">{_abstract(p['slug'])}</p>
     </div>""")
     body = f"""
