@@ -168,6 +168,7 @@ NAV = """  <header class="site-header">
           <span class="drop">
             <a href="./index.html">Next data point (k = 1)</a>
             <a href="./gift.html">GIFT reconciliation</a>
+            <a href="./horizon-weights.html">Horizon weights</a>
           </span>
         </span>
         <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
@@ -1203,6 +1204,11 @@ def main():
     open(os.path.join(OUT, "size.html"), "w").write(size_page(prov, f3))
     open(os.path.join(OUT, "methodology.html"), "w").write(methodology(prov))
     open(os.path.join(OUT, "not-evaluated.html"), "w").write(not_evaluated_page())
+    import horizon_weights as hw
+    open(os.path.join(OUT, "horizon-weights.html"), "w").write(page(
+        "Horizon weights", hw.page_body(),
+        "Approximate importance of each forecast lead for a trader with transaction costs, from Garleanu and Pedersen (2013), with presets.",
+        extra_css=hw.HW_CSS))
     open(os.path.join(os.path.dirname(OUT), "NOT_EVALUATED.md"), "w").write(not_evaluated_md())
     open(os.path.join(OUT, "laplace.html"), "w").write(laplace_page(prov, perf))
     open(os.path.join(OUT, "laplacepp.html"), "w").write(laplacepp_page(prov))

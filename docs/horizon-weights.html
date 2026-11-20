@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Horizon weights</title>
+  <meta name="description" content="Approximate importance of each forecast lead for a trader with transaction costs, from Garleanu and Pedersen (2013), with presets." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
+    ol.refs li, ul.refs li { font-size:.92rem; margin-bottom:6px; }
+
+    .hw-picker { display:grid; grid-template-columns:max-content 1fr; gap:6px 12px; align-items:center; max-width:520px; }
+    .hw-picker input, .hw-picker select { max-width:260px; }
+    .hw-chart { position:relative; margin:8px 0 4px; }
+    .hw-chart svg { display:block; width:100%; height:auto; }
+    .hw-tip { position:absolute; pointer-events:none; background:var(--panel); border:1px solid var(--border);
+              border-radius:4px; padding:3px 7px; font-size:.8rem; color:var(--text); display:none; white-space:nowrap; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">foundational prediction</a>
+      <nav>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+            <a href="./horizon-weights.html">Horizon weights</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <span class="drop-head">Reference</span>
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">granger</a>
+            <span class="drop-head">Foundational models</span>
+            <a href="./model-chronos.html">Chronos</a>
+            <a href="./model-chronos2.html">Chronos-2</a>
+            <a href="./model-ciproto.html">ci-proto</a>
+            <a href="./model-hirondel.html">Hirondel-7M</a>
+            <a href="./model-iamtime.html">iAmTime</a>
+            <a href="./model-kairos.html">Kairos</a>
+            <a href="./model-moirai2.html">Moirai 2.0</a>
+            <a href="./model-simons.html">Simons</a>
+            <a href="./model-t0gamma.html">t0-gamma</a>
+            <a href="./model-tafsut.html">Tafsut</a>
+            <a href="./model-timeh2o.html">TimeH2O</a>
+            <a href="./model-timers1.html">Timer-S1</a>
+            <a href="./model-timesfm.html">TimesFM</a>
+            <a href="./model-timesfm3.html">TimesFM3</a>
+            <a href="./model-timessm.html">TimeSSM</a>
+            <a href="./model-timestral.html">Timestral</a>
+            <a href="./model-tinycast.html">TinyCast</a>
+            <a href="./model-tirex.html">TiRex</a>
+            <a href="./model-tirex2.html">TiRex-2</a>
+            <a href="./model-toto2.html">Toto 2.0</a>
+            <a href="./model-ttm3.html">TTM-R3</a>
+            <a href="./model-yug.html">Yug</a>
+            <span class="drop-head">Conformal</span>
+            <a href="./model-csp.html">Conformal Seasonal Pools</a>
+            <span class="drop-head">Classical</span>
+            <a href="./model-autoarima.html">AutoARIMA</a>
+            <a href="./model-autoets.html">AutoETS</a>
+            <a href="./model-autotheta.html">AutoTheta</a>
+            <a href="./model-garcht.html">GARCH-t</a>
+            <span class="drop-head">Absent</span>
+            <a href="./not-evaluated.html">Not evaluated</a>
+          </span>
+        </span>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./papers.html">Papers</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>Horizon weights</h1>
+    <p class="lede">How much each forecast lead matters to a trader who pays to trade, approximately.</p>
+    <p>A frictionless log-optimal trader uses only the next interval's predictive distribution, which is why the
+      <a href="index.html">leaderboard</a> scores one step ahead (<a href="horizon-note.pdf">note</a>). With trading costs,
+      later leads enter today's trade. In the quadratic-cost model of Gârleanu and Pedersen (2013) the expected
+      one-interval price change at lead <i>j</i> gets weight <i>z</i>(1&minus;<i>z</i>)<sup><i>j</i>&minus;1</sup>.
+      This page puts a number on <i>z</i> for common trading set-ups.</p>
+
+    <div class="picker hw-picker">
+      <label class="lab" for="hw-preset">Set-up</label><select id="hw-preset"></select>
+      <label class="lab" for="hw-c">one-way cost (bp)</label><input id="hw-c" type="number" min="0" step="0.5">
+      <label class="lab" for="hw-s">volatility per interval (%)</label><input id="hw-s" type="number" min="0.01" step="0.1">
+      <label class="lab" for="hw-ic">signal IC</label><input id="hw-ic" type="number" min="0.001" step="0.005">
+    </div>
+    <p id="hw-summary" class="pick"></p>
+    <div id="hw-chart" class="hw-chart" role="img" aria-label="Weight on each forecast lead"></div>
+    <p class="small muted">Bars: the weight on each lead. Dashed line: equal weight on each of 48 leads, which is how a score
+      pooled over a 48-step window (GIFT-Eval's hourly setting) weights them. Hover a bar for its value.</p>
+
+    <h2>Presets</h2>
+    <table class="lb"><thead><tr><th>set-up</th><th class="num">cost (bp)</th><th class="num">vol</th><th class="num">IC</th>
+      <th class="num" title="expected return per interval, IC times volatility">alpha (bp)</th><th class="num">mean lead</th>
+      <th class="num">lead 1</th><th class="num">leads 1&ndash;5</th><th class="num">leads 1&ndash;12</th></tr></thead>
+      <tbody><tr><td>Frictionless, any interval</td><td class="num">0</td><td class="num">1%</td><td class="num">0.02</td><td class="num">2.0</td><td class="num">1.0 intervals</td><td class="num">100%</td><td class="num">100%</td><td class="num">100%</td></tr><tr><td>Daily index futures, 1 bp</td><td class="num">1</td><td class="num">1%</td><td class="num">0.02</td><td class="num">2.0</td><td class="num">2.0 days</td><td class="num">50%</td><td class="num">97%</td><td class="num">100%</td></tr><tr><td>Weekly FX, 2 bp</td><td class="num">2</td><td class="num">1.4%</td><td class="num">0.03</td><td class="num">4.2</td><td class="num">2.0 weeks</td><td class="num">51%</td><td class="num">97%</td><td class="num">100%</td></tr><tr><td>Monthly asset allocation, 10 bp</td><td class="num">10</td><td class="num">4%</td><td class="num">0.05</td><td class="num">20.0</td><td class="num">2.0 months</td><td class="num">50%</td><td class="num">97%</td><td class="num">100%</td></tr><tr><td>Daily US large-cap equity, 5 bp</td><td class="num">5</td><td class="num">1.5%</td><td class="num">0.02</td><td class="num">3.0</td><td class="num">4.3 days</td><td class="num">23%</td><td class="num">73%</td><td class="num">96%</td></tr><tr><td>Daily equity, 30 bp</td><td class="num">30</td><td class="num">2%</td><td class="num">0.02</td><td class="num">4.0</td><td class="num">16.0 days</td><td class="num">6%</td><td class="num">28%</td><td class="num">54%</td></tr><tr><td>Hourly crypto (taker), 10 bp</td><td class="num">10</td><td class="num">0.6%</td><td class="num">0.02</td><td class="num">1.2</td><td class="num">17.7 hours</td><td class="num">6%</td><td class="num">25%</td><td class="num">50%</td></tr></tbody></table>
+    <p class="small muted">The cost, volatility and IC columns are illustrative assumptions, not measurements. Edit them above.</p>
+
+    <h2>Where the number comes from</h2>
+    <p>Gârleanu and Pedersen's trader pays &frac12;&lambda;&sigma;<sup>2</sup>(&Delta;<i>n</i>)<sup>2</sup> to trade and
+      has risk aversion &gamma;. The weights depend on the cost only through &lambda;/&gamma;, and with no discounting
+      <i>z</i> = &gamma;/(&gamma; + <i>a</i>) with &lambda;/&gamma; = (<i>a</i>/&gamma;)(1 + <i>a</i>/&gamma;).</p>
+    <p>Real costs are closer to linear: a one-way cost <i>c</i> per unit traded. We match the two at the trade the
+      policy actually makes, a fraction <i>a</i>/&lambda; of the Markowitz position. That gives
+      <i>a</i>/&gamma; = 2<i>c</i>/&alpha;, where &alpha; is the expected return per interval, taken here as IC times
+      volatility. So the mean lead is 1 + 2<i>c</i>/&alpha;. In words: the leads that matter run out to about the
+      time the signal's accumulated alpha takes to pay for a round trip.</p>
+
+    <h2>What the weights are not</h2>
+    <p>They are an approximation in three places.</p>
+    <ul>
+      <li>The calibration from linear to quadratic cost is ours. The <a href="horizon-note.pdf">note</a> deliberately
+        stops at the model; this page adds a rough map from a trading set-up to it.</li>
+      <li>The weights are a trading policy for expected returns. The loss from forecast errors <i>e</i><sub><i>j</i></sub>
+        is proportional to (&Sigma;<i>w</i><sub><i>j</i></sub><i>e</i><sub><i>j</i></sub>)<sup>2</sup>, which has
+        cross-lead terms. If the errors at different leads were independent, the importance of lead <i>j</i> would be
+        <i>w</i><sub><i>j</i></sub><sup>2</sup>, which is even more concentrated on lead 1. Either way, a weighted sum of
+        per-lead scores is an approximation to the decision loss, not the loss itself.</li>
+      <li>Lead <i>j</i> means the return over the single interval <i>j</i> steps ahead. A pooled benchmark scores the
+        level at step <i>j</i>, which bundles every interval up to <i>j</i>.</li>
+    </ul>
+    <script>window.HW_PRESETS = [{"label": "Frictionless, any interval", "c": 0.0, "sigma": 1.0, "ic": 0.02, "unit": "interval"}, {"label": "Daily index futures, 1 bp", "c": 1.0, "sigma": 1.0, "ic": 0.02, "unit": "day"}, {"label": "Weekly FX, 2 bp", "c": 2.0, "sigma": 1.4, "ic": 0.03, "unit": "week"}, {"label": "Monthly asset allocation, 10 bp", "c": 10.0, "sigma": 4.0, "ic": 0.05, "unit": "month"}, {"label": "Daily US large-cap equity, 5 bp", "c": 5.0, "sigma": 1.5, "ic": 0.02, "unit": "day"}, {"label": "Daily equity, 30 bp", "c": 30.0, "sigma": 2.0, "ic": 0.02, "unit": "day"}, {"label": "Hourly crypto (taker), 10 bp", "c": 10.0, "sigma": 0.6, "ic": 0.02, "unit": "hour"}];</script>
+    <script>
+(function () {
+  var P = window.HW_PRESETS, sel = document.getElementById('hw-preset');
+  var ci = document.getElementById('hw-c'), si = document.getElementById('hw-s'), ii = document.getElementById('hw-ic');
+  var unit = 'interval';
+  P.forEach(function (p, i) { var o = document.createElement('option'); o.value = i; o.textContent = p.label; sel.appendChild(o); });
+  function load(i) { var p = P[i]; ci.value = p.c; si.value = p.sigma; ii.value = p.ic; unit = p.unit; draw(); }
+  function pct(x) { return (100 * x).toFixed(x < 0.1 ? 1 : 0) + '%'; }
+  function draw() {
+    var c = +ci.value, s = +si.value, ic = +ii.value;
+    var alpha = ic * s * 100, r = alpha > 0 ? 2 * c / alpha : 0, q = r / (1 + r);
+    var w = []; for (var j = 1; j <= 400; j++) w.push((1 - q) * Math.pow(q, j - 1));
+    var cum = 0, n = 1; for (var k = 0; k < w.length; k++) { cum += w[k]; if (cum >= 0.95) { n = k + 1; break; } }
+    n = Math.max(12, Math.min(n, 120));
+    var m5 = w.slice(0, 5).reduce(function (a, b) { return a + b; }, 0);
+    document.getElementById('hw-summary').innerHTML = 'Alpha ' + alpha.toFixed(1) + ' bp per ' + unit +
+      '. Mean lead <b>' + (1 + r).toFixed(1) + ' ' + unit + 's</b>; lead 1 carries <b>' + pct(w[0]) +
+      '</b> of the weight and leads 1&ndash;5 carry ' + pct(m5) + '.';
+    var W = 640, H = 236, L = 40, B = 44, T = 8, R = 8, pw = (W - L - R) / n, ymax = Math.max(w[0], 1 / 48) * 1.1;
+    var y = function (v) { return T + (H - T - B) * (1 - v / ymax); };
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (f) { var v = f * ymax / 1.1, yy = y(v);
+      svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + yy + '" y2="' + yy + '" stroke="#e8e8e8"/>' +
+             '<text x="' + (L - 6) + '" y="' + (yy + 4) + '" text-anchor="end" font-size="11" fill="#5a5a5a">' + pct(v) + '</text>'; });
+    for (var i = 0; i < n; i++) {
+      var x = L + i * pw + 1, bw = Math.max(1, pw - 2), y0 = y(w[i]), h = Math.max(0, (H - B) - y0);
+      svg += '<rect class="hwb" data-i="' + i + '" x="' + x + '" y="' + y0 + '" width="' + bw + '" height="' + h + '" rx="' + Math.min(4, bw / 2) + '" fill="#4a3aff"/>';
+      svg += '<rect class="hwh" data-i="' + i + '" x="' + (L + i * pw) + '" y="' + T + '" width="' + pw + '" height="' + (H - T - B) + '" fill="transparent"/>';
+      if (i === 0 || (i + 1) % Math.ceil(n / 12) === 0) svg += '<text x="' + (x + bw / 2) + '" y="' + (H - B + 16) + '" text-anchor="middle" font-size="11" fill="#5a5a5a">' + (i + 1) + '</text>';
+    }
+    var ug = y(1 / 48), ue = L + Math.min(48, n) * pw;
+    svg += '<line x1="' + L + '" x2="' + ue + '" y1="' + ug + '" y2="' + ug + '" stroke="#5a5a5a" stroke-width="2" stroke-dasharray="5 4"/>';
+    svg += '<text x="' + (W - R) + '" y="' + (H - 2) + '" text-anchor="end" font-size="11" fill="#5a5a5a">lead (' + unit + 's ahead)</text></svg>';
+    var box = document.getElementById('hw-chart'); box.innerHTML = svg + '<div class="hw-tip"></div>';
+    var tip = box.querySelector('.hw-tip');
+    box.querySelectorAll('.hwh').forEach(function (el) {
+      el.addEventListener('mousemove', function (e) { var i = +el.getAttribute('data-i'), rb = box.getBoundingClientRect();
+        tip.style.display = 'block'; tip.textContent = 'lead ' + (i + 1) + ': ' + pct(w[i]);
+        tip.style.left = (e.clientX - rb.left + 12) + 'px'; tip.style.top = (e.clientY - rb.top - 28) + 'px'; });
+      el.addEventListener('mouseleave', function () { tip.style.display = 'none'; });
+    });
+  }
+  sel.addEventListener('change', function () { load(+sel.value); });
+  [ci, si, ii].forEach(function (el) { el.addEventListener('input', draw); });
+  sel.value = 5; load(5);
+})();
+</script>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>
