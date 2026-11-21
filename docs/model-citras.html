@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Foundational prediction: CITRAS-FM</title>
+  <meta name="description" content="CITRAS-FM: how it was run and how it compares with laplace one step ahead on every panel." />
+  <link rel="stylesheet" href="./academic.css" />
+  <style>
+    .wdl { display:inline-flex; height:13px; width:120px; border-radius:3px; overflow:hidden; border:1px solid #ddd; vertical-align:middle; }
+    .wdl i { display:block; height:100%; }
+    .wdl .w { background:#1a8c4a; } .wdl .d { background:#c8c8d4; } .wdl .l { background:#c0392b; }
+    .wdlnum { font-size:.8rem; color:#666; margin-left:8px; }
+    .muted { color:#777; } .small { font-size:.82rem; }
+    table.lb { border-collapse:collapse; width:100%; margin:6px 0 10px; }
+    table.lb th, table.lb td { border-bottom:1px solid #e5e5e5; padding:7px 8px; text-align:left; vertical-align:middle; font-size:.93rem; }
+    table.lb th { border-bottom:2px solid #bbb; font-weight:600; }
+    table.lb td.num, table.lb th.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    table.lb td { white-space:nowrap; }
+    .tag { display:inline-block; font-size:.72rem; color:#555; background:#f0f0f4; border-radius:3px;
+           padding:1px 6px; margin-left:4px; vertical-align:middle; font-weight:400; }
+    .wdlnum { display:inline-block; min-width:72px; }
+    tr.yard td { background:#f4f9f5; }
+    .pick { background:#f6f4ff; border-left:4px solid #4a3aff; padding:8px 12px; margin:10px 0 18px; }
+    .stamp { color:#888; font-size:.85em; font-style:italic; }
+    .foot { font-size:.82rem; color:#666; margin-top:4px; }
+    .tabs { display:flex; flex-wrap:wrap; gap:4px; border-bottom:2px solid #ddd; margin:14px 0 0; }
+    .tab { background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+           padding:8px 14px; font:inherit; font-size:.95rem; color:#555; cursor:pointer; }
+    .tab:hover { color:#111; }
+    .tab.on { color:#4a3aff; border-bottom-color:#4a3aff; font-weight:600; }
+    .panel { padding-top:6px; overflow-x:auto; }
+    header.site-header nav .menu .drop .drop-head { display:block; padding:8px 14px 2px; font-size:.7rem;
+           letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+    header.site-header nav .menu .drop { max-height:80vh; overflow-y:auto; }
+    ol.refs li, ul.refs li { font-size:.92rem; margin-bottom:6px; }
+</style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">foundational prediction</a>
+      <nav>
+        <span class="menu" tabindex="0"><span class="menu-label">Leaderboard &#9662;</span>
+          <span class="drop">
+            <a href="./index.html">Next data point (k = 1)</a>
+            <a href="./gift.html">GIFT reconciliation</a>
+            <a href="./horizon-weights.html">Horizon weights</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Performance &#9662;</span>
+          <span class="drop">
+            <a href="./frontier.html">Overview</a>
+            <a href="./speed.html">Speed</a>
+            <a href="./size.html">Size</a>
+          </span>
+        </span>
+        <span class="menu" tabindex="0"><span class="menu-label">Models &#9662;</span>
+          <span class="drop">
+            <span class="drop-head">Reference</span>
+            <a href="./laplace.html">laplace</a>
+            <a href="./laplacepp.html">granger</a>
+            <span class="drop-head">Foundational models</span>
+            <a href="./model-chronos.html">Chronos</a>
+            <a href="./model-chronos2.html">Chronos-2</a>
+            <a href="./model-ciproto.html">ci-proto</a>
+            <a href="./model-citras.html">CITRAS-FM</a>
+            <a href="./model-hirondel.html">Hirondel-7M</a>
+            <a href="./model-iamtime.html">iAmTime</a>
+            <a href="./model-kairos.html">Kairos</a>
+            <a href="./model-moirai2.html">Moirai 2.0</a>
+            <a href="./model-patchtstfm.html">PatchTST-FM</a>
+            <a href="./model-simons.html">Simons</a>
+            <a href="./model-t0gamma.html">t0-gamma</a>
+            <a href="./model-tabby.html">Tabby</a>
+            <a href="./model-tafsut.html">Tafsut</a>
+            <a href="./model-timeh2o.html">TimeH2O</a>
+            <a href="./model-timers1.html">Timer-S1</a>
+            <a href="./model-timesfm.html">TimesFM</a>
+            <a href="./model-timesfm3.html">TimesFM3</a>
+            <a href="./model-timessm.html">TimeSSM</a>
+            <a href="./model-timestral.html">Timestral</a>
+            <a href="./model-tinycast.html">TinyCast</a>
+            <a href="./model-tirex.html">TiRex</a>
+            <a href="./model-tirex2.html">TiRex-2</a>
+            <a href="./model-toto2.html">Toto 2.0</a>
+            <a href="./model-tsicl.html">TS-ICL</a>
+            <a href="./model-ttm3.html">TTM-R3</a>
+            <a href="./model-yug.html">Yug</a>
+            <span class="drop-head">Conformal</span>
+            <a href="./model-csp.html">Conformal Seasonal Pools</a>
+            <span class="drop-head">Classical</span>
+            <a href="./model-autoarima.html">AutoARIMA</a>
+            <a href="./model-autoets.html">AutoETS</a>
+            <a href="./model-autotheta.html">AutoTheta</a>
+            <a href="./model-garcht.html">GARCH-t</a>
+            <span class="drop-head">Absent</span>
+            <a href="./not-evaluated.html">Not evaluated</a>
+          </span>
+        </span>
+        <a href="./methodology.html">Methodology</a>
+        <a href="./papers.html">Papers</a>
+        <a href="https://skaters.microprediction.org/">skaters</a>
+        <a href="https://github.com/microprediction/foundationalprediction">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+
+    <h1>CITRAS-FM</h1>
+    <p class="muted small">foundation &middot; Hitachi &middot; 7M &middot; licence: CC BY-NC-SA 4.0 &middot; <a href="https://huggingface.co/hitachi-nlp/citras-fm">Model card</a> &middot; <a href="https://arxiv.org/abs/2606.10798">Paper</a> &middot; <a href="https://github.com/hitachi-ais/citras-fm">Code</a></p>
+    <p class="lede">CITRAS-FM (EUSIPCO 2026) is a 7M-parameter covariate-informed forecaster with nine quantile outputs, run here on the target alone.</p>
+    <h2>How it was run</h2>
+    <p>Run zero-shot on CPU with a fixed 128-length context from the citras-fm code at commit a7f5648 (not on PyPI) and pinned weights revision 8633940, one call per context window. Weights are non-commercial.</p>
+    <p>Nine native deciles. The tight arm reconstructs them with quantile_dist.</p>
+    <h2>Resources</h2><ul class="refs"><li><a href="https://huggingface.co/hitachi-nlp/citras-fm">Model card</a> &mdash; <span class="muted small">https://huggingface.co/hitachi-nlp/citras-fm</span></li><li><a href="https://arxiv.org/abs/2606.10798">Paper</a> &mdash; <span class="muted small">https://arxiv.org/abs/2606.10798</span></li><li><a href="https://github.com/hitachi-ais/citras-fm">Code</a> &mdash; <span class="muted small">https://github.com/hitachi-ais/citras-fm</span></li></ul>
+    <h2>Against laplace, one step ahead</h2>
+    <p>On the <a href="https://foundationalprediction.com/#All/All/CITRAS-FM%28wide%29">interactive leaderboard</a> you can make CITRAS-FM the reference and see every other model paired against it, on any panel or subset of series; the tables below keep laplace as the reference.</p>
+    <p class="small muted">Per series, Diebold&ndash;Mariano on the log score; a win is the model ahead beyond 1.96 standard
+      errors, a loss laplace ahead, the rest draws. Median &Delta;LL is the model's log score minus laplace's, in nats per step;
+      CRPS ratio is model over laplace (below 1 favours the model); coverage is the share of outcomes inside the central 90%.
+      The <a href="methodology.html">methodology</a> page has the protocol; the <a href="index.html">leaderboards</a> place
+      the model among the rest.</p>
+    <table class="lb"><thead><tr><th>arm</th><th>panel</th><th class="num">series</th><th>wins / losses vs laplace</th><th class="num">median &Delta;LL</th><th class="num">CRPS ratio</th><th class="num">coverage 90</th></tr></thead><tbody><tr><td><code>CITRAS-FM(wide)</code><br><span class="muted small">headline</span></td><td>Economic, Weekly</td><td class="num">2,623</td><td><span class="wdl"><i class="w" style="width:16.1%"></i><i class="d" style="width:55.7%"></i><i class="l" style="width:28.3%"></i></span><span class="wdlnum">16% / 28%</span></td><td class="num">-0.102</td><td class="num">0.949</td><td class="num">0.868</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,476</td><td><span class="wdl"><i class="w" style="width:15.6%"></i><i class="d" style="width:71.4%"></i><i class="l" style="width:13.0%"></i></span><span class="wdlnum">16% / 13%</span></td><td class="num">-0.011</td><td class="num">0.917</td><td class="num">0.844</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,046</td><td><span class="wdl"><i class="w" style="width:2.9%"></i><i class="d" style="width:62.7%"></i><i class="l" style="width:34.4%"></i></span><span class="wdlnum">3% / 34%</span></td><td class="num">-0.151</td><td class="num">1.000</td><td class="num">0.870</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:13.8%"></i><i class="d" style="width:57.0%"></i><i class="l" style="width:29.2%"></i></span><span class="wdlnum">14% / 29%</span></td><td class="num">-0.036</td><td class="num">0.987</td><td class="num">0.834</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">5,898</td><td><span class="wdl"><i class="w" style="width:1.6%"></i><i class="d" style="width:92.7%"></i><i class="l" style="width:5.7%"></i></span><span class="wdlnum">2% / 6%</span></td><td class="num">-0.026</td><td class="num">1.020</td><td class="num">0.869</td></tr><tr><td><code>CITRAS-FM</code><br><span class="muted small">tight reconstruction</span></td><td>Economic, Weekly</td><td class="num">2,623</td><td><span class="wdl"><i class="w" style="width:6.5%"></i><i class="d" style="width:42.7%"></i><i class="l" style="width:50.7%"></i></span><span class="wdlnum">7% / 51%</span></td><td class="num">-1.003</td><td class="num">0.956</td><td class="num">0.822</td></tr><tr><td></td><td>Economic, Monthly</td><td class="num">5,476</td><td><span class="wdl"><i class="w" style="width:1.1%"></i><i class="d" style="width:59.7%"></i><i class="l" style="width:39.2%"></i></span><span class="wdlnum">1% / 39%</span></td><td class="num">-0.859</td><td class="num">0.923</td><td class="num">0.785</td></tr><tr><td></td><td>Economic, Daily</td><td class="num">2,046</td><td><span class="wdl"><i class="w" style="width:1.6%"></i><i class="d" style="width:33.7%"></i><i class="l" style="width:64.8%"></i></span><span class="wdlnum">2% / 65%</span></td><td class="num">-1.074</td><td class="num">1.006</td><td class="num">0.814</td></tr><tr><td></td><td>Economic, Hourly (M4)</td><td class="num">414</td><td><span class="wdl"><i class="w" style="width:0.7%"></i><i class="d" style="width:56.0%"></i><i class="l" style="width:43.2%"></i></span><span class="wdlnum">1% / 43%</span></td><td class="num">-0.748</td><td class="num">0.994</td><td class="num">0.769</td></tr><tr><td></td><td>Prices, Daily</td><td class="num">5,898</td><td><span class="wdl"><i class="w" style="width:0.0%"></i><i class="d" style="width:58.8%"></i><i class="l" style="width:41.1%"></i></span><span class="wdlnum">0% / 41%</span></td><td class="num">-0.648</td><td class="num">1.026</td><td class="num">0.805</td></tr></tbody></table>
+    
+    <h2>References</h2><ol class='refs'><li>Paper: <a href="https://arxiv.org/abs/2606.10798">https://arxiv.org/abs/2606.10798</a></li></ol><h3>Evaluated on this site in</h3><ul class='refs'><li>Cotton, P. (2026). A stronger univariate benchmark for foundational time-series model evaluation. <a href="https://skaters.microprediction.org/papers.html">skaters papers</a> (the protocol and the reconstruction question used on every table here).</li><li>Cotton, P. (2026). On the importance of evaluating foundational time-series models one step ahead in an investment context. <a href="./horizon-note.pdf">PDF</a> (why the leaderboards are one step ahead).</li></ul>
+    <p class="stamp">Built 2026-11-20 from skaters commit dcc6bf7.</p>
+
+  </main>
+  <footer>
+    Generated from the <a href="https://github.com/microprediction/skaters">skaters</a> canonical store.
+    Part of the <a href="https://repos.microprediction.org/">microprediction</a> family.
+  </footer>
+</body>
+</html>
