@@ -74,11 +74,13 @@ def load():
 
 def sizes(f3):
     """Size records [{name, slug, mb, footprint_how}], ascending. laplace's two
-    rows come from the frontier record; every other arm from the size roster in
-    benchmarks/footprint_results.json ("models"), which needs neither an
-    accuracy nor a timing run. A skaters checkout without that roster falls
-    back to the frontier points."""
-    out = [dict(name=p["name"], slug="laplace", mb=p["mb"], footprint_how=p["footprint_how"])
+    rows and granger's come from the frontier record; every other arm from the
+    size roster in benchmarks/footprint_results.json ("models"), which needs
+    neither an accuracy nor a timing run. A skaters checkout without that
+    roster falls back to the frontier points."""
+    out = [dict(name="granger", slug="laplacepp", mb=p["mb"], footprint_how=p["footprint_how"])
+           if p["name"].startswith("granger") else
+           dict(name=p["name"], slug="laplace", mb=p["mb"], footprint_how=p["footprint_how"])
            for p in f3["points"] if p["group"] == "laplace"]
     try:
         models = json.load(open(os.path.join(BENCH, "footprint_results.json"))).get("models")
@@ -625,7 +627,7 @@ def _fmt_ms(ms):
 
 def _kind_of(name):
     n = name.lower()
-    if n.startswith("laplace"):
+    if n.startswith(("laplace", "granger")):
         return "ours"
     if any(x in n for x in ("arima", "ets", "theta", "garch", "prophet")):
         return "classical"
@@ -736,7 +738,7 @@ def speed_page(prov, perf, perf_meta):
 
 def size_page(prov, f3, slugs):
     """One row per checkpoint of every model that has a page on the site."""
-    pts = [q for q in sizes(f3) if q["slug"] is None or q["slug"] == "laplace" or q["slug"] in slugs]
+    pts = [q for q in sizes(f3) if q["slug"] is None or q["slug"] in ("laplace", "laplacepp") or q["slug"] in slugs]
     trs = []
     for q in pts:
         trs.append(f'<tr><td><b>{q["name"]}</b></td><td class="num">{_fmt_mb(q["mb"])}</td>'
