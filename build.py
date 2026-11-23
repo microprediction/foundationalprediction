@@ -68,7 +68,28 @@ def load():
     warm = {r["model"]: r["ms"] for r in perf["rows"] if r["regime"] == "warm"}
     f3 = json.load(open(os.path.join(BENCH, "frontier3d.json")))
     mb = {p["name"]: p["mb"] for p in f3["points"]}
+    mb.update({q["name"]: q["mb"] for q in sizes(f3)})
     return vs, cov, warm, mb, perf.get("meta", {}), f3.get("meta", {})
+
+
+def sizes(f3):
+    """Size records [{name, slug, mb, footprint_how}], ascending. laplace's two
+    rows come from the frontier record; every other arm from the size roster in
+    benchmarks/footprint_results.json ("models"), which needs neither an
+    accuracy nor a timing run. A skaters checkout without that roster falls
+    back to the frontier points."""
+    out = [dict(name=p["name"], slug="laplace", mb=p["mb"], footprint_how=p["footprint_how"])
+           for p in f3["points"] if p["group"] == "laplace"]
+    try:
+        models = json.load(open(os.path.join(BENCH, "footprint_results.json"))).get("models")
+    except OSError:
+        models = None
+    if models:
+        out += [dict(name=m["name"], slug=m["slug"], mb=m["bytes"] / 1e6, footprint_how=m["footprint_how"]) for m in models]
+    else:
+        out += [dict(name=p["name"], slug=None, mb=p["mb"], footprint_how=p["footprint_how"])
+                for p in f3["points"] if p["group"] != "laplace"]
+    return sorted(out, key=lambda q: q["mb"])
 
 
 def learned_arm(vs, stratum):
@@ -608,6 +629,8 @@ def _kind_of(name):
         return "ours"
     if any(x in n for x in ("arima", "ets", "theta", "garch", "prophet")):
         return "classical"
+    if n == "csp":
+        return "conformal"
     return "foundation"
 
 
@@ -711,13 +734,12 @@ def speed_page(prov, perf, perf_meta):
     return page("Foundational prediction: speed", body, "Cost per forecast, streaming and batch, on one CPU.")
 
 
-def size_page(prov, f3):
-    pts = sorted(f3["points"], key=lambda p: p["mb"])
+def size_page(prov, f3, slugs):
+    """One row per checkpoint of every model that has a page on the site."""
+    pts = [q for q in sizes(f3) if q["slug"] is None or q["slug"] == "laplace" or q["slug"] in slugs]
     trs = []
     for q in pts:
-        mb = q["mb"]
-        size = f"{mb * 1000:.0f} KB" if mb < 1 else f"{mb:,.0f} MB"
-        trs.append(f'<tr><td><b>{q["name"]}</b></td><td class="num">{size}</td>'
+        trs.append(f'<tr><td><b>{q["name"]}</b></td><td class="num">{_fmt_mb(q["mb"])}</td>'
                    f'<td class="muted small">{q["footprint_how"]}</td></tr>')
     body = f"""
     <h1>Size</h1>
@@ -1017,7 +1039,7 @@ def references_block(spec):
     return out
 
 
-def model_page(spec, prov, perf, mb):
+def model_page(spec, prov, perf, mb, by_slug=None):
     vs, cov = _summary_rows()
     trs = []
     for arm, lab in spec["arms"]:
@@ -1042,14 +1064,16 @@ def model_page(spec, prov, perf, mb):
     names = spec.get("perf_names")
     match = (lambda m: m in names) if names else (lambda m: _norm(m).startswith(key[:6]) or key.startswith(_norm(m)[:6]))
     warm = [(m, ms) for (m, reg), ms in perf.items() if reg == "warm" and match(m)]
-    size = [(m, v) for m, v in mb.items() if _norm(m).startswith(key[:6]) or key.startswith(_norm(m)[:6])]
+    size = [(q["name"], q["mb"]) for q in (by_slug or []) if q["slug"] == spec["slug"]][::-1]
+    if not size:
+        size = [(m, v) for m, v in mb.items() if _norm(m).startswith(key[:6]) or key.startswith(_norm(m)[:6])]
     cost = ""
     if warm or size:
         cost = "<h2>Cost and size</h2><ul>"
         for m, ms in warm[:3]:
             cost += f"<li>{m}: {_fmt_ms(ms)} per forecast on one CPU thread (<a href=\"speed.html\">speed</a>)</li>"
-        for m, v in size[:3]:
-            cost += f"<li>{m}: {v:,.0f} MB of weights and runtime (<a href=\"size.html\">size</a>)</li>"
+        for m, v in size[:6]:
+            cost += f"<li>{m}: {_fmt_mb(v)} of weights and runtime (<a href=\"size.html\">size</a>)</li>"
         cost += "</ul>"
     links = " &middot; ".join(f'<a href="{u}">{t}</a>' for t, u in spec.get("links", []))
     from urllib.parse import quote as _q
@@ -1201,7 +1225,7 @@ def main():
     perf = json.load(open(os.path.join(BENCH, "perf_results.json")))
     f3 = json.load(open(os.path.join(BENCH, "frontier3d.json")))
     open(os.path.join(OUT, "speed.html"), "w").write(speed_page(prov, perf, perf.get("meta", {})))
-    open(os.path.join(OUT, "size.html"), "w").write(size_page(prov, f3))
+    open(os.path.join(OUT, "size.html"), "w").write(size_page(prov, f3, {s["slug"] for s in specs}))
     open(os.path.join(OUT, "methodology.html"), "w").write(methodology(prov))
     open(os.path.join(OUT, "not-evaluated.html"), "w").write(not_evaluated_page())
     import horizon_weights as hw
@@ -1214,7 +1238,7 @@ def main():
     open(os.path.join(OUT, "laplacepp.html"), "w").write(laplacepp_page(prov))
     perf_by = {(r["model"], r["regime"]): r["ms"] for r in perf["rows"]}
     for spec in specs:
-        open(os.path.join(OUT, f"model-{spec['slug']}.html"), "w").write(model_page(spec, prov, perf_by, mb))
+        open(os.path.join(OUT, f"model-{spec['slug']}.html"), "w").write(model_page(spec, prov, perf_by, mb, sizes(f3)))
     open(os.path.join(OUT, "gift.html"), "w").write(gift())
     open(os.path.join(OUT, "papers.html"), "w").write(papers_page(prov))
     open(os.path.join(OUT, ".nojekyll"), "w").write("")
